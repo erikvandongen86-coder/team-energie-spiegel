@@ -31,7 +31,7 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: 'Team Energie Spiegel <spiegel@erikvandongen.eu>',
+          from: 'Team Energie Spiegel <info@erikvandongen.eu>',
           to: email,
           subject: 'Jouw Team Energie Spiegel resultaten',
           html: `
