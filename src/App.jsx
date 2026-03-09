@@ -29,28 +29,11 @@ const CATEGORIES = {
   Vertrouwen:[1,2], Eigenaarschap:[3,4,5], Samenwerking:[6,7], Richting:[8,9], Tempo:[10,11,12],
 };
 
-// ─── Storage ──────────────────────────────────────────────────────────────────
+// ─── Storage & API ────────────────────────────────────────────────────────────
 function getSessionId() {
   let id = sessionStorage.getItem("tes_sid");
   if (!id) { id = Math.random().toString(36).slice(2,10); sessionStorage.setItem("tes_sid", id); }
   return id;
-}
-function saveTeamEntry(teamCode, scores, memberEmail) {
-  const key = "tes_team_" + teamCode;
-  const sid = getSessionId();
-  const existing = JSON.parse(sessionStorage.getItem(key) || "[]");
-  const filtered = existing.filter(e => e.sid !== sid);
-  filtered.push({ scores, sid, email: memberEmail || null, ts: Date.now() });
-  sessionStorage.setItem(key, JSON.stringify(filtered));
-}
-function getTeamEntries(teamCode) {
-  return JSON.parse(sessionStorage.getItem("tes_team_" + teamCode) || "[]");
-}
-function saveTeamMeta(teamCode, meta) {
-  sessionStorage.setItem("tes_meta_" + teamCode, JSON.stringify(meta));
-}
-function getTeamMeta(teamCode) {
-  return JSON.parse(sessionStorage.getItem("tes_meta_" + teamCode) || "null");
 }
 function generateTeamCode() {
   return "TEAM-" + Math.floor(1000 + Math.random() * 9000);
@@ -58,9 +41,53 @@ function generateTeamCode() {
 function generateOwnerToken() {
   return Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,10);
 }
-function isOwner(teamCode, token) {
-  var m = getTeamMeta(teamCode);
-  return !!(m && token && m.ownerToken === token);
+
+// API calls naar Vercel serverless functions
+async function apiCreateTeam(teamData) {
+  const res = await fetch("/api/teams", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(teamData),
+  });
+  if (!res.ok) throw new Error("Aanmaken team mislukt");
+  return res.json();
+}
+async function apiGetTeam(teamCode) {
+  try {
+    const res = await fetch("/api/teams?code=" + teamCode);
+    if (!res.ok) return null;
+    return res.json();
+  } catch(e) { return null; }
+}
+async function apiSaveEntry(teamCode, sessionId, scores, email) {
+  const res = await fetch("/api/entries", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ teamCode, sessionId, scores, email }),
+  });
+  if (!res.ok) throw new Error("Opslaan resultaat mislukt");
+  return res.json();
+}
+async function apiGetEntries(teamCode) {
+  try {
+    const res = await fetch("/api/entries?code=" + teamCode);
+    if (!res.ok) return [];
+    return res.json();
+  } catch(e) { return []; }
+}
+async function apiValidateOwner(teamCode, ownerToken) {
+  try {
+    const res = await fetch("/api/owner?code=" + teamCode + "&token=" + ownerToken);
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.valid === true;
+  } catch(e) { return false; }
+}
+async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis) {
+  const res = await fetch("/api/subscribe", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ teamCode, sessionId, name, email, wantsTeamAnalysis }),
+  });
+  if (!res.ok) throw new Error("Opslaan email mislukt");
+  return res.json();
 }
 
 // ─── Score calculations ───────────────────────────────────────────────────────
@@ -510,14 +537,23 @@ function TeamPage(props) {
   var [createdToken, setCreatedToken] = useState(null);
   var [createdMeta, setCreatedMeta] = useState(null);
 
+  var [meta, setMeta] = useState(null);
+
   useEffect(function(){
     if(prefilledCode){
-      saveTeamEntry(prefilledCode, catScores);
-      setTeamData(getTeamEntries(prefilledCode));
+      apiSaveEntry(prefilledCode, getSessionId(), catScores, null).then(function(){
+        return apiGetEntries(prefilledCode);
+      }).then(function(entries){ setTeamData(entries); });
+      apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); });
     }
   },[]);
 
-  var meta = teamCode ? getTeamMeta(teamCode) : null;
+  useEffect(function(){
+    if(teamCode && !meta){
+      apiGetTeam(teamCode).then(function(m){ if(m) setMeta(m); });
+    }
+  },[teamCode]);
+
   function avg() { return teamData.length ? calcAvgScores(teamData) : catScores; }
 
   var completed = teamData.length;
@@ -530,31 +566,45 @@ function TeamPage(props) {
     ? meta.ownerName+" nodigt je uit voor de Team Energie Spiegel van team "+meta.teamName+".\n\nOpen deze link — de teamcode wordt automatisch ingevuld:\n"+inviteLink+"\n\nOf gebruik code "+teamCode+" op erikvandongen.eu/spiegel"
     : "Doe de Team Energie Spiegel met teamcode "+teamCode+": "+inviteLink;
 
-  function handleCreate() {
+  async function handleCreate() {
     if(!ownerName.trim()){ setFormError("Vul jouw naam in."); return; }
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)){ setFormError("Vul een geldig e-mailadres in."); return; }
     if(!teamName.trim()){ setFormError("Vul een teamnaam in."); return; }
     if(!memberCount||parseInt(memberCount)<2){ setFormError("Vul het aantal teamleden in (minimaal 2)."); return; }
     if(shareWithAll===null){ setFormError("Kies wie de teamanalyse mag ontvangen."); return; }
-    setFormError("");
+    setFormError("Bezig met aanmaken...");
     var code = generateTeamCode();
     var token = generateOwnerToken();
     var m = {ownerName:ownerName.trim(),ownerEmail:ownerEmail.trim(),teamName:teamName.trim(),memberCount:parseInt(memberCount),deadlineDays:parseInt(deadlineDays)||7,shareWithAll:shareWithAll,ownerToken:token,createdAt:Date.now()};
-    saveTeamMeta(code, m);
-    saveTeamEntry(code, catScores, ownerEmail.trim());
-    setCreatedToken(token);
-    setCreatedMeta(m);
-    setTeamCode(code);
-    setTeamData(getTeamEntries(code));
-    setStep("share");
+    try {
+      await apiCreateTeam({teamCode:code,teamName:m.teamName,ownerName:m.ownerName,ownerEmail:m.ownerEmail,memberCount:m.memberCount,deadlineDays:m.deadlineDays,shareWithAll:m.shareWithAll,ownerToken:token});
+      await apiSaveEntry(code, getSessionId(), catScores, ownerEmail.trim());
+      var entries = await apiGetEntries(code);
+      setFormError("");
+      setCreatedToken(token);
+      setCreatedMeta(m);
+      setMeta(m);
+      setTeamCode(code);
+      setTeamData(entries);
+      setStep("share");
+    } catch(e) {
+      setFormError("Er ging iets mis bij het aanmaken. Probeer opnieuw.");
+    }
   }
-  function handleJoin() {
+  async function handleJoin() {
     var code = joinCode.trim().toUpperCase();
     if(!/^TEAM-\d{4}$/.test(code)) return;
-    saveTeamEntry(code, catScores);
-    setTeamCode(code);
-    setTeamData(getTeamEntries(code));
-    setStep("view");
+    try {
+      await apiSaveEntry(code, getSessionId(), catScores, null);
+      var entries = await apiGetEntries(code);
+      var teamMeta = await apiGetTeam(code);
+      setTeamCode(code);
+      setTeamData(entries);
+      if(teamMeta) setMeta(teamMeta);
+      setStep("view");
+    } catch(e) {
+      console.error("Join error:", e);
+    }
   }
   async function handleTeamAnalysis() {
     setTeamAnalysisLoading(true);
@@ -760,7 +810,7 @@ function TeamPage(props) {
           label={"De teamaanmaker heeft ingesteld dat iedereen de teamanalyse mag ontvangen. Laat je e-mailadres achter — je ontvangt de analyse zodra ze beschikbaar is."}
           hint="Alleen de teamanalyse. Geen spam."
           buttonLabel="Stuur mij de teamanalyse"
-          onSubmit={function(name,email){ console.log("Team email:", {name,email,teamCode}); setTeamEmailSubmitted(true); }}
+          onSubmit={function(name,email){ apiSaveEmail(teamCode, getSessionId(), name, email, true).finally(function(){ setTeamEmailSubmitted(true); }); }}
           submitted={teamEmailSubmitted}
           submittedMsg="Genoteerd ✓ — je ontvangt de teamanalyse zodra die beschikbaar is."
         />
@@ -801,18 +851,25 @@ var DEMO_ENTRIES = [
 function OwnerDashboard(props) {
   var isDemo = !!props.isDemo;
   var teamCode = isDemo ? DEMO_CODE : props.teamCode;
-  var meta = isDemo ? DEMO_META : getTeamMeta(teamCode);
-  var [teamData, setTeamData] = useState(function(){ return isDemo ? DEMO_ENTRIES : getTeamEntries(teamCode); });
+  var [meta, setMeta] = useState(isDemo ? DEMO_META : null);
+  var [teamData, setTeamData] = useState(isDemo ? DEMO_ENTRIES : []);
   var [teamAnalysis, setTeamAnalysis] = useState(null);
   var [teamAnalysisLoading, setTeamAnalysisLoading] = useState(false);
   var [teamAnalysisLoaded, setTeamAnalysisLoaded] = useState(false);
+  var [loading, setLoading] = useState(!isDemo);
 
   useEffect(function(){
     if(isDemo) return;
-    var iv = setInterval(function(){ setTeamData(getTeamEntries(teamCode)); }, 8000);
+    function loadData() {
+      apiGetTeam(teamCode).then(function(m){ if(m) setMeta(m); });
+      apiGetEntries(teamCode).then(function(entries){ setTeamData(entries); setLoading(false); });
+    }
+    loadData();
+    var iv = setInterval(loadData, 8000);
     return function(){ clearInterval(iv); };
   },[]);
 
+  if(loading) return <div style={{maxWidth:560,margin:"80px auto",padding:"0 24px",textAlign:"center"}}><LoadingDots/></div>;
   if(!meta) return <div style={{maxWidth:560,margin:"80px auto",padding:"0 24px",textAlign:"center"}}>
     <Heading size={3} color={C.muted}>Teamcode niet gevonden. Controleer de link.</Heading>
   </div>;
@@ -908,17 +965,30 @@ export default function App() {
     } catch(e){ return {team:null,owner:null}; }
   });
 
-  // If URL has ?team=X&owner=TOKEN and token matches → show owner dashboard directly
-  var ownerView = urlParams.team && urlParams.owner && isOwner(urlParams.team, urlParams.owner);
+  var [ownerView, setOwnerView] = useState(false);
+  var [ownerChecked, setOwnerChecked] = useState(false);
+
+  useEffect(function(){
+    if(urlParams.team && urlParams.owner){
+      apiValidateOwner(urlParams.team, urlParams.owner).then(function(valid){
+        setOwnerView(valid);
+        setOwnerChecked(true);
+      });
+    } else {
+      setOwnerChecked(true);
+    }
+  }, []);
 
   var [page, setPage] = useState("start");
   var [answers, setAnswers] = useState({});
-  var [prefilledCode, setPrefilledCode] = useState(!ownerView && urlParams.team ? urlParams.team : null);
+  var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
 
-  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({}); setPrefilledCode(!ownerView&&urlParams.team?urlParams.team:null); }
+  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({}); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
 
   var showingDashboard = ownerView || demoMode;
+
+  if(!ownerChecked) return <div style={{minHeight:"100vh",background:C.cream,display:"flex",alignItems:"center",justifyContent:"center"}}><LoadingDots/></div>;
 
   return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
