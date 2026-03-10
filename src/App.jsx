@@ -1065,6 +1065,21 @@ function OwnerDashboard(props) {
         <Btn variant="green" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent("Reminder voor team "+meta.teamName+": "+inviteLink));}}>✓ WhatsApp</Btn>
       </div>
     </Card>
+    {/* CTA */}
+    <Card style={{background:C.olive,border:"none"}}>
+      <div style={{display:"inline-block",background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"3px 13px",marginBottom:16}}>
+        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Van diagnose naar beweging</span>
+      </div>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.3rem,3.5vw,1.75rem)",color:C.white,marginBottom:16,marginTop:0,lineHeight:1.3}}>Je weet nu waar energie lekt in jullie team.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:12,lineHeight:1.75,marginTop:0}}>In bijna ieder team zijn de intenties goed. Toch ontstaan er irritaties die steeds terugkomen. Niet omdat mensen onprofessioneel zijn, maar omdat verschillen in tempo, stijl en prioriteit onbewust botsen.</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.15rem",color:C.white,marginBottom:12,marginTop:0,fontWeight:400,fontStyle:"italic"}}>En precies daar zit de kans.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:28,lineHeight:1.75,marginTop:0}}>In een vrijblijvend gesprek kijk ik met je mee naar de uitkomsten en verkennen we hoe wat nu wrijving geeft, kan uitgroeien tot de kracht van jullie team.</p>
+      <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/inzicht-in-teamdynamiek","_blank");}} style={{fontSize:15,padding:"14px 28px"}}>Plan een vrijblijvend intakegesprek</Btn>
+      <div style={{marginTop:20,display:"flex",flexDirection:"column",gap:5,alignItems:"flex-start"}}>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>📞 +31 (0)6 22 56 51 28</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>✉ erik@erikvandongen.eu</p>
+      </div>
+    </Card>
     <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
   </div>;
 }
