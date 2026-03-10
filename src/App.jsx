@@ -335,7 +335,12 @@ function TeamCodePage(props) {
       : <div>
           <div style={{background:C.white,border:"1.5px solid "+(isValid?C.olive:C.warm),borderRadius:14,padding:"20px 24px",marginBottom:16}}>
             <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:10,marginTop:0}}>Jouw teamcode</p>
-            <input type="text" placeholder="TEAM-0000" value={teamCode} onChange={function(e){setTeamCode(e.target.value);}} autoFocus
+            <input type="text" placeholder="TEAM-0000" value={teamCode} onChange={function(e){
+              var v = e.target.value.toUpperCase();
+              if(!v.startsWith("TEAM-")) v = "TEAM-";
+              if(v.length > 9) v = v.slice(0,9);
+              setTeamCode(v);
+            }} autoFocus
               style={{width:"100%",boxSizing:"border-box",padding:"12px 16px",borderRadius:8,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:20,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.charcoal,background:C.cream,outline:"none"}}/>
             {isValid&&<div style={{display:"flex",alignItems:"center",gap:6,marginTop:10}}>
               <div style={{width:7,height:7,borderRadius:"50%",background:C.olive}}/>
@@ -358,7 +363,7 @@ function TeamCodePage(props) {
 // ─── START PAGE ───────────────────────────────────────────────────────────────
 function StartPage(props) {
   var inviteContext = props.inviteContext;
-  var [teamCode, setTeamCode] = useState((inviteContext&&inviteContext.code)||"");
+  var [teamCode, setTeamCode] = useState((inviteContext&&inviteContext.code)||"TEAM-");
   var [showField, setShowField] = useState(!!(inviteContext&&inviteContext.code));
   var inputCode = teamCode.trim().toUpperCase();
   var isValid = /^TEAM-\d{4}$/.test(inputCode);
@@ -571,7 +576,7 @@ function TeamPage(props) {
   var [formError, setFormError] = useState("");
 
   // Join
-  var [joinCode, setJoinCode] = useState("");
+  var [joinCode, setJoinCode] = useState("TEAM-");
 
   // Team analysis
   var [teamAnalysis, setTeamAnalysis] = useState(null);
@@ -797,7 +802,12 @@ function TeamPage(props) {
       <SectionLabel>Team aansluiten</SectionLabel>
       <Heading size={2}>Vul de teamcode in</Heading>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:18,marginTop:0}}>Heb je een teamcode ontvangen van je collega? Vul hem hieronder in om jouw resultaten toe te voegen aan het team.</p>
-      <input type="text" placeholder="TEAM-0000" value={joinCode} onChange={function(e){setJoinCode(e.target.value.toUpperCase());}}
+      <input type="text" placeholder="TEAM-0000" value={joinCode} onChange={function(e){
+              var v = e.target.value.toUpperCase();
+              if(!v.startsWith("TEAM-")) v = "TEAM-";
+              if(v.length > 9) v = v.slice(0,9);
+              setJoinCode(v);
+            }}
         style={{width:"100%",padding:"13px 17px",borderRadius:12,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:17,color:C.charcoal,background:C.white,outline:"none",boxSizing:"border-box",marginBottom:14,textTransform:"uppercase",letterSpacing:"0.12em"}}/>
       <div style={{display:"flex",gap:10}}>
         <Btn onClick={handleJoin} disabled={!/^TEAM-\d{4}$/.test(joinCode)}>Voeg mijn resultaten toe</Btn>
