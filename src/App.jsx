@@ -445,6 +445,38 @@ function QuestionsPage(props) {
   </div>;
 }
 
+// ─── EMAIL DROPDOWN ──────────────────────────────────────────────────────────
+function EmailDropdown(props) {
+  var [open, setOpen] = useState(false);
+  var [name, setName] = useState("");
+  var [email, setEmail] = useState("");
+  var [error, setError] = useState("");
+
+  function handleSubmit() {
+    if(!name.trim()){ setError("Vul je naam in."); return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setError("Vul een geldig e-mailadres in."); return; }
+    props.onSubmit(name.trim(), email.trim());
+  }
+
+  return <div style={{marginBottom:16}}>
+    <button onClick={function(){setOpen(function(o){return !o;});}} style={{display:"flex",alignItems:"center",gap:10,background:"none",border:"1.5px solid "+C.neutral,borderRadius:50,padding:"11px 20px",cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,width:"100%",justifyContent:"space-between"}}>
+      <span>{props.canReceiveTeamAnalysis ? "Analyse per mail ontvangen?" : "Analyse per mail ontvangen?"}</span>
+      <span style={{fontSize:18,color:C.muted,transform:open?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>↓</span>
+    </button>
+    {open&&<div style={{background:C.warm,borderRadius:"0 0 16px 16px",padding:"20px 20px 16px",border:"1.5px solid "+C.neutral,borderTop:"none",marginTop:-2}}>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>
+        {props.canReceiveTeamAnalysis
+          ? "Laat je gegevens achter en ontvang jouw individuele analyse én de teamanalyse zodra iedereen klaar is."
+          : "Laat je gegevens achter en ontvang jouw individuele analyse. Volledig vrijblijvend."}
+      </p>
+      <FormInput label="Jouw naam" placeholder="Erik van Dongen" value={name} onChange={setName}/>
+      <FormInput label="Jouw e-mailadres" type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.canReceiveTeamAnalysis ? "Je ontvangt jouw analyse én de teamanalyse. Jouw antwoorden blijven anoniem." : "Alleen jouw individuele analyse. Geen spam."}/>
+      {error&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.terra,marginBottom:10,marginTop:0}}>{error}</p>}
+      <Btn onClick={handleSubmit}>Stuur mij mijn resultaten</Btn>
+    </div>}
+  </div>;
+}
+
 // ─── ANALYSIS PAGE ────────────────────────────────────────────────────────────
 function AnalysisPage(props) {
   var answers = props.answers;
@@ -495,24 +527,18 @@ function AnalysisPage(props) {
       </div>;})}
     </Card>
 
-    {/* Email capture — individual results always; team results only if shareWithAll */}
-    <Card>
-      <SectionLabel>Ontvang jouw resultaten per e-mail</SectionLabel>
-      <EmailCapture
-        label={canReceiveTeamAnalysis
-          ? "Laat je e-mailadres achter en ontvang jouw individuele analyse én de teamanalyse zodra iedereen klaar is."
-          : "Wil je jouw individuele analyse per e-mail ontvangen? Laat dan je gegevens achter — volledig vrijblijvend."}
-        hint={canReceiveTeamAnalysis
-          ? "Je ontvangt jouw eigen analyse én de teamanalyse. Jouw antwoorden blijven anoniem."
-          : "Alleen jouw individuele analyse. Geen spam, geen teamresultaten gedeeld."}
-        buttonLabel="Stuur mij mijn resultaten"
-        onSubmit={function(name,email){
-          apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
-        }}
-        submitted={emailSubmitted}
-        submittedMsg="Genoteerd ✓ — je ontvangt je resultaten per e-mail."
-      />
-    </Card>
+    {/* Email capture — collapsible */}
+    {!emailSubmitted
+      ? <EmailDropdown
+          canReceiveTeamAnalysis={canReceiveTeamAnalysis}
+          onSubmit={function(name,email){
+            apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
+          }}
+        />
+      : <Card>
+          <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,fontWeight:600,margin:0}}>Genoteerd ✓ je ontvangt je resultaten per e-mail.</p>
+        </Card>
+    }
 
     {/* CTA */}
     <Card style={{background:C.olive,border:"none",textAlign:"center"}}>
