@@ -12,15 +12,17 @@ export default async function handler(req, res) {
 
   const { teamCode, sessionId, name, email, wantsTeamAnalysis } = req.body
 
-  if (!teamCode || !sessionId || !email) {
+  if (!sessionId || !email) {
     return res.status(400).json({ error: 'Verplichte velden ontbreken' })
   }
 
   try {
-    await sql`
-      UPDATE entries SET email = ${email}, name = ${name || null}
-      WHERE team_code = ${teamCode} AND session_id = ${sessionId}
-    `
+    if (teamCode) {
+      await sql`
+        UPDATE entries SET email = ${email}, name = ${name || null}
+        WHERE team_code = ${teamCode} AND session_id = ${sessionId}
+      `
+    }
 
     if (process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {
