@@ -100,8 +100,8 @@ function calcCategoryScores(answers) {
   return result;
 }
 function classifyScore(score) {
-  if (score <= 2) return "strength";
-  if (score <= 3) return "neutral";
+  if (score >= 4) return "strength";
+  if (score >= 3) return "neutral";
   return "leak";
 }
 function calcAvgScores(entries) {
@@ -129,7 +129,7 @@ async function fetchAIAnalysis(categoryScores, memberCount, isTeam) {
   const perspective = isTeam
     ? "Schrijf vanuit TEAM-perspectief. Spreek het team als geheel aan."
     : "Schrijf vanuit individueel perspectief. Spreek de invuller direct aan.";
-  const prompt = "Je bent een scherpe, eerlijke teamcoach. " + context + "\n\nScores op de Team Energie Spiegel (1-5, 4-5=energielek, 1-2=kracht):\n" + lines + "\n\n" + perspective + "\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen)\n2. Wat dit betekent\n3. Wat er gebeurt als er niets verandert\n4. 3 gespreksvragen (genummerd)\n\nToon: eerlijk, scherp, herkenbaar.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{\"diagnose\":\"...\",\"betekenis\":\"...\",\"geenVerandering\":\"...\",\"gespreksvragen\":[\"...\",\"...\",\"...\"]}";
+  const prompt = "Je bent een scherpe, eerlijke teamcoach. " + context + "\n\nScores op de Team Energie Spiegel (1-5, 1-2=energielek, 4-5=kracht):\n" + lines + "\n\n" + perspective + "\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen)\n2. Wat dit betekent\n3. Wat er gebeurt als er niets verandert\n4. 3 gespreksvragen (genummerd)\n\nToon: eerlijk, scherp, herkenbaar.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{\"diagnose\":\"...\",\"betekenis\":\"...\",\"geenVerandering\":\"...\",\"gespreksvragen\":[\"...\",\"...\",\"...\"]}";
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -313,6 +313,57 @@ function SocialProof() {
   </div>;
 }
 
+// ─── TEAM CODE PAGE ───────────────────────────────────────────────────────────
+function TeamCodePage(props) {
+  var [teamCode, setTeamCode] = useState("");
+  var [showInput, setShowInput] = useState(false);
+  var inputCode = teamCode.trim().toUpperCase();
+  var isValid = /^TEAM-\d{4}$/.test(inputCode);
+
+  return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
+    {/* Logo */}
+    <div style={{marginBottom:56}}>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:36,color:C.olive,letterSpacing:"0.06em",fontWeight:400,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,letterSpacing:"0.03em",margin:"0 0 4px"}}>Van inzicht naar beweging</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,letterSpacing:"0.04em",margin:0}}>erikvandongen.eu</p>
+    </div>
+
+    <SectionLabel>Team Energie Spiegel</SectionLabel>
+    <Heading size={2}>Doe je mee als onderdeel van een team?</Heading>
+    <p style={{fontFamily:FONT_BODY,fontSize:16,color:C.muted,lineHeight:1.7,marginBottom:40,marginTop:0}}>Als je een teamcode hebt ontvangen, vul die dan hieronder in. Zo worden jouw antwoorden gekoppeld aan jullie team.</p>
+
+    {!showInput
+      ? <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          <Btn onClick={function(){setShowInput(true);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px"}}>
+            Ja, ik heb een teamcode
+          </Btn>
+          <Btn variant="ghost" onClick={function(){props.onStart(null);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px",border:"1.5px solid "+C.warm}}>
+            Nee, ik doe het individueel →
+          </Btn>
+        </div>
+      : <div>
+          <div style={{background:C.white,border:"1.5px solid "+(isValid?C.olive:C.warm),borderRadius:14,padding:"20px 24px",marginBottom:16}}>
+            <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:10,marginTop:0}}>Jouw teamcode</p>
+            <input type="text" placeholder="TEAM-0000" value={teamCode} onChange={function(e){setTeamCode(e.target.value);}} autoFocus
+              style={{width:"100%",boxSizing:"border-box",padding:"12px 16px",borderRadius:8,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:20,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.charcoal,background:C.cream,outline:"none"}}/>
+            {isValid&&<div style={{display:"flex",alignItems:"center",gap:6,marginTop:10}}>
+              <div style={{width:7,height:7,borderRadius:"50%",background:C.olive}}/>
+              <span style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600}}>Teamcode herkend</span>
+            </div>}
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <Btn onClick={function(){if(isValid) props.onStart(inputCode);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px",opacity:isValid?1:0.5}}>
+              Start met teamcode →
+            </Btn>
+            <button onClick={function(){setShowInput(false); setTeamCode("");}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.muted,textDecoration:"underline",textUnderlineOffset:3,padding:"8px 0"}}>
+              ← Toch individueel doen
+            </button>
+          </div>
+        </div>
+    }
+  </div>;
+}
+
 // ─── START PAGE ───────────────────────────────────────────────────────────────
 function StartPage(props) {
   var inviteContext = props.inviteContext;
@@ -323,14 +374,6 @@ function StartPage(props) {
   var meta = isValid ? getTeamMeta(inputCode) : null;
 
   return <div style={{maxWidth:680,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
-    {/* Logo */}
-    <div style={{marginBottom:44,display:"flex",alignItems:"center",gap:12}}>
-      <div style={{width:36,height:36,background:C.olive,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}>
-        <div style={{display:"flex",gap:3,alignItems:"flex-end",height:18}}>{[10,14,18,14,10].map(function(h,i){return <div key={i} style={{width:3,height:h,background:C.cream,borderRadius:2}}/>;})}</div>
-      </div>
-      <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,letterSpacing:"0.05em"}}>erikvandongen.eu</span>
-    </div>
-
     {/* Invite banner */}
     {inviteContext&&inviteContext.code&&meta&&<div style={{background:C.olive,borderRadius:16,padding:"20px 24px",marginBottom:28}}>
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:"#c8d4a8",marginBottom:5,marginTop:0}}>Je bent uitgenodigd</p>
@@ -435,7 +478,7 @@ function AnalysisPage(props) {
   },[]);
 
   return <div style={{maxWidth:640,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
-    <SectionLabel>Jouw resultaat</SectionLabel>
+    <SectionLabel>Jouw individuele resultaat</SectionLabel>
     <Heading size={2}>Jouw teampatroon in beeld</Heading>
 
     {/* Context note for team members */}
@@ -490,12 +533,15 @@ function AnalysisPage(props) {
     {/* CTA */}
     <Card style={{background:C.olive,border:"none",textAlign:"center"}}>
       <div style={{display:"inline-block",background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"3px 13px",marginBottom:12}}>
-        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#d4e0b0",letterSpacing:"0.1em",textTransform:"uppercase"}}>Gratis kennismaking · 30 minuten</span>
+        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#d4e0b0",letterSpacing:"0.1em",textTransform:"uppercase"}}>Vrijblijvend kennismaken</span>
       </div>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.5rem",color:C.white,marginBottom:8,marginTop:0,lineHeight:1.3}}>Herken je dit patroon in jouw team?</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"#c8d4a8",marginBottom:22,lineHeight:1.7,marginTop:0}}>Ik denk graag 30 minuten met je mee — zonder verkooppraatje.<br/>Wat zie ik in jouw uitkomst, en wat zou er kunnen veranderen?</p>
-      <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/contact","_blank");}} style={{fontSize:15}}>Plan een gesprek met Erik →</Btn>
-      <p style={{fontFamily:FONT_BODY,fontSize:12,color:"rgba(200,212,168,0.7)",marginTop:10,marginBottom:0}}>Vrijblijvend · Geen verplichtingen</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.5rem",color:C.white,marginBottom:8,marginTop:0,lineHeight:1.3}}>Wat zit er achter jouw uitkomst?</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"#c8d4a8",marginBottom:22,lineHeight:1.7,marginTop:0}}>Ik kijk graag geheel vrijblijvend naar de uitkomsten — en welke stappen er eventueel gezet kunnen worden voor maximale energie en output in jouw team.</p>
+      <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/contact","_blank");}} style={{fontSize:15}}>Laten we vrijblijvend kennismaken →</Btn>
+      <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:4,alignItems:"center"}}>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>📞 +31 (0)6 22 56 51 28</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>✉ erik@erikvandongen.eu</p>
+      </div>
     </Card>
 
     <div style={{textAlign:"center",marginTop:6,marginBottom:6}}>
@@ -1004,13 +1050,17 @@ export default function App() {
           <div style={{width:5,height:5,borderRadius:"50%",background:C.terra}}/>
           <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.terra,fontWeight:600,letterSpacing:"0.05em"}}>Voorbeeldweergave</span>
         </div>}
-        {(showingDashboard||page!=="start")&&<button onClick={handleReset} style={{background:"none",border:"1px solid "+C.warm,borderRadius:20,padding:"6px 14px",cursor:"pointer",fontFamily:FONT_BODY,fontSize:13,color:C.muted}}>← Terug naar home</button>}
+        {(showingDashboard||page!=="start"&&page!=="teamcode")&&<button onClick={handleReset} style={{background:"none",border:"1px solid "+C.warm,borderRadius:20,padding:"6px 14px",cursor:"pointer",fontFamily:FONT_BODY,fontSize:13,color:C.muted}}>← Terug naar home</button>}
       </div>
     </div>
     {showingDashboard
       ? <OwnerDashboard teamCode={urlParams.team} isDemo={demoMode}/>
       : <>
-          {page==="start"    &&<StartPage onStart={function(code){setPrefilledCode(code);setPage("questions");}} inviteContext={!ownerView&&urlParams.team?{code:urlParams.team}:null} onDemo={function(){setDemoMode(true);}}/>}
+          {page==="start"    &&<StartPage onStart={function(code){setPrefilledCode(code);setPage("teamcode");}} inviteContext={!ownerView&&urlParams.team?{code:urlParams.team}:null} onDemo={function(){setDemoMode(true);}}/>}
+          {page==="teamcode"  &&(!ownerView&&urlParams.team
+            ? <StartPage onStart={function(code){setPrefilledCode(code);setPage("questions");}} inviteContext={{code:urlParams.team}} onDemo={function(){setDemoMode(true);}}/>
+            : <TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>
+          )}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
           {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("team");}}/>}
           {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} onBack={function(){setPage("analysis");}}/>}
