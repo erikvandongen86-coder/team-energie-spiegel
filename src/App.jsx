@@ -240,6 +240,7 @@ function AnalysisBlock(props) {
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",fontWeight:600,color:C.terra,marginBottom:5,marginTop:0}}>Als er niets verandert</p>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.7,margin:0}}>{a.geenVerandering}</p>
     </div>
+    {props.cta&&<div style={{margin:"18px 0"}}>{props.cta}</div>}
     <div>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",fontWeight:600,color:C.olive,marginBottom:10,marginTop:0}}>{isTeam?"Start het teamgesprek":"Start het gesprek"}</p>
       {(a.gespreksvragen||[]).map(function(v,i){return <div key={i} style={{display:"flex",gap:10,marginBottom:10}}>
@@ -459,9 +460,9 @@ function EmailDropdown(props) {
   }
 
   return <div style={{marginBottom:16}}>
-    <button onClick={function(){setOpen(function(o){return !o;});}} style={{display:"flex",alignItems:"center",gap:10,background:"none",border:"1.5px solid "+C.neutral,borderRadius:50,padding:"11px 20px",cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,width:"100%",justifyContent:"space-between"}}>
-      <span>{props.canReceiveTeamAnalysis ? "Analyse per mail ontvangen?" : "Analyse per mail ontvangen?"}</span>
-      <span style={{fontSize:18,color:C.muted,transform:open?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>↓</span>
+    <button onClick={function(){setOpen(function(o){return !o;});}} style={{display:"flex",alignItems:"center",gap:10,background:open?C.warm:C.olive,border:"none",borderRadius:open?"16px 16px 0 0":50,padding:"14px 22px",cursor:"pointer",fontFamily:FONT_BODY,fontSize:15,fontWeight:600,color:open?C.charcoal:C.white,width:"100%",justifyContent:"space-between",transition:"all 0.2s"}}>
+      <span>Ontvang de analyse per e-mail</span>
+      <span style={{fontSize:16,transform:open?"rotate(180deg)":"rotate(0deg)",transition:"transform 0.2s"}}>↓</span>
     </button>
     {open&&<div style={{background:C.warm,borderRadius:"0 0 16px 16px",padding:"20px 20px 16px",border:"1.5px solid "+C.neutral,borderTop:"none",marginTop:-2}}>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>
@@ -517,7 +518,15 @@ function AnalysisPage(props) {
 
     <Card style={{background:C.warm,border:"none"}}>
       <SectionLabel>Analyse · individueel</SectionLabel>
-      {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : analysis&&<AnalysisBlock analysis={analysis} isTeam={false}/>}
+      {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : analysis&&<AnalysisBlock analysis={analysis} isTeam={false} cta={
+        !emailSubmitted
+          ? <EmailDropdown canReceiveTeamAnalysis={canReceiveTeamAnalysis} onSubmit={function(name,email){
+              apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
+            }}/>
+          : <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#E8EDE3",borderRadius:12}}>
+              <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,fontWeight:600,margin:0}}>Genoteerd ✓ je ontvangt je resultaten per e-mail.</p>
+            </div>
+      }/>}
     </Card>
 
     <Card>
@@ -527,18 +536,7 @@ function AnalysisPage(props) {
       </div>;})}
     </Card>
 
-    {/* Email capture — collapsible */}
-    {!emailSubmitted
-      ? <EmailDropdown
-          canReceiveTeamAnalysis={canReceiveTeamAnalysis}
-          onSubmit={function(name,email){
-            apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
-          }}
-        />
-      : <Card>
-          <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,fontWeight:600,margin:0}}>Genoteerd ✓ je ontvangt je resultaten per e-mail.</p>
-        </Card>
-    }
+
 
     {/* CTA */}
     <Card style={{background:C.olive,border:"none"}}>
