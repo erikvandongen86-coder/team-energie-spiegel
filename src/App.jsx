@@ -426,11 +426,12 @@ function AnalysisPage(props) {
   var [loading, setLoading] = useState(true);
   var [emailSubmitted, setEmailSubmitted] = useState(false);
   var catScores = calcCategoryScores(answers);
-  var meta = prefilledCode ? getTeamMeta(prefilledCode) : null;
+  var [meta, setMeta] = useState(null);
   var canReceiveTeamAnalysis = meta&&meta.shareWithAll;
 
   useEffect(function(){
     fetchAIAnalysis(catScores, 1, false).then(function(a){ setAnalysis(a); setLoading(false); });
+    if(prefilledCode) apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); });
   },[]);
 
   return <div style={{maxWidth:640,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
@@ -479,11 +480,10 @@ function AnalysisPage(props) {
           : "Alleen jouw individuele analyse. Geen spam, geen teamresultaten gedeeld."}
         buttonLabel="Stuur mij mijn resultaten"
         onSubmit={function(name,email){
-          console.log("Email requested:", {name,email,scores:catScores,teamCode:prefilledCode});
-          setEmailSubmitted(true);
+          apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
         }}
         submitted={emailSubmitted}
-        submittedMsg="Genoteerd ✓ — je ontvangt je resultaten zodra we de backend hebben ingericht."
+        submittedMsg="Genoteerd ✓ — je ontvangt je resultaten per e-mail."
       />
     </Card>
 
