@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const sql = neon(process.env.DATABASE_URL)
 
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   if (req.method === 'OPTIONS') return res.status(200).end()
 
@@ -52,6 +52,17 @@ export default async function handler(req, res) {
       `
 
       return res.status(201).json({ success: true, teamCode })
+    }
+
+    if (req.method === 'PATCH') {
+      const { teamCode, shareWithAll } = req.body
+      if (!teamCode) return res.status(400).json({ error: 'Geen teamcode opgegeven' })
+
+      await sql`
+        UPDATE teams SET share_with_all = ${shareWithAll}
+        WHERE team_code = ${teamCode}
+      `
+      return res.status(200).json({ success: true })
     }
 
     return res.status(405).json({ error: 'Methode niet toegestaan' })
