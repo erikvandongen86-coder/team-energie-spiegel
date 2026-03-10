@@ -34,13 +34,21 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Verplichte velden ontbreken' })
       }
 
-      await sql`
-        INSERT INTO entries (team_code, session_id, scores, email)
-        VALUES (${teamCode}, ${sessionId}, ${JSON.stringify(scores)}, ${email || null})
-        ON CONFLICT (team_code, session_id)
-        DO UPDATE SET scores = EXCLUDED.scores, email = EXCLUDED.email
-      `
+      // Update teamcode als sessie al bestaat met andere code
+      const existing = await sql`SELECT id FROM entries WHERE session_id = ${sessionId} LIMIT 1`
+      if (existing.length > 0) {
+        await sql`
+          UPDATE entries SET team_code = ${teamCode}, scores = ${JSON.stringify(scores)}, email = ${email || null}
+          WHERE session_id = ${sessionId}
+        `
+      } else {
+        await sql`
+          INSERT INTO entries (team_code, session_id, scores, email)
+          VALUES (${teamCode}, ${sessionId}, ${JSON.stringify(scores)}, ${email || null})
+        `
+      }
 
+      // Check of team nu compleet is → stuur bevestiging aan aanmaker
       const [team] = await sql`SELECT * FROM teams WHERE team_code = ${teamCode}`
       if (team) {
         const [{ count }] = await sql`
