@@ -22,13 +22,14 @@ export default async function handler(req, res) {
     }).join('\n')
 
   const context = isTeam
-    ? `Dit zijn de GEMIDDELDE scores van ${memberCount || 1} teamleden.`
-    : 'Dit zijn de scores van één persoon over zijn of haar beleving van het team.'
-  const perspective = isTeam
-    ? 'Schrijf vanuit TEAM-perspectief. Spreek het team als geheel aan.'
-    : 'Schrijf vanuit individueel perspectief. Spreek de invuller direct aan.'
+    ? `Dit zijn de GEMIDDELDE scores van ${memberCount || 1} teamleden over hoe zij hun team beleven.`
+    : 'Dit zijn de scores van één teamlid over hoe hij of zij het team beleeft. De vragen gingen over het team — niet over de persoon zelf.'
 
-  const prompt = `Je bent een scherpe, eerlijke teamcoach. ${context}\n\nScores op de Team Energie Spiegel (1-5, 1-2=energielek, 4-5=kracht):\n${lines}\n\n${perspective}\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen)\n2. Wat dit betekent\n3. Wat er gebeurt als er niets verandert\n4. 3 gespreksvragen (genummerd)\n\nToon: eerlijk, scherp, herkenbaar.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{"diagnose":"...","betekenis":"...","geenVerandering":"...","gespreksvragen":["...","...","..."]}`
+  const perspective = isTeam
+    ? 'Schrijf vanuit TEAM-perspectief. Spreek het team als geheel aan met "jullie team" of "het team".'
+    : 'Schrijf over het TEAM zoals de invuller dat ervaart. Gebruik "jullie team" of "het team" — nooit "jij" of "je". De invuller heeft vragen beantwoord over het team, niet over zichzelf. Zeg dus niet "jij hebt een sterke drive" maar "jullie team laat zien dat..." of "in jullie team...".'
+
+  const prompt = `Je bent een scherpe, eerlijke teamcoach. ${context}\n\nScores op de Team Energie Spiegel (1-5, 1-2=energielek, 4-5=kracht):\n${lines}\n\n${perspective}\n\nDe vijf categorieën meten:\n- Vertrouwen: of mensen zich veilig voelen om zich uit te spreken\n- Eigenaarschap: of verantwoordelijkheid duidelijk is en opgepakt wordt\n- Samenwerking: of mensen met elkaar praten in plaats van over elkaar\n- Richting: of iedereen weet waar het team naartoe werkt\n- Tempo: of het team voortgang maakt of blijft hangen\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen, over het team)\n2. Wat dit betekent (voor het team)\n3. Wat er gebeurt als er niets verandert (in het team)\n4. 3 gespreksvragen voor het team (genummerd)\n\nToon: eerlijk, scherp, herkenbaar. Altijd over het team, nooit over de invuller persoonlijk.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{"diagnose":"...","betekenis":"...","geenVerandering":"...","gespreksvragen":["...","...","..."]}`
 
   try {
     const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
