@@ -562,6 +562,7 @@ function TeamPage(props) {
   // Create form
   var [ownerName, setOwnerName] = useState("");
   var [ownerEmail, setOwnerEmail] = useState("");
+  var [companyName, setCompanyName] = useState("");
   var [teamName, setTeamName] = useState("");
   var [memberCount, setMemberCount] = useState("");
   var [deadlineDays, setDeadlineDays] = useState("7");
@@ -620,7 +621,7 @@ function TeamPage(props) {
     var token = generateOwnerToken();
     var m = {ownerName:ownerName.trim(),ownerEmail:ownerEmail.trim(),teamName:teamName.trim(),memberCount:parseInt(memberCount),deadlineDays:parseInt(deadlineDays)||7,shareWithAll:shareWithAll,ownerToken:token,createdAt:Date.now()};
     try {
-      await apiCreateTeam({teamCode:code,teamName:m.teamName,ownerName:m.ownerName,ownerEmail:m.ownerEmail,memberCount:m.memberCount,deadlineDays:m.deadlineDays,shareWithAll:m.shareWithAll,ownerToken:token});
+      await apiCreateTeam({teamCode:code,teamName:m.teamName,ownerName:m.ownerName,ownerEmail:m.ownerEmail,companyName:companyName.trim(),memberCount:m.memberCount,deadlineDays:m.deadlineDays,shareWithAll:m.shareWithAll,ownerToken:token});
       await apiSaveEntry(code, getSessionId(), catScores, ownerEmail.trim());
       var entries = await apiGetEntries(code);
       setFormError("");
@@ -688,6 +689,7 @@ function TeamPage(props) {
         <SectionLabel>Jouw gegevens</SectionLabel>
         <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Hierop ontvang je de teamresultaten zodra de deadline is bereikt of iedereen heeft ingevuld.</p>
         <FormInput label="Jouw naam" placeholder="Erik van Dongen" value={ownerName} onChange={setOwnerName}/>
+        <FormInput label="Bedrijfsnaam" placeholder="Bijv. Acme B.V." value={companyName} onChange={setCompanyName}/>
         <FormInput label="Jouw e-mailadres" type="email" placeholder="erik@erikvandongen.eu" value={ownerEmail} onChange={setOwnerEmail} hint="Je ontvangt hier de teamanalyse."/>
       </Card>
 
@@ -734,7 +736,7 @@ function TeamPage(props) {
           <SectionLabel color={C.olive}>Jouw persoonlijke beheerlink</SectionLabel>
         </div>
         <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.6,marginBottom:12,marginTop:0}}>
-          Sla deze link op — hiermee bekijk je op elk moment de tussentijdse resultaten. Je hoeft de spiegel <strong>niet</strong> opnieuw in te vullen.
+          Sla deze link op — hiermee bekijk je op elk moment de tussentijdse resultaten. Je hoeft de spiegel <strong>niet</strong> opnieuw in te vullen. <strong>We hebben deze link ook naar {createdMeta.ownerEmail} gestuurd</strong>, zodat je hem altijd terug kunt vinden in je inbox.
         </p>
         <div style={{background:C.white,borderRadius:10,padding:"10px 14px",marginBottom:12,fontFamily:FONT_BODY,fontSize:12,color:C.charcoal,wordBreak:"break-all",lineHeight:1.6,border:"1px solid "+C.warm}}>
           {"https://spiegel.erikvandongen.eu?team="+teamCode+"&owner="+createdToken}
