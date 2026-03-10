@@ -544,7 +544,7 @@ function AnalysisPage(props) {
         <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Van diagnose naar beweging</span>
       </div>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.3rem,3.5vw,1.75rem)",color:C.white,marginBottom:12,marginTop:0,lineHeight:1.3}}>Je weet nu waar energie lekt in jullie team.</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:8,lineHeight:1.75,marginTop:0}}>De volgende stap is begrijpen waarom en wat er verandert als jullie die verschillen bewust gaan benutten.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:8,lineHeight:1.75,marginTop:0}}>De volgende stap is begrijpen welke gedragspatronen hierachter zitten en waar die vandaan komen, zodat jullie talenten gaan werken voor het team in plaats van tegen elkaar.</p>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:24,lineHeight:1.75,marginTop:0}}>In een vrijblijvend gesprek kijk ik met je mee naar de uitkomsten en verken ik wat er in jullie samenwerking direct te winnen valt.</p>
       <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/inzicht-in-teamdynamiek","_blank");}} style={{fontSize:15}}>Plan een vrijblijvend intakegesprek</Btn>
       <div style={{marginTop:18,display:"flex",flexDirection:"column",gap:5,alignItems:"flex-start"}}>
