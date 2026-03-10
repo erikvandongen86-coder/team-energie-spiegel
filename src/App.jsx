@@ -402,7 +402,7 @@ function StartPage(props) {
     </div>
 
     <div style={{display:"flex",alignItems:"center",gap:18,flexWrap:"wrap",marginBottom:22}}>
-      <Btn onClick={function(){props.onStart(null);}}>Start de Team Energie Spiegel</Btn>
+      <Btn onClick={function(){props.onStart(props.inviteContext&&props.inviteContext.code?props.inviteContext.code:null);}}>Start de Team Energie Spiegel</Btn>
       <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted}}>⏱ 3 minuten · 12 vragen</span>
     </div>
     <SocialProof/>
