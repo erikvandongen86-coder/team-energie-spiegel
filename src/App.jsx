@@ -321,10 +321,10 @@ function TeamCodePage(props) {
 
   return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
     {/* Logo */}
-    <div style={{marginBottom:56}}>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:36,color:C.olive,letterSpacing:"0.06em",fontWeight:400,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,letterSpacing:"0.03em",margin:"0 0 4px"}}>Van inzicht naar beweging</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,letterSpacing:"0.04em",margin:0}}>erikvandongen.eu</p>
+    <div style={{background:C.olive,margin:"0 -24px",padding:"22px 24px",marginBottom:48}}>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:34,color:"#F5F3EF",letterSpacing:"0.08em",fontWeight:400,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"rgba(245,243,239,0.75)",letterSpacing:"0.03em",margin:"0 0 2px"}}>Van inzicht naar beweging</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:12,color:"rgba(245,243,239,0.5)",letterSpacing:"0.04em",margin:0}}>erikvandongen.eu</p>
     </div>
 
     <SectionLabel>Team Energie Spiegel</SectionLabel>
@@ -373,10 +373,10 @@ function StartPage(props) {
 
   return <div style={{maxWidth:680,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
     {/* Logo */}
-    <div style={{marginBottom:44}}>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:36,color:C.olive,letterSpacing:"0.06em",fontWeight:400,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,letterSpacing:"0.03em",margin:"0 0 4px"}}>Van inzicht naar beweging</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,letterSpacing:"0.04em",margin:0}}>erikvandongen.eu</p>
+    <div style={{background:C.olive,margin:"0 -24px",padding:"22px 24px",marginBottom:40}}>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:34,color:"#F5F3EF",letterSpacing:"0.08em",fontWeight:400,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"rgba(245,243,239,0.75)",letterSpacing:"0.03em",margin:"0 0 2px"}}>Van inzicht naar beweging</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:12,color:"rgba(245,243,239,0.5)",letterSpacing:"0.04em",margin:0}}>erikvandongen.eu</p>
     </div>
 
     {/* Invite banner */}
