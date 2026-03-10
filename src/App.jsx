@@ -399,25 +399,8 @@ function StartPage(props) {
       </div>;})}
     </div>
 
-    {/* Team code field — hide if invite already provided */}
-    {!(inviteContext&&inviteContext.code)&&<div style={{marginBottom:26}}>
-      {!showField
-        ? <button onClick={function(){setShowField(true);}} style={{background:"none",border:"none",cursor:"pointer",padding:0,fontFamily:FONT_BODY,fontSize:14,color:C.olive,textDecoration:"underline",textUnderlineOffset:3}}>Heb je een teamcode? Vul die hier in →</button>
-        : <div style={{background:C.white,border:"1.5px solid "+(isValid?C.olive:C.warm),borderRadius:14,padding:"16px 20px"}}>
-          <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:8,marginTop:0}}>Teamcode</p>
-          <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
-            <input type="text" placeholder="TEAM-0000" value={teamCode} onChange={function(e){setTeamCode(e.target.value);}} autoFocus
-              style={{flex:1,minWidth:130,padding:"10px 14px",borderRadius:8,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:17,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:C.charcoal,background:C.cream,outline:"none"}}/>
-            {isValid&&<div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:7,height:7,borderRadius:"50%",background:C.olive}}/><span style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600}}>Code herkend</span></div>}
-          </div>
-          {isValid&&meta&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,marginTop:8,marginBottom:0}}>Je sluit aan bij team <strong>{meta.teamName}</strong>, uitgenodigd door {meta.ownerName}.</p>}
-          {isValid&&!meta&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,marginTop:8,marginBottom:0}}>Jouw resultaten worden gekoppeld aan <strong>{inputCode}</strong>.</p>}
-        </div>
-      }
-    </div>}
-
     <div style={{display:"flex",alignItems:"center",gap:18,flexWrap:"wrap",marginBottom:22}}>
-      <Btn onClick={function(){props.onStart(isValid?inputCode:null);}}>Start de Team Energie Spiegel</Btn>
+      <Btn onClick={function(){props.onStart(null);}}>Start de Team Energie Spiegel</Btn>
       <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted}}>⏱ 3 minuten · 12 vragen</span>
     </div>
     <SocialProof/>
@@ -607,7 +590,7 @@ function TeamPage(props) {
   var progressPct = target ? Math.min((completed/target)*100,100) : 0;
   var deadlineDate = meta ? new Date(meta.createdAt+meta.deadlineDays*86400000).toLocaleDateString("nl-NL",{day:"numeric",month:"long"}) : "";
 
-  var inviteLink = "https://erikvandongen.eu/spiegel?team=" + teamCode;
+  var inviteLink = "https://spiegel.erikvandongen.eu?team=" + teamCode;
   var shareMsg = meta
     ? meta.ownerName+" nodigt je uit voor de Team Energie Spiegel van team "+meta.teamName+".\n\nOpen deze link — de teamcode wordt automatisch ingevuld:\n"+inviteLink+"\n\nOf gebruik code "+teamCode+" op erikvandongen.eu/spiegel"
     : "Doe de Team Energie Spiegel met teamcode "+teamCode+": "+inviteLink;
@@ -740,10 +723,10 @@ function TeamPage(props) {
           Sla deze link op — hiermee bekijk je op elk moment de tussentijdse resultaten. Je hoeft de spiegel <strong>niet</strong> opnieuw in te vullen.
         </p>
         <div style={{background:C.white,borderRadius:10,padding:"10px 14px",marginBottom:12,fontFamily:FONT_BODY,fontSize:12,color:C.charcoal,wordBreak:"break-all",lineHeight:1.6,border:"1px solid "+C.warm}}>
-          {"https://erikvandongen.eu/spiegel?team="+teamCode+"&owner="+createdToken}
+          {"https://spiegel.erikvandongen.eu?team="+teamCode+"&owner="+createdToken}
         </div>
         <Btn variant="primary" onClick={function(){
-          var link = "https://erikvandongen.eu/spiegel?team="+teamCode+"&owner="+createdToken;
+          var link = "https://spiegel.erikvandongen.eu?team="+teamCode+"&owner="+createdToken;
           try {
             navigator.clipboard.writeText(link).then(function(){ alert("Beheerlink gekopieerd naar klembord!"); });
           } catch(e) { alert("Kopieer handmatig: "+link); }
@@ -925,7 +908,7 @@ function OwnerDashboard(props) {
   var progressPct = target ? Math.min((completed/target)*100,100) : 0;
   var deadlineDate = new Date(meta.createdAt+meta.deadlineDays*86400000).toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
   var avg = completed ? calcAvgScores(teamData) : null;
-  var inviteLink = "https://erikvandongen.eu/spiegel?team="+teamCode;
+  var inviteLink = "https://spiegel.erikvandongen.eu?team="+teamCode;
 
   return <div style={{maxWidth:640,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
     {isDemo&&<div style={{background:C.terra,borderRadius:14,padding:"14px 20px",marginBottom:24,display:"flex",alignItems:"flex-start",gap:12}}>
