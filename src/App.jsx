@@ -371,7 +371,6 @@ function StartPage(props) {
   var [showField, setShowField] = useState(!!(inviteContext&&inviteContext.code));
   var inputCode = teamCode.trim().toUpperCase();
   var isValid = /^TEAM-\d{4}$/.test(inputCode);
-  var meta = isValid ? getTeamMeta(inputCode) : null;
 
   return <div style={{maxWidth:680,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
     {/* Logo */}
@@ -382,15 +381,14 @@ function StartPage(props) {
     </div>
 
     {/* Invite banner */}
-    {inviteContext&&inviteContext.code&&meta&&<div style={{background:C.olive,borderRadius:16,padding:"20px 24px",marginBottom:28}}>
+    {inviteContext&&inviteContext.code&&<div style={{background:C.olive,borderRadius:16,padding:"20px 24px",marginBottom:28}}>
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:"#c8d4a8",marginBottom:5,marginTop:0}}>Je bent uitgenodigd</p>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.35rem",color:C.white,marginBottom:3,marginTop:0}}>{meta.teamName}</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"#c8d4a8",marginBottom:12,marginTop:0}}>Uitgenodigd door <strong style={{color:C.white}}>{meta.ownerName}</strong> · {meta.memberCount} teamleden gevraagd</p>
-      <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"7px 14px"}}>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.35rem",color:C.white,marginBottom:3,marginTop:0}}>Team Energie Spiegel</p>
+      <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"7px 14px",marginBottom:8}}>
         <span style={{fontFamily:FONT_BODY,fontSize:13,color:C.white}}>Teamcode:</span>
         <strong style={{fontFamily:FONT_BODY,fontSize:15,letterSpacing:"0.1em",color:C.white}}>{inviteContext.code}</strong>
       </div>
-      <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(200,212,168,0.85)",marginTop:10,marginBottom:0}}>✓ Jouw teamcode is automatisch ingevuld. Klik hieronder om direct te starten.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(200,212,168,0.85)",marginTop:4,marginBottom:0}}>✓ Jouw teamcode is automatisch ingevuld. Klik hieronder om direct te starten.</p>
     </div>}
 
     <SectionLabel>Team Energie Spiegel</SectionLabel>
