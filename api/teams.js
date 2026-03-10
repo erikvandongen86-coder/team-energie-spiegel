@@ -4,6 +4,7 @@ import { neon } from '@neondatabase/serverless'
 export default async function handler(req, res) {
   const sql = neon(process.env.DATABASE_URL)
 
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -50,6 +51,48 @@ export default async function handler(req, res) {
         VALUES (${teamCode}, ${teamName}, ${ownerName}, ${ownerEmail},
                 ${memberCount}, ${deadlineDays}, ${shareWithAll}, ${ownerToken})
       `
+
+      // Stuur beheerlink per e-mail naar aanmaker
+      if (process.env.RESEND_API_KEY) {
+        const ownerLink = `${process.env.APP_URL}?team=${teamCode}&owner=${ownerToken}`
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: 'Team Energie Spiegel <info@erikvandongen.eu>',
+            to: ownerEmail,
+            subject: `Jouw beheerlink — Team ${teamName}`,
+            html: `
+              <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 560px; margin: 0 auto; color: #2C2C2A;">
+                <div style="background: #5C6B3A; padding: 28px 32px; border-radius: 12px 12px 0 0;">
+                  <p style="color: #F5F0E8; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">Team Energie Spiegel</p>
+                </div>
+                <div style="background: #F5F0E8; padding: 32px; border-radius: 0 0 12px 12px;">
+                  <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 24px; color: #2C2C2A; margin: 0 0 16px;">Hoi ${ownerName},</h1>
+                  <p style="font-size: 15px; line-height: 1.7; color: #7A7268; margin: 0 0 16px;">
+                    Je hebt zojuist het team <strong style="color: #2C2C2A;">${teamName}</strong> aangemaakt. Bewaar deze e-mail goed — hieronder vind je jouw persoonlijke beheerlink waarmee je op elk moment de resultaten kunt inzien en instellingen kunt aanpassen.
+                  </p>
+                  <div style="background: #EEF1E8; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;">
+                    <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #5C6B3A; margin: 0 0 10px;">Jouw beheerlink</p>
+                    <p style="font-size: 12px; color: #7A7268; word-break: break-all; margin: 0 0 14px; line-height: 1.6;">${ownerLink}</p>
+                    <a href="${ownerLink}" style="display: inline-block; background: #5C6B3A; color: #FDFCFA; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 50px; text-decoration: none;">Open beheerdersdashboard →</a>
+                  </div>
+                  <p style="font-size: 14px; line-height: 1.7; color: #7A7268; margin: 0 0 8px;">
+                    <strong style="color: #2C2C2A;">Uitnodigingslink voor teamleden:</strong><br/>
+                    <a href="${process.env.APP_URL}?team=${teamCode}" style="color: #5C6B3A; word-break: break-all;">${process.env.APP_URL}?team=${teamCode}</a>
+                  </p>
+                  <p style="font-size: 12px; color: #9E9688; margin: 24px 0 0; text-align: center;">
+                    Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a>
+                  </p>
+                </div>
+              </div>
+            `,
+          }),
+        }).catch(err => console.error('Email fout:', err))
+      }
 
       return res.status(201).json({ success: true, teamCode })
     }
