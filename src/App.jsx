@@ -293,19 +293,11 @@ function SliderQ(props) {
   </div>;
 }
 function SocialProof() {
-  var [count, setCount] = useState(0);
+  var [count, setCount] = useState(null);
   useEffect(function(){
-    var total=0;
-    for(var i=0;i<sessionStorage.length;i++){
-      var key=sessionStorage.key(i);
-      if(key&&key.startsWith("tes_team_")){
-        var entries=JSON.parse(sessionStorage.getItem(key)||"[]");
-        total+=entries.length;
-      }
-    }
-    setCount(total);
+    fetch("/api/stats").then(function(r){ return r.json(); }).then(function(d){ setCount(d.total||0); }).catch(function(){ setCount(0); });
   },[]);
-  if(count===0) return null;
+  if(!count||count===0) return null;
   return <div style={{display:"flex",alignItems:"center",gap:10,background:C.warm,borderRadius:12,padding:"9px 15px",marginBottom:18,alignSelf:"flex-start",width:"fit-content"}}>
     <div style={{display:"flex"}}>{["#8A9E6A","#5C6B3A","#45543B"].slice(0,Math.min(count,3)).map(function(bg,i){return <div key={i} style={{width:24,height:24,borderRadius:"50%",background:bg,border:"2px solid "+C.cream,marginLeft:i>0?-7:0}}/>;})}</div>
     <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal}}><strong>{count}</strong> {count===1?"persoon deed":"mensen deden"} al de spiegel</span>
@@ -391,13 +383,13 @@ function StartPage(props) {
     </div>}
 
     <SectionLabel>Team Energie Spiegel</SectionLabel>
-    <Heading size={1}>Waarom komt jouw team niet echt in beweging?</Heading>
-    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>De meeste teamproblemen gaan niet over strategie.<br/>Ze gaan over gesprekken die niet worden gevoerd.</p>
+    <Heading size={1}>Waar zit de energie in jouw team en waar lekt die weg?</Heading>
+    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>In 12 vragen krijg je een helder beeld van wat jullie team drijft en wat het vertraagt. Concreet, anoniem en direct bruikbaar als gespreksstarter.</p>
 
     <div style={{background:C.warm,borderRadius:16,padding:"22px 26px",marginBottom:32}}>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,lineHeight:1.8,marginBottom:12,marginTop:0}}>Teams werken hard. Er worden plannen gemaakt, doelen gesteld en overleggen gepland. En toch voelt het soms alsof er iets blijft hangen.</p>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",color:C.charcoal,marginBottom:14,fontStyle:"italic",marginTop:0}}>Met deze korte spiegel ontdek je:</p>
-      {["Waar energie in je team weglekt","Waar juist kracht zit","Welke gesprekken vaak worden vermeden"].map(function(item,i){return <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:7}}>
+      {["Waar energie in je team weglekt","Waar juist kracht zit","Waar de volgende stap voor jullie team ligt"].map(function(item,i){return <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:7}}>
         <div style={{width:6,height:6,borderRadius:"50%",background:C.terra,marginTop:7,flexShrink:0}}/>
         <span style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal}}>{item}</span>
       </div>;})}
@@ -408,7 +400,7 @@ function StartPage(props) {
       <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted}}>⏱ 3 minuten · 12 vragen</span>
     </div>
     <SocialProof/>
-    <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.neutral,lineHeight:1.6,marginTop:4}}>Geen registratie nodig · Direct starten · Anoniem</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.6,marginTop:4}}>Geen registratie nodig · Direct starten · Anoniem</p>
 
     {props.onDemo&&<div style={{marginTop:36,paddingTop:24,borderTop:"1px solid "+C.warm}}>
       <p style={{fontFamily:FONT_BODY,fontSize:12,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:8,marginTop:0}}>Voor teamaanmakers</p>
