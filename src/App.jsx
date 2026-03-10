@@ -132,14 +132,13 @@ async function fetchAIAnalysis(categoryScores, memberCount, isTeam) {
   const prompt = "Je bent een scherpe, eerlijke teamcoach. " + context + "\n\nScores op de Team Energie Spiegel (1-5, 1-2=energielek, 4-5=kracht):\n" + lines + "\n\n" + perspective + "\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen)\n2. Wat dit betekent\n3. Wat er gebeurt als er niets verandert\n4. 3 gespreksvragen (genummerd)\n\nToon: eerlijk, scherp, herkenbaar.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{\"diagnose\":\"...\",\"betekenis\":\"...\",\"geenVerandering\":\"...\",\"gespreksvragen\":[\"...\",\"...\",\"...\"]}";
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("/api/analyze", {
       method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000,
-        messages:[{role:"user", content:prompt}] }),
+      body: JSON.stringify({ categoryScores, memberCount, isTeam }),
     });
     const data = await res.json();
-    const text = (data.content && data.content.find(function(b){return b.type==="text";})||{}).text || "{}";
-    return JSON.parse(text.replace(/```json|```/g,"").trim());
+    if (data.error) throw new Error(data.error);
+    return data;
   } catch(e) {
     return {
       diagnose:"Op basis van de antwoorden zien we een team dat hard werkt, maar waar een aantal dynamieken energie kosten.",
