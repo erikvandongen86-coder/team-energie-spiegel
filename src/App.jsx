@@ -487,7 +487,7 @@ function AnalysisPage(props) {
       {Object.entries(catScores).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})}</Card>
 
     <Card style={{background:C.warm,border:"none"}}>
-      <SectionLabel>AI-analyse · individueel</SectionLabel>
+      <SectionLabel>Analyse · individueel</SectionLabel>
       {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : analysis&&<AnalysisBlock analysis={analysis} isTeam={false}/>}
     </Card>
 
