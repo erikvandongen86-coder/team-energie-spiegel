@@ -3,9 +3,9 @@ import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tool
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
-  olive:"#5C6B3A", oliveL:"#7A8B50", terra:"#B5622A", clay:"#C8905A",
-  cream:"#F5F0E8", warm:"#EDE7D9", charcoal:"#2C2C2A", muted:"#7A7268",
-  white:"#FDFCFA", neutral:"#9E9688",
+  olive:"#45543B", oliveL:"#45543B", terra:"#9D6D58", clay:"#A27D67",
+  cream:"#F5F3EF", warm:"#EFEBE7", charcoal:"#332D28", muted:"#766960",
+  white:"#FFFFFF", neutral:"#DED7CF",
 };
 const FONT_DISPLAY = "'Cormorant Garamond', Georgia, serif";
 const FONT_BODY    = "'Source Sans Pro', 'Helvetica Neue', sans-serif";
@@ -187,7 +187,7 @@ function FormInput(props) {
 }
 function FaceIcon(props) {
   var type = props.type; var size = props.size||28;
-  var cfg = {strength:{color:C.olive,bg:"#EEF1E8"},neutral:{color:C.muted,bg:"#F0EDE6"},leak:{color:C.terra,bg:"#FBF0EA"}};
+  var cfg = {strength:{color:C.olive,bg:"#E8EDE3"},neutral:{color:C.muted,bg:"#F0EDE6"},leak:{color:C.terra,bg:"#FBF0EA"}};
   var color = cfg[type].color; var bg = cfg[type].bg; var r = size/2;
   var mouth = {
     strength:"M"+(r*.38)+" "+(r*1.28)+"Q"+r+" "+(r*1.62)+" "+(r*1.62)+" "+(r*1.28),
@@ -203,7 +203,7 @@ function FaceIcon(props) {
 }
 function ScorePill(props) {
   var type = classifyScore(props.score);
-  var cfg = {leak:{bg:"#FBF0EA",text:C.terra,lbl:"Energielek"},neutral:{bg:"#F5F2EC",text:C.muted,lbl:"Neutraal"},strength:{bg:"#EEF1E8",text:C.olive,lbl:"Kracht"}};
+  var cfg = {leak:{bg:"#FBF0EA",text:C.terra,lbl:"Energielek"},neutral:{bg:"#F5F2EC",text:C.muted,lbl:"Neutraal"},strength:{bg:"#E8EDE3",text:C.olive,lbl:"Kracht"}};
   var c = cfg[type];
   return <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 15px",borderRadius:12,background:c.bg,marginBottom:8}}>
     <div style={{display:"flex",alignItems:"center",gap:10}}><FaceIcon type={type} size={26}/><span style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,fontWeight:500}}>{props.label}</span></div>
@@ -252,7 +252,7 @@ function EmailCapture(props) {
   var [name, setName] = useState("");
   var [email, setEmail] = useState("");
   var valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && name.trim().length > 0;
-  if (props.submitted) return <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#EEF1E8",borderRadius:12}}>
+  if (props.submitted) return <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#E8EDE3",borderRadius:12}}>
     <span style={{fontSize:16}}>✓</span>
     <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,margin:0,fontWeight:600}}>{props.submittedMsg||"Genoteerd — we sturen je de resultaten zodra ze beschikbaar zijn."}</p>
   </div>;
@@ -289,7 +289,7 @@ function SliderQ(props) {
         <span style={{fontFamily:FONT_BODY,fontSize:9,color:C.muted,display:"block",lineHeight:1.3}}>{n===1?"Helemaal\nniet":n===3?"Deels":n===5?"Zeer\nherkenbaar":""}</span>
       </div>;})}
     </div>
-    <style>{`input[type='range']::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:${C.olive};border:3px solid ${C.white};box-shadow:0 2px 8px rgba(92,107,58,0.3);cursor:pointer}input[type='range']::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:${C.olive};border:3px solid ${C.white};cursor:pointer}`}</style>
+    <style>{`input[type='range']::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:${C.olive};border:3px solid ${C.white};box-shadow:0 2px 8px rgba(69,84,59,0.3);cursor:pointer}input[type='range']::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:${C.olive};border:3px solid ${C.white};cursor:pointer}`}</style>
   </div>;
 }
 function SocialProof() {
@@ -307,7 +307,7 @@ function SocialProof() {
   },[]);
   if(count===0) return null;
   return <div style={{display:"flex",alignItems:"center",gap:10,background:C.warm,borderRadius:12,padding:"9px 15px",marginBottom:18,alignSelf:"flex-start",width:"fit-content"}}>
-    <div style={{display:"flex"}}>{["#8A9E6A","#7A8B50","#5C6B3A"].slice(0,Math.min(count,3)).map(function(bg,i){return <div key={i} style={{width:24,height:24,borderRadius:"50%",background:bg,border:"2px solid "+C.cream,marginLeft:i>0?-7:0}}/>;})}</div>
+    <div style={{display:"flex"}}>{["#8A9E6A","#5C6B3A","#45543B"].slice(0,Math.min(count,3)).map(function(bg,i){return <div key={i} style={{width:24,height:24,borderRadius:"50%",background:bg,border:"2px solid "+C.cream,marginLeft:i>0?-7:0}}/>;})}</div>
     <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal}}><strong>{count}</strong> {count===1?"persoon deed":"mensen deden"} al de spiegel</span>
   </div>;
 }
@@ -381,7 +381,7 @@ function StartPage(props) {
 
     {/* Invite banner */}
     {inviteContext&&inviteContext.code&&<div style={{background:C.olive,borderRadius:16,padding:"20px 24px",marginBottom:28}}>
-      <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:"#c8d4a8",marginBottom:5,marginTop:0}}>Je bent uitgenodigd</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:"#b8c9a3",marginBottom:5,marginTop:0}}>Je bent uitgenodigd</p>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.35rem",color:C.white,marginBottom:3,marginTop:0}}>Team Energie Spiegel</p>
       <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"7px 14px",marginBottom:8}}>
         <span style={{fontFamily:FONT_BODY,fontSize:13,color:C.white}}>Teamcode:</span>
@@ -520,14 +520,14 @@ function AnalysisPage(props) {
     {/* CTA */}
     <Card style={{background:C.olive,border:"none",textAlign:"center"}}>
       <div style={{display:"inline-block",background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"3px 13px",marginBottom:12}}>
-        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#d4e0b0",letterSpacing:"0.1em",textTransform:"uppercase"}}>Vrijblijvend kennismaken</span>
+        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Vrijblijvend kennismaken</span>
       </div>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.5rem",color:C.white,marginBottom:8,marginTop:0,lineHeight:1.3}}>Wat zit er achter jouw uitkomst?</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"#c8d4a8",marginBottom:22,lineHeight:1.7,marginTop:0}}>Ik kijk graag geheel vrijblijvend naar de uitkomsten — en welke stappen er eventueel gezet kunnen worden voor maximale energie en output in jouw team.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"#b8c9a3",marginBottom:22,lineHeight:1.7,marginTop:0}}>Ik kijk graag geheel vrijblijvend naar de uitkomsten — en welke stappen er eventueel gezet kunnen worden voor maximale energie en output in jouw team.</p>
       <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/contact","_blank");}} style={{fontSize:15}}>Laten we vrijblijvend kennismaken →</Btn>
       <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:4,alignItems:"center"}}>
-        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>📞 +31 (0)6 22 56 51 28</p>
-        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>✉ erik@erikvandongen.eu</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>📞 +31 (0)6 22 56 51 28</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>✉ erik@erikvandongen.eu</p>
       </div>
     </Card>
 
@@ -537,17 +537,17 @@ function AnalysisPage(props) {
     <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,padding:"16px 24px",background:"linear-gradient(to top, rgba(245,240,232,1) 60%, rgba(245,240,232,0))",pointerEvents:"none"}}>
       <div style={{maxWidth:640,margin:"0 auto",pointerEvents:"all"}}>
         {prefilledCode
-          ? <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(92,107,58,0.25)",flexWrap:"wrap"}}>
+          ? <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(69,84,59,0.25)",flexWrap:"wrap"}}>
               <div>
                 <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 2px",lineHeight:1.3}}>Klaar met invullen?</p>
-                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>Voeg jouw antwoorden toe aan het team.</p>
+                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>Voeg jouw antwoorden toe aan het team.</p>
               </div>
               <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Resultaten indienen →</Btn>
             </div>
-          : <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(92,107,58,0.25)",flexWrap:"wrap"}}>
+          : <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(69,84,59,0.25)",flexWrap:"wrap"}}>
               <div>
                 <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 2px",lineHeight:1.3}}>Laat je team ook de spiegel invullen</p>
-                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>Zie waar jullie beleving overeenkomt — en waar niet.</p>
+                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>Zie waar jullie beleving overeenkomt — en waar niet.</p>
               </div>
               <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Vergelijk met je team →</Btn>
             </div>
@@ -715,7 +715,7 @@ function TeamPage(props) {
         {[
           {val:false,title:"Alleen naar mij",desc:"Jij ontvangt de teamanalyse. Teamleden zien alleen hun eigen individuele resultaten. Je kunt dit later alsnog openbaar maken via jouw beheerlink."},
           {val:true,title:"Iedereen mag de teamanalyse ontvangen",desc:"Alle deelnemers die hun e-mailadres hebben achtergelaten ontvangen de gezamenlijke teamanalyse. Individuele antwoorden blijven altijd anoniem. Je kunt dit later ook nog uitschakelen via jouw beheerlink."},
-        ].map(function(opt){return <div key={String(opt.val)} onClick={function(){setShareWithAll(opt.val);}} style={{padding:"13px 17px",borderRadius:12,border:"2px solid "+(shareWithAll===opt.val?C.olive:C.warm),cursor:"pointer",background:shareWithAll===opt.val?"#EEF1E8":C.white,transition:"all 0.2s",marginBottom:10}}>
+        ].map(function(opt){return <div key={String(opt.val)} onClick={function(){setShareWithAll(opt.val);}} style={{padding:"13px 17px",borderRadius:12,border:"2px solid "+(shareWithAll===opt.val?C.olive:C.warm),cursor:"pointer",background:shareWithAll===opt.val?"#E8EDE3":C.white,transition:"all 0.2s",marginBottom:10}}>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
             <div style={{width:18,height:18,borderRadius:"50%",border:"2px solid "+(shareWithAll===opt.val?C.olive:C.muted),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               {shareWithAll===opt.val&&<div style={{width:8,height:8,borderRadius:"50%",background:C.olive}}/>}
@@ -739,7 +739,7 @@ function TeamPage(props) {
       <Heading size={2}>Nodig je teamleden uit</Heading>
 
       {/* ── Beheerlink voor aanmaker ── */}
-      <Card style={{background:"#EEF1E8",border:"2px solid "+C.olive}}>
+      <Card style={{background:"#E8EDE3",border:"2px solid "+C.olive}}>
         <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
           <div style={{width:8,height:8,borderRadius:"50%",background:C.olive}}/>
           <SectionLabel color={C.olive}>Jouw persoonlijke beheerlink</SectionLabel>
@@ -759,7 +759,7 @@ function TeamPage(props) {
         <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,marginTop:10,marginBottom:0}}>⚠ Deze link is alleen voor jou — deel hem niet met je teamleden.</p>
       </Card>
 
-      <Card style={{background:"#EEF1E8",border:"none"}}>
+      <Card style={{background:"#E8EDE3",border:"none"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
           <div>
             <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.olive,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:3,marginTop:0}}>Team</p>
@@ -830,7 +830,7 @@ function TeamPage(props) {
             <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:600,color:C.charcoal,marginTop:0,marginBottom:0}}>{deadlineDate}</p>
           </div>
         </div>
-        <div style={{height:6,background:"rgba(92,107,58,0.2)",borderRadius:3,overflow:"hidden"}}>
+        <div style={{height:6,background:"rgba(69,84,59,0.2)",borderRadius:3,overflow:"hidden"}}>
           <div style={{height:"100%",width:progressPct+"%",background:C.olive,borderRadius:3,transition:"width 0.5s ease"}}/>
         </div>
         {completed>=target&&target>0&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600,marginTop:8,marginBottom:0}}>✓ Iedereen heeft de spiegel ingevuld!</p>}
@@ -953,7 +953,7 @@ function OwnerDashboard(props) {
       </div>
     </div>}
     <div style={{marginBottom:28}}>
-      <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"#EEF1E8",borderRadius:8,padding:"4px 12px",marginBottom:14}}>
+      <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"#E8EDE3",borderRadius:8,padding:"4px 12px",marginBottom:14}}>
         <div style={{width:6,height:6,borderRadius:"50%",background:C.olive}}/>
         <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.olive,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>Beheerdersdashboard</span>
       </div>
@@ -973,7 +973,7 @@ function OwnerDashboard(props) {
           <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:600,color:C.charcoal,marginTop:0,marginBottom:0}}>{deadlineDate}</p>
         </div>
       </div>
-      <div style={{height:8,background:"rgba(92,107,58,0.2)",borderRadius:4,overflow:"hidden",marginBottom:8}}>
+      <div style={{height:8,background:"rgba(69,84,59,0.2)",borderRadius:4,overflow:"hidden",marginBottom:8}}>
         <div style={{height:"100%",width:progressPct+"%",background:C.olive,borderRadius:4,transition:"width 0.5s ease"}}/>
       </div>
       {completed>=target&&target>0
