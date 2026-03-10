@@ -533,18 +533,27 @@ function AnalysisPage(props) {
 
     <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.neutral,textAlign:"center",marginTop:22,marginBottom:80,lineHeight:1.6}}>De analyse wordt ondersteund door AI en gebaseerd op jouw antwoorden. De uitkomst is bedoeld als reflectie en gesprekstarter.</p>
 
-    {/* Floating CTA — alleen zonder teamcode */}
-    {!prefilledCode&&<div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,padding:"16px 24px",background:"linear-gradient(to top, rgba(245,240,232,1) 60%, rgba(245,240,232,0))",pointerEvents:"none"}}>
+    {/* Floating CTA */}
+    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,padding:"16px 24px",background:"linear-gradient(to top, rgba(245,240,232,1) 60%, rgba(245,240,232,0))",pointerEvents:"none"}}>
       <div style={{maxWidth:640,margin:"0 auto",pointerEvents:"all"}}>
-        <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(92,107,58,0.25)",flexWrap:"wrap"}}>
-          <div>
-            <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 2px",lineHeight:1.3}}>Laat je team ook de spiegel invullen</p>
-            <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>Zie waar jullie beleving overeenkomt — en waar niet.</p>
-          </div>
-          <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Vergelijk met je team →</Btn>
-        </div>
+        {prefilledCode
+          ? <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(92,107,58,0.25)",flexWrap:"wrap"}}>
+              <div>
+                <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 2px",lineHeight:1.3}}>Klaar met invullen?</p>
+                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>Voeg jouw antwoorden toe aan het team.</p>
+              </div>
+              <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Resultaten indienen →</Btn>
+            </div>
+          : <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(92,107,58,0.25)",flexWrap:"wrap"}}>
+              <div>
+                <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 2px",lineHeight:1.3}}>Laat je team ook de spiegel invullen</p>
+                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#c8d4a8",margin:0}}>Zie waar jullie beleving overeenkomt — en waar niet.</p>
+              </div>
+              <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Vergelijk met je team →</Btn>
+            </div>
+        }
       </div>
-    </div>}
+    </div>
     <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
   </div>;
 }
@@ -829,12 +838,12 @@ function TeamPage(props) {
       </Card>}
 
       <Card>
-        <SectionLabel>Gemiddelde teamscores</SectionLabel>
+        <SectionLabel>{meta&&!meta.shareWithAll?"Jouw scores":"Gemiddelde teamscores"}{meta&&meta.shareWithAll&&completed>1?" ("+completed+" deelnemers)":""}</SectionLabel>
         <RadarViz data={avg()}/>
       </Card>
 
       <Card>
-        <SectionLabel>Per categorie (teamgemiddelde)</SectionLabel>
+        <SectionLabel>{meta&&!meta.shareWithAll?"Jouw resultaat per categorie":"Per categorie (teamgemiddelde)"}</SectionLabel>
         {Object.entries(avg()).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})}</Card>
 
       {/* Team AI analysis */}
