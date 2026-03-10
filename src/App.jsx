@@ -1046,11 +1046,11 @@ export default function App() {
     {showingDashboard
       ? <OwnerDashboard teamCode={urlParams.team} isDemo={demoMode}/>
       : <>
-          {page==="start"    &&<StartPage onStart={function(code){setPrefilledCode(code);setPage("teamcode");}} inviteContext={!ownerView&&urlParams.team?{code:urlParams.team}:null} onDemo={function(){setDemoMode(true);}}/>}
-          {page==="teamcode"  &&(!ownerView&&urlParams.team
+          {page==="start"    &&(!ownerView&&urlParams.team
             ? <StartPage onStart={function(code){setPrefilledCode(code);setPage("questions");}} inviteContext={{code:urlParams.team}} onDemo={function(){setDemoMode(true);}}/>
-            : <TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>
+            : <StartPage onStart={function(code){setPrefilledCode(code);setPage("teamcode");}} inviteContext={null} onDemo={function(){setDemoMode(true);}}/>
           )}
+          {page==="teamcode"  &&<TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
           {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("team");}}/>}
           {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} onBack={function(){setPage("analysis");}}/>}
