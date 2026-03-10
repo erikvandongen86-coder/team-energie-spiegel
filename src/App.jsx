@@ -693,8 +693,8 @@ function TeamPage(props) {
         <SectionLabel>Wie ontvangt de teamanalyse?</SectionLabel>
         <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.6,marginBottom:14,marginTop:0}}>De teamanalyse is gebaseerd op het gemiddelde van alle ingevulde spiegels. Kies wie deze mag ontvangen.</p>
         {[
-          {val:false,title:"Alleen naar mij",desc:"Jij ontvangt de teamanalyse. Teamleden ontvangen uitsluitend hun eigen individuele analyse — als ze dat zelf aangeven."},
-          {val:true,title:"Iedereen mag de teamanalyse ontvangen",desc:"Alle deelnemers die hun e-mailadres hebben achtergelaten ontvangen de gezamenlijke teamanalyse. Individuele antwoorden blijven altijd anoniem."},
+          {val:false,title:"Alleen naar mij",desc:"Jij ontvangt de teamanalyse. Teamleden zien alleen hun eigen individuele resultaten. Je kunt dit later alsnog openbaar maken via jouw beheerlink."},
+          {val:true,title:"Iedereen mag de teamanalyse ontvangen",desc:"Alle deelnemers die hun e-mailadres hebben achtergelaten ontvangen de gezamenlijke teamanalyse. Individuele antwoorden blijven altijd anoniem. Je kunt dit later ook nog uitschakelen via jouw beheerlink."},
         ].map(function(opt){return <div key={String(opt.val)} onClick={function(){setShareWithAll(opt.val);}} style={{padding:"13px 17px",borderRadius:12,border:"2px solid "+(shareWithAll===opt.val?C.olive:C.warm),cursor:"pointer",background:shareWithAll===opt.val?"#EEF1E8":C.white,transition:"all 0.2s",marginBottom:10}}>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
             <div style={{width:18,height:18,borderRadius:"50%",border:"2px solid "+(shareWithAll===opt.val?C.olive:C.muted),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -838,7 +838,16 @@ function TeamPage(props) {
       </Card>
 
       {/* Email for team results */}
-      {meta&&meta.shareWithAll&&<Card>
+      {meta&&!meta.shareWithAll&&<Card style={{background:C.warm,border:"none"}}>
+      <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+        <span style={{fontSize:18,flexShrink:0}}>🔒</span>
+        <div>
+          <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",color:C.charcoal,margin:"0 0 6px",fontWeight:600}}>Teamresultaten nog niet gedeeld</p>
+          <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,margin:0}}>De teamaanmaker heeft er nog voor gekozen de teamresultaten niet te delen. Je ontvangt een bericht zodra de analyse beschikbaar is.</p>
+        </div>
+      </div>
+    </Card>}
+    {meta&&meta.shareWithAll&&<Card>
         <SectionLabel>Ontvang de teamanalyse per e-mail</SectionLabel>
         <EmailCapture
           label={"De teamaanmaker heeft ingesteld dat iedereen de teamanalyse mag ontvangen. Laat je e-mailadres achter — je ontvangt de analyse zodra ze beschikbaar is."}
@@ -950,6 +959,28 @@ function OwnerDashboard(props) {
       {completed>=target&&target>0
         ? <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600,margin:0}}>✓ Iedereen heeft de spiegel ingevuld!</p>
         : <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0}}>Nog {target-completed} {target-completed===1?"teamlid":"teamleden"} te gaan. Pagina ververst automatisch.</p>}
+    </Card>
+
+    {/* Share toggle */}
+    <Card>
+      <SectionLabel>Teamresultaten delen met deelnemers</SectionLabel>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>
+        {meta.shareWithAll
+          ? "Deelnemers kunnen de teamresultaten momenteel inzien. Je kunt dit uitschakelen."
+          : "Deelnemers zien nu alleen hun eigen resultaten. Schakel in om de teamresultaten ook met hen te delen."}
+      </p>
+      <Btn variant={meta.shareWithAll?"ghost":"primary"} onClick={async function(){
+        try {
+          await fetch("/api/teams", {
+            method:"PATCH",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({teamCode, shareWithAll:!meta.shareWithAll})
+          });
+          setMeta(Object.assign({},meta,{shareWithAll:!meta.shareWithAll}));
+        } catch(e){ console.error(e); }
+      }}>
+        {meta.shareWithAll ? "🔒 Resultaten verbergen voor deelnemers" : "🔓 Resultaten zichtbaar maken voor deelnemers"}
+      </Btn>
     </Card>
 
     {/* Results or placeholder */}
