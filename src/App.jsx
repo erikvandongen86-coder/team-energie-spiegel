@@ -1211,12 +1211,171 @@ function OwnerDashboard(props) {
   </div>;
 }
 
+
+// ─── ADMIN DASHBOARD ──────────────────────────────────────────────────────────
+function AdminDashboard() {
+  var [password, setPassword] = useState("");
+  var [authed, setAuthed] = useState(false);
+  var [error, setError] = useState(null);
+  var [loading, setLoading] = useState(false);
+  var [data, setData] = useState(null);
+  var [selectedTeam, setSelectedTeam] = useState(null);
+
+  function calcAvg(entries) {
+    if (!entries.length) return null;
+    const cats = ['Vertrouwen', 'Eigenaarschap', 'Samenwerking', 'Richting', 'Tempo'];
+    const result = {};
+    cats.forEach(cat => {
+      result[cat] = parseFloat((entries.reduce((acc, e) => acc + (e.scores[cat] || 0), 0) / entries.length).toFixed(2));
+    });
+    return result;
+  }
+
+  async function handleLogin() {
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ password })
+      });
+      const json = await res.json();
+      if (!res.ok) { setError(json.error || "Ongeldig wachtwoord"); setLoading(false); return; }
+      setData(json); setAuthed(true); setLoading(false);
+    } catch(e) { setError("Verbindingsfout"); setLoading(false); }
+  }
+
+  if (!authed) return <div style={{minHeight:"100vh",background:C.cream,display:"flex",alignItems:"center",justifyContent:"center"}}>
+    <div style={{background:C.white,borderRadius:16,padding:"40px 36px",boxShadow:"0 4px 40px rgba(44,44,42,0.1)",width:"100%",maxWidth:380}}>
+      <div style={{textAlign:"center",marginBottom:28}}>
+        <div style={{width:40,height:40,background:C.olive,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
+          <div style={{display:"flex",gap:2,alignItems:"flex-end",height:20}}>{[8,12,16,12,8].map(function(h,i){return <div key={i} style={{width:3,height:h,background:C.cream,borderRadius:1}}/>;})}</div>
+        </div>
+        <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,letterSpacing:"0.1em",textTransform:"uppercase",margin:"0 0 6px"}}>Team Energie Spiegel</p>
+        <h1 style={{fontFamily:FONT_DISPLAY,fontSize:"1.6rem",color:C.charcoal,margin:0,fontWeight:400}}>Admin</h1>
+      </div>
+      <FormInput label="Wachtwoord" type="password" placeholder="••••••••" value={password} onChange={setPassword}/>
+      {error&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.terra,margin:"-8px 0 12px"}}>{error}</p>}
+      <Btn onClick={handleLogin} disabled={loading||!password} style={{width:"100%",justifyContent:"center"}}>
+        {loading ? "Laden..." : "Inloggen"}
+      </Btn>
+    </div>
+  </div>;
+
+  if (selectedTeam) {
+    const t = selectedTeam;
+    const avg = calcAvg(t.entries);
+    return <div style={{maxWidth:700,margin:"0 auto",padding:"clamp(22px,5vw,48px) 24px"}}>
+      <button onClick={function(){setSelectedTeam(null);}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.muted,marginBottom:20,padding:0}}>← Terug naar overzicht</button>
+      <div style={{marginBottom:24}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"#E8EDE3",borderRadius:8,padding:"4px 12px",marginBottom:12}}>
+          <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.olive,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>Team detail</span>
+        </div>
+        <Heading size={2}>{t.teamName}</Heading>
+        <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>{t.ownerName} · {t.ownerEmail} · Aangemaakt {new Date(t.createdAt).toLocaleDateString("nl-NL")}</p>
+      </div>
+
+      <Card style={{background:C.warm,border:"none"}}>
+        <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+          {[["Verwacht",t.memberCount],["Ingevuld",t.entries.length],["Deadline",t.deadlineDays+" dagen"]].map(function(item){
+            return <div key={item[0]}>
+              <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,margin:"0 0 2px",textTransform:"uppercase",letterSpacing:"0.06em"}}>{item[0]}</p>
+              <p style={{fontFamily:FONT_BODY,fontSize:20,fontWeight:700,color:C.charcoal,margin:0}}>{item[1]}</p>
+            </div>;
+          })}
+        </div>
+      </Card>
+
+      {avg&&<><Card>
+        <SectionLabel>Gemiddelde scores</SectionLabel>
+        <RadarViz data={avg}/>
+      </Card>
+      <Card>
+        <SectionLabel>Per categorie</SectionLabel>
+        {Object.entries(avg).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})}</Card></>}
+
+      {t.analysis&&<Card style={{background:C.warm,border:"none"}}>
+        <SectionLabel>Opgeslagen teamanalyse</SectionLabel>
+        <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,margin:"0 0 12px"}}>{t.analysisAt ? "Gegenereerd op "+new Date(t.analysisAt).toLocaleDateString("nl-NL") : ""}</p>
+        <AnalysisBlock analysis={t.analysis} isTeam={true}/>
+      </Card>}
+
+      {t.entries.length>0&&<Card>
+        <SectionLabel>Deelnemers ({t.entries.length})</SectionLabel>
+        <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
+          <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>#</th>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>E-mail</th>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Datum</th>
+          </tr></thead>
+          <tbody>{t.entries.map(function(e,i){
+            return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
+              <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
+              <td style={{padding:"8px 10px",color:C.charcoal}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
+              <td style={{padding:"8px 10px",color:C.muted}}>{e.email||"—"}</td>
+              <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL")}</td>
+            </tr>;
+          })}</tbody>
+        </table>
+      </Card>}
+
+      {avg&&<Card>
+        <SectionLabel>Exporteren</SectionLabel>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <Btn variant="secondary" onClick={function(){ exportTeamCSV(t, t.entries, avg, t.analysis); }}>↓ CSV</Btn>
+          <Btn variant="secondary" onClick={function(){ exportTeamPDF(t, t.entries, avg, t.analysis); }}>↓ PDF</Btn>
+        </div>
+      </Card>}
+    </div>;
+  }
+
+  return <div style={{maxWidth:800,margin:"0 auto",padding:"clamp(22px,5vw,48px) 24px"}}>
+    <div style={{marginBottom:28}}>
+      <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"#E8EDE3",borderRadius:8,padding:"4px 12px",marginBottom:14}}>
+        <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.olive,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>Admin dashboard</span>
+      </div>
+      <Heading size={2}>Alle teams & sessies</Heading>
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
+      {[["Teams",data.totalTeams],["Sessies",data.totalEntries],["Conversie",(data.totalTeams?Math.round((data.totalEntries/data.teams.reduce(function(a,t){return a+t.memberCount;},0))*100):0)+"%"]].map(function(item){
+        return <Card key={item[0]} style={{textAlign:"center",padding:"16px"}}>
+          <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,margin:"0 0 4px",textTransform:"uppercase",letterSpacing:"0.06em"}}>{item[0]}</p>
+          <p style={{fontFamily:FONT_DISPLAY,fontSize:"2rem",color:C.charcoal,margin:0,fontWeight:400}}>{item[1]}</p>
+        </Card>;
+      })}
+    </div>
+
+    {data.teams.map(function(t){
+      var pct = t.memberCount ? Math.round((t.entries.length/t.memberCount)*100) : 0;
+      return <Card key={t.teamCode} style={{cursor:"pointer",transition:"box-shadow 0.2s"}} onClick={function(){setSelectedTeam(t);}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
+          <div style={{flex:1,minWidth:0}}>
+            <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,margin:"0 0 3px",textTransform:"uppercase",letterSpacing:"0.06em"}}>{t.teamCode}</p>
+            <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.2rem",color:C.charcoal,margin:"0 0 4px",fontWeight:400}}>{t.teamName}</p>
+            <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0}}>{t.ownerName} · {t.ownerEmail}</p>
+          </div>
+          <div style={{textAlign:"right",flexShrink:0}}>
+            <p style={{fontFamily:FONT_BODY,fontSize:13,fontWeight:700,color:pct>=100?C.olive:C.muted,margin:"0 0 2px"}}>{t.entries.length}/{t.memberCount}</p>
+            <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,margin:"0 0 6px"}}>{new Date(t.createdAt).toLocaleDateString("nl-NL")}</p>
+            {t.analysis&&<span style={{fontFamily:FONT_BODY,fontSize:11,background:"#E8EDE3",color:C.olive,borderRadius:20,padding:"2px 10px",fontWeight:600}}>✓ Analyse</span>}
+          </div>
+        </div>
+        <div style={{height:4,background:C.warm,borderRadius:2,marginTop:12,overflow:"hidden"}}>
+          <div style={{height:"100%",width:pct+"%",background:pct>=100?C.olive:C.clay,borderRadius:2,transition:"width 0.3s"}}/>
+        </div>
+      </Card>;
+    })}
+    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
+  </div>;
+}
+
 // ─── APP SHELL ────────────────────────────────────────────────────────────────
 export default function App() {
   var [urlParams] = useState(function(){
     try {
       var p = new URLSearchParams(window.location.search);
-      return { team: p.get("team")||null, owner: p.get("owner")||null };
+      return { team: p.get("team")||null, owner: p.get("owner")||null, admin: p.get("admin")||null };
     } catch(e){ return {team:null,owner:null}; }
   });
 
@@ -1234,6 +1393,7 @@ export default function App() {
     }
   }, []);
 
+  var isAdmin = urlParams.admin === "true";
   var [page, setPage] = useState("start");
   var [answers, setAnswers] = useState({});
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
@@ -1244,6 +1404,11 @@ export default function App() {
   var showingDashboard = ownerView || demoMode;
 
   if(!ownerChecked) return <div style={{minHeight:"100vh",background:C.cream,display:"flex",alignItems:"center",justifyContent:"center"}}><LoadingDots/></div>;
+
+  if(isAdmin) return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+    <AdminDashboard/>
+  </div>;
 
   return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
