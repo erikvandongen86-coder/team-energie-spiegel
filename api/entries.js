@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       if (!code) return res.status(400).json({ error: 'Geen teamcode opgegeven' })
 
       const rows = await sql`
-        SELECT session_id, scores, submitted_at
+        SELECT session_id, scores, submitted_at, email, name
         FROM entries WHERE team_code = ${code}
         ORDER BY submitted_at ASC
       `
@@ -24,6 +24,8 @@ export default async function handler(req, res) {
         sid: r.session_id,
         scores: r.scores,
         ts: new Date(r.submitted_at).getTime(),
+        email: r.email || null,
+        name: r.name || null,
       })))
     }
 
@@ -34,7 +36,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Verplichte velden ontbreken' })
       }
 
-      // Update teamcode als sessie al bestaat met andere code
       const existing = await sql`SELECT id FROM entries WHERE session_id = ${sessionId} LIMIT 1`
       if (existing.length > 0) {
         await sql`
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
         `
       }
 
-      // Check of team nu compleet is → stuur bevestiging aan aanmaker
+      // Check of team compleet is → stuur teamanalyse mail
       const [team] = await sql`SELECT * FROM teams WHERE team_code = ${teamCode}`
       if (team) {
         const [{ count }] = await sql`
