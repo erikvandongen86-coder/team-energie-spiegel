@@ -597,7 +597,7 @@ function StartPage(props) {
 
     <SectionLabel>Team Energie Spiegel</SectionLabel>
     <Heading size={1}>Waar zit de energie in jouw team en waar lekt die weg?</Heading>
-    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>Start met jezelf. In 12 vragen scan je waar energie stroomt en waar het stokt in jullie team. Anoniem, gratis, geen account nodig. Nodig daarna je teamleden uit — zij vullen dezelfde scan in en jullie zien automatisch het teamgemiddelde. Een eerlijke, anonieme spiegel als vertrekpunt voor een goed gesprek.</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>In 12 vragen scan je waar energie stroomt en waar het stokt in jullie team. Anoniem en geen account nodig. Nodig daarna eventueel je teamleden uit — zij vullen dezelfde scan in en jullie zien automatisch het teamgemiddelde. Een eerlijke, anonieme spiegel als vertrekpunt voor een goed gesprek.</p>
 
     <div style={{background:C.warm,borderRadius:16,padding:"22px 26px",marginBottom:32}}>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,lineHeight:1.8,marginBottom:12,marginTop:0}}>Teams werken hard. Er worden plannen gemaakt, doelen gesteld en overleggen gepland. En toch voelt het soms alsof er iets blijft hangen.</p>
