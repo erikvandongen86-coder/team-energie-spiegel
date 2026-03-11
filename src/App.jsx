@@ -1462,6 +1462,7 @@ function AdminDashboard() {
       <SectionLabel>Feedback ({data.feedback.length})</SectionLabel>
       <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
         <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
           <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Pagina</th>
           <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Score</th>
           <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Zou gebruiken</th>
@@ -1470,6 +1471,7 @@ function AdminDashboard() {
         </tr></thead>
         <tbody>{data.feedback.map(function(f,i){
           return <tr key={i} style={{borderBottom:"1px solid "+C.warm}}>
+            <td style={{padding:"8px 10px",color:C.charcoal}}>{f.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
             <td style={{padding:"8px 10px",color:C.muted}}>{f.page||"—"}</td>
             <td style={{padding:"8px 10px"}}>{f.rating ? "⭐".repeat(f.rating) : "—"}</td>
             <td style={{padding:"8px 10px",color:f.wouldUse==="Ja"?C.olive:f.wouldUse==="Nee"?C.terra:C.muted}}>{f.wouldUse||"—"}</td>
