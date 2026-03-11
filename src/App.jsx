@@ -539,7 +539,7 @@ function TeamCodePage(props) {
           <Btn onClick={function(){setShowInput(true);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px"}}>
             Ja, ik heb een teamcode
           </Btn>
-          <Btn variant="ghost" onClick={function(){props.onStart(null);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px",border:"1.5px solid "+C.warm}}>
+          <Btn variant="ghost" onClick={function(){props.onStart(null);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px",border:"1.5px solid "+C.muted,color:C.charcoal}}>
             Nee, ik doe het individueel →
           </Btn>
         </div>
