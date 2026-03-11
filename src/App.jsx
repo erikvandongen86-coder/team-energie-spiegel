@@ -7,7 +7,7 @@ const C = {
   cream:"#F5F3EF", warm:"#EFEBE7", charcoal:"#332D28", muted:"#766960",
   white:"#FFFFFF", neutral:"#DED7CF",
 };
-const FONT_DISPLAY = "'Playfair Display', Georgia, serif";
+const FONT_DISPLAY = "'Lora', Georgia, serif";
 const FEEDBACK_MODE = true; // zet op false om feedback uit te schakelen
 const FONT_BODY    = "'Source Sans Pro', 'Helvetica Neue', sans-serif";
 
@@ -1588,12 +1588,12 @@ export default function App() {
   if(!ownerChecked) return <div style={{minHeight:"100vh",background:C.cream,display:"flex",alignItems:"center",justifyContent:"center"}}><LoadingDots/></div>;
 
   if(isAdmin) return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
     <AdminDashboard/>
   </div>;
 
   return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
     <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(245,240,232,0.93)",backdropFilter:"blur(8px)",borderBottom:"1px solid "+C.warm,padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:8}}>
         <div style={{width:24,height:24,background:C.olive,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center"}}>
