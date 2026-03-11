@@ -1449,8 +1449,8 @@ function AdminDashboard() {
       <Heading size={2}>Alle teams & sessies</Heading>
     </div>
 
-    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
-      {[["Teams",data.totalTeams],["Sessies",data.totalEntries],["Conversie",(data.totalTeams?Math.round((data.totalEntries/data.teams.reduce(function(a,t){return a+t.memberCount;},0))*100):0)+"%"]].map(function(item){
+    <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:12,marginBottom:20}}>
+      {[["Teams",data.totalTeams],["Sessies",data.totalSessions],["Subscribers",(data.subscribers||[]).length],["Conversie",(data.totalTeams?Math.round((data.totalEntries/data.teams.reduce(function(a,t){return a+t.memberCount;},0))*100):0)+"%"]].map(function(item){
         return <Card key={item[0]} style={{textAlign:"center",padding:"16px"}}>
           <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,margin:"0 0 4px",textTransform:"uppercase",letterSpacing:"0.06em"}}>{item[0]}</p>
           <p style={{fontFamily:FONT_DISPLAY,fontSize:"2rem",color:C.charcoal,margin:0,fontWeight:400}}>{item[1]}</p>
@@ -1458,7 +1458,25 @@ function AdminDashboard() {
       })}
     </div>
 
-    {data.feedback&&data.feedback.length>0&&<Card style={{marginBottom:20}}>
+    {data.subscribers&&data.subscribers.length>0&&<Card style={{marginBottom:20}}>
+      <SectionLabel>Abonnees — e-mail opgevraagd ({data.subscribers.length})</SectionLabel>
+      <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
+        <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>E-mail</th>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Datum</th>
+        </tr></thead>
+        <tbody>{data.subscribers.map(function(s,i){
+          return <tr key={i} style={{borderBottom:"1px solid "+C.warm}}>
+            <td style={{padding:"8px 10px",color:C.charcoal,fontWeight:s.name!=="—"?600:400}}>{s.name}</td>
+            <td style={{padding:"8px 10px"}}><a href={"mailto:"+s.email} style={{color:C.olive,textDecoration:"none"}}>{s.email}</a></td>
+            <td style={{padding:"8px 10px",color:C.muted}}>{new Date(s.date).toLocaleDateString("nl-NL")}</td>
+          </tr>;
+        })}</tbody>
+      </table>
+    </Card>}
+
+        {data.feedback&&data.feedback.length>0&&<Card style={{marginBottom:20}}>
       <SectionLabel>Feedback ({data.feedback.length})</SectionLabel>
       <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
         <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
