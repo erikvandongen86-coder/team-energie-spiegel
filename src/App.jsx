@@ -1543,7 +1543,7 @@ export default function App() {
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
 
-  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({}); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
+  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({}); setFeedbackDone(false); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
 
   var showingDashboard = ownerView || demoMode;
 
@@ -1582,7 +1582,7 @@ export default function App() {
           {page==="teamcode"  &&<TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
           {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage(!prefilledCode?"feedback":"team");}}/>}
-          {page==="feedback" &&(!feedbackDone ? <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}}/>  : null)}
+          {page==="feedback" &&(!feedbackDone ? <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}/> : (setPage("team"), null))}
           {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} onBack={function(){setPage("analysis");}}/>}
         </>
     }
