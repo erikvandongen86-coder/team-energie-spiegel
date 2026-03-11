@@ -222,7 +222,7 @@ function FeedbackEndScreen(props) {
   return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
     <div style={{background:C.olive,borderRadius:16,padding:"28px 32px",marginBottom:24,textAlign:"center"}}>
       <p style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase",margin:"0 0 8px"}}>MVP Test</p>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.4rem,4vw,2rem)",color:C.white,margin:0,lineHeight:1.3}}>Wat vond je van de tool tot dusver?</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.4rem,4vw,2rem)",color:C.white,margin:0,lineHeight:1.3}}>Wat vind je er tot nu toe van?</p>
     </div>
     {sent ? <Card style={{textAlign:"center",padding:"40px"}}>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.5rem",color:C.olive,margin:"0 0 8px"}}>Dankjewel! 🙏</p>
@@ -1582,7 +1582,7 @@ export default function App() {
           {page==="teamcode"  &&<TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
           {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage(!prefilledCode?"feedback":"team");}}/>}
-          {page==="feedback" &&(!feedbackDone ? <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}/> : (setPage("team"), null))}
+          {page==="feedback" &&(feedbackDone ? (function(){ setTimeout(function(){setPage("team");},0); return null; })() : <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}}/>)}
           {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} onBack={function(){setPage("analysis");}}/>}
         </>
     }
