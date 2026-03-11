@@ -27,6 +27,11 @@ export default async function handler(req, res) {
       FROM entries ORDER BY submitted_at DESC
     `
 
+    const feedback = await sql`
+      SELECT session_id, page, rating, comment, would_use, created_at
+      FROM feedback ORDER BY created_at DESC
+    `
+
     const result = teams.map(t => {
       const teamEntries = entries.filter(e => e.team_code === t.team_code)
       return {
@@ -55,6 +60,14 @@ export default async function handler(req, res) {
       teams: result,
       totalTeams: teams.length,
       totalEntries: entries.length,
+      feedback: feedback.map(f => ({
+        sessionId: f.session_id,
+        page: f.page,
+        rating: f.rating,
+        comment: f.comment,
+        wouldUse: f.would_use,
+        createdAt: new Date(f.created_at).getTime(),
+      }))
     })
   } catch (err) {
     console.error('admin error:', err)
