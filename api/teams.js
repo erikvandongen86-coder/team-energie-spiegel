@@ -54,19 +54,19 @@ export default async function handler(req, res) {
       `
 
       // Stuur beheerlink per e-mail naar aanmaker
-      if (process.env.RESEND_API_KEY) {
+      if (process.env.BREVO_API_KEY) {
         const ownerLink = `${process.env.APP_URL}?team=${teamCode}&owner=${ownerToken}`
-        await fetch('https://api.resend.com/emails', {
+        await fetch('https://api.brevo.com/v3/smtp/email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            'api-key': process.env.BREVO_API_KEY,
           },
           body: JSON.stringify({
-            from: 'Team Energie Spiegel <info@erikvandongen.eu>',
-            to: ownerEmail,
+            sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+            to: [{ email: ownerEmail }],
             subject: `Jouw beheerlink — Team ${teamName}`,
-            html: `
+            htmlContent: `
               <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 560px; margin: 0 auto; color: #2C2C2A;">
                 <div style="background: #5C6B3A; padding: 28px 32px; border-radius: 12px 12px 0 0;">
                   <p style="color: #F5F0E8; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">Team Energie Spiegel</p>
