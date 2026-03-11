@@ -7,7 +7,7 @@ const C = {
   cream:"#F5F3EF", warm:"#EFEBE7", charcoal:"#332D28", muted:"#766960",
   white:"#FFFFFF", neutral:"#DED7CF",
 };
-const FONT_DISPLAY = "'Lora', Georgia, serif";
+const FONT_DISPLAY = "'Cormorant Garamond', Georgia, serif";
 const FEEDBACK_MODE = true; // zet op false om feedback uit te schakelen
 const FONT_BODY    = "'Source Sans Pro', 'Helvetica Neue', sans-serif";
 
@@ -363,7 +363,7 @@ function SectionLabel(props) {
 function Heading(props) {
   var size = props.size||1;
   var sizes = {1:"clamp(1.9rem,5vw,2.8rem)",2:"clamp(1.3rem,3.5vw,1.9rem)",3:"clamp(1.05rem,2.5vw,1.3rem)"};
-  return <h1 style={{fontFamily:FONT_DISPLAY,fontSize:sizes[size],color:props.color||C.charcoal,fontWeight:600,lineHeight:1.25,marginBottom:size===1?18:12,marginTop:0}}>{props.children}</h1>;
+  return <h1 style={{fontFamily:FONT_DISPLAY,fontSize:sizes[size],color:props.color||C.charcoal,fontWeight:400,lineHeight:1.25,marginBottom:size===1?18:12,marginTop:0}}>{props.children}</h1>;
 }
 function Btn(props) {
   var variant = props.variant||"primary";
@@ -525,7 +525,7 @@ function TeamCodePage(props) {
   return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
     {/* Logo */}
     <div style={{background:C.olive,margin:"0 -24px",padding:"22px 24px",marginBottom:48,borderRadius:"0 0 20px 20px"}}>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:30,color:"#F5F3EF",letterSpacing:"0.05em",fontWeight:700,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:34,color:"#F5F3EF",letterSpacing:"0.08em",fontWeight:400,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:"rgba(245,243,239,0.75)",letterSpacing:"0.03em",margin:"0 0 2px"}}>Van inzicht naar beweging</p>
       <p style={{fontFamily:FONT_BODY,fontSize:12,color:"rgba(245,243,239,0.5)",letterSpacing:"0.04em",margin:0}}>erikvandongen.eu</p>
     </div>
@@ -582,7 +582,7 @@ function StartPage(props) {
   return <div style={{maxWidth:680,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
     {/* Logo */}
     <div style={{background:C.olive,margin:"0 -24px",padding:"22px 24px",marginBottom:40,borderRadius:"0 0 20px 20px"}}>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:30,color:"#F5F3EF",letterSpacing:"0.05em",fontWeight:700,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:34,color:"#F5F3EF",letterSpacing:"0.08em",fontWeight:400,textTransform:"uppercase",margin:"0 0 4px"}}>Erik van Dongen</p>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:"rgba(245,243,239,0.75)",letterSpacing:"0.03em",margin:"0 0 2px"}}>Van inzicht naar beweging</p>
       <p style={{fontFamily:FONT_BODY,fontSize:12,color:"rgba(245,243,239,0.5)",letterSpacing:"0.04em",margin:0}}>erikvandongen.eu</p>
     </div>
@@ -1383,7 +1383,7 @@ function AdminDashboard() {
           <div style={{display:"flex",gap:2,alignItems:"flex-end",height:20}}>{[8,12,16,12,8].map(function(h,i){return <div key={i} style={{width:3,height:h,background:C.cream,borderRadius:1}}/>;})}</div>
         </div>
         <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,letterSpacing:"0.1em",textTransform:"uppercase",margin:"0 0 6px"}}>Team Energie Spiegel</p>
-        <h1 style={{fontFamily:FONT_DISPLAY,fontSize:"1.6rem",color:C.charcoal,margin:0,fontWeight:600}}>Admin</h1>
+        <h1 style={{fontFamily:FONT_DISPLAY,fontSize:"1.6rem",color:C.charcoal,margin:0,fontWeight:400}}>Admin</h1>
       </div>
       <FormInput label="Wachtwoord" type="password" placeholder="••••••••" value={password} onChange={setPassword}/>
       {error&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.terra,margin:"-8px 0 12px"}}>{error}</p>}
@@ -1588,12 +1588,12 @@ export default function App() {
   if(!ownerChecked) return <div style={{minHeight:"100vh",background:C.cream,display:"flex",alignItems:"center",justifyContent:"center"}}><LoadingDots/></div>;
 
   if(isAdmin) return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
     <AdminDashboard/>
   </div>;
 
   return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
     <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(245,240,232,0.93)",backdropFilter:"blur(8px)",borderBottom:"1px solid "+C.warm,padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:8}}>
         <div style={{width:24,height:24,background:C.olive,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center"}}>
