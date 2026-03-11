@@ -1562,6 +1562,12 @@ export default function App() {
         setOwnerView(valid);
         setOwnerChecked(true);
       });
+    } else if(urlParams.team && !urlParams.owner) {
+      // Teamlid via uitnodigingslink — direct welkomstscherm laden
+      apiGetTeam(urlParams.team).then(function(m){
+        if(m){ setWelcomeMeta(m); setPage("welcome"); }
+        setOwnerChecked(true);
+      });
     } else {
       setOwnerChecked(true);
     }
@@ -1575,7 +1581,7 @@ export default function App() {
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
 
-  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({}); setFeedbackDone(false); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
+  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({}); setFeedbackDone(false); setWelcomeMeta(null); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
 
   var showingDashboard = ownerView || demoMode;
 
@@ -1627,4 +1633,3 @@ export default function App() {
     }
   </div>;
 }
-
