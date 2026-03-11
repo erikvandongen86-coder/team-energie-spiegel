@@ -112,8 +112,8 @@ export default async function handler(req, res) {
     const analysis = await generateTeamAnalysis(avgScores, entries.length)
     const html = buildTeamEmailHtml(team.team_name, team.owner_name, analysis, entries.length)
 
-    if (!process.env.RESEND_API_KEY) {
-      return res.status(200).json({ success: true, analysis, note: 'Geen Resend key geconfigureerd' })
+    if (!process.env.BREVO_API_KEY) {
+      return res.status(200).json({ success: true, analysis, note: 'Geen Brevo key geconfigureerd' })
     }
 
     const recipients = [team.owner_email]
@@ -126,17 +126,17 @@ export default async function handler(req, res) {
     }
 
     await Promise.all(recipients.map(to =>
-      fetch('https://api.resend.com/emails', {
+      fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'api-key': process.env.BREVO_API_KEY,
         },
         body: JSON.stringify({
-          from: 'Team Energie Spiegel <info@erikvandongen.eu>',
-          to,
+          sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+          to: [{ email: to }],
           subject: `Teamanalyse ${team.team_name} — Team Energie Spiegel`,
-          html,
+          htmlContent: html,
         }),
       })
     ))
