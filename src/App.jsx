@@ -804,7 +804,6 @@ function TeamPage(props) {
   var [companyName, setCompanyName] = useState("");
   var [teamName, setTeamName] = useState("");
   var [memberCount, setMemberCount] = useState("");
-  var [deadlineDays, setDeadlineDays] = useState("7");
   var [shareWithAll, setShareWithAll] = useState(null);
   var [formError, setFormError] = useState("");
 
@@ -842,7 +841,6 @@ function TeamPage(props) {
   var completed = teamData.length;
   var target = (meta&&meta.memberCount)||0;
   var progressPct = target ? Math.min((completed/target)*100,100) : 0;
-  var deadlineDate = meta ? new Date(meta.createdAt+meta.deadlineDays*86400000).toLocaleDateString("nl-NL",{day:"numeric",month:"long"}) : "";
 
   var inviteLink = "https://spiegel.erikvandongen.eu?team=" + teamCode;
   var shareMsg = meta
@@ -858,9 +856,9 @@ function TeamPage(props) {
     setFormError("Bezig met aanmaken...");
     var code = generateTeamCode();
     var token = generateOwnerToken();
-    var m = {ownerName:ownerName.trim(),ownerEmail:ownerEmail.trim(),teamName:teamName.trim(),memberCount:parseInt(memberCount),deadlineDays:parseInt(deadlineDays)||7,shareWithAll:shareWithAll,ownerToken:token,createdAt:Date.now()};
+    var m = {ownerName:ownerName.trim(),ownerEmail:ownerEmail.trim(),teamName:teamName.trim(),memberCount:parseInt(memberCount),shareWithAll:shareWithAll,ownerToken:token,createdAt:Date.now()};
     try {
-      await apiCreateTeam({teamCode:code,teamName:m.teamName,ownerName:m.ownerName,ownerEmail:m.ownerEmail,companyName:companyName.trim(),memberCount:m.memberCount,deadlineDays:m.deadlineDays,shareWithAll:m.shareWithAll,ownerToken:token});
+      await apiCreateTeam({teamCode:code,teamName:m.teamName,ownerName:m.ownerName,ownerEmail:m.ownerEmail,companyName:companyName.trim(),memberCount:m.memberCount,shareWithAll:m.shareWithAll,ownerToken:token});
       await apiSaveEntry(code, getSessionId(), catScores, ownerEmail.trim());
       var entries = await apiGetEntries(code);
       setFormError("");
@@ -926,7 +924,7 @@ function TeamPage(props) {
 
       <Card>
         <SectionLabel>Jouw gegevens</SectionLabel>
-        <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Hierop ontvang je de teamresultaten zodra de deadline is bereikt of iedereen heeft ingevuld.</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Hierop ontvang je de teamresultaten zodra iedereen heeft ingevuld.</p>
         <FormInput label="Jouw naam" placeholder="Erik van Dongen" value={ownerName} onChange={setOwnerName}/>
         <FormInput label="Bedrijfsnaam" placeholder="Bijv. Acme B.V." value={companyName} onChange={setCompanyName}/>
         <FormInput label="Jouw e-mailadres" type="email" placeholder="erik@erikvandongen.eu" value={ownerEmail} onChange={setOwnerEmail} hint="Je ontvangt hier de teamanalyse."/>
@@ -936,7 +934,6 @@ function TeamPage(props) {
         <SectionLabel>Teaminstellingen</SectionLabel>
         <FormInput label="Teamnaam" placeholder="Bijv. MT Commercie" value={teamName} onChange={setTeamName}/>
         <FormInput label="Aantal teamleden dat je uitnodigt" placeholder="Bijv. 6" value={memberCount} onChange={setMemberCount} hint="Zodra iedereen klaar is ontvang je automatisch de teamanalyse."/>
-        <FormInput label="Stuur mij de resultaten na ... dagen (ook als niet iedereen heeft ingevuld)" placeholder="7" value={deadlineDays} onChange={setDeadlineDays} hint={"Je ontvangt de analyse sowieso na "+deadlineDays+" dag"+(deadlineDays==="1"?"":"en")+", ongeacht hoeveel mensen hebben ingevuld."}/>
       </Card>
 
       <Card>
@@ -1018,7 +1015,6 @@ function TeamPage(props) {
         <SectionLabel>Wat gebeurt er nu?</SectionLabel>
         {[
           {n:"1",t:"Teamleden vullen de spiegel in",d:"Via de uitnodigingslink. Hun antwoorden zijn volledig anoniem."},
-          {n:"2",t:"Automatische analyse na "+createdMeta.deadlineDays+" dagen",d:"Je ontvangt de teamanalyse op "+createdMeta.ownerEmail+" — ook als niet iedereen heeft ingevuld."+(createdMeta.shareWithAll?" Alle deelnemers die hun e-mailadres hebben achtergelaten ontvangen de teamanalyse ook.":"")},
           {n:"3",t:"Bespreek de uitkomst met je team",d:"De analyse is een gespreksstarter. Gebruik hem om het gesprek te openen dat er al te lang niet is gevoerd."},
         ].map(function(item,i){return <div key={i} style={{display:"flex",gap:14,marginBottom:i<2?16:0}}>
           <div style={{width:26,height:26,borderRadius:"50%",background:C.olive,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -1060,10 +1056,7 @@ function TeamPage(props) {
             <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,marginBottom:3,marginTop:0,textTransform:"uppercase",letterSpacing:"0.06em"}}>Voortgang</p>
             <p style={{fontFamily:FONT_BODY,fontSize:22,fontWeight:700,color:C.charcoal,marginTop:0,marginBottom:0}}>{completed} <span style={{fontSize:14,fontWeight:400,color:C.muted}}>/ {target} teamleden</span></p>
           </div>
-          <div style={{textAlign:"right"}}>
-            <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,marginBottom:3,marginTop:0,textTransform:"uppercase",letterSpacing:"0.06em"}}>Deadline</p>
-            <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:600,color:C.charcoal,marginTop:0,marginBottom:0}}>{deadlineDate}</p>
-          </div>
+
         </div>
         <div style={{height:6,background:"rgba(69,84,59,0.2)",borderRadius:3,overflow:"hidden"}}>
           <div style={{height:"100%",width:progressPct+"%",background:C.olive,borderRadius:3,transition:"width 0.5s ease"}}/>
@@ -1134,7 +1127,7 @@ var DEMO_CODE = "TEAM-DEMO";
 var DEMO_TOKEN = "demo-owner-token";
 var DEMO_META = {
   ownerName:"Erik van Dongen", ownerEmail:"erik@erikvandongen.eu",
-  teamName:"MT Commercie", memberCount:6, deadlineDays:7,
+  teamName:"MT Commercie", memberCount:6,
   shareWithAll:false, ownerToken:DEMO_TOKEN,
   createdAt: Date.now() - 3*86400000,
 };
@@ -1180,7 +1173,6 @@ function OwnerDashboard(props) {
   var completed = teamData.length;
   var target = meta.memberCount;
   var progressPct = target ? Math.min((completed/target)*100,100) : 0;
-  var deadlineDate = new Date(meta.createdAt+meta.deadlineDays*86400000).toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
   var avg = completed ? calcAvgScores(teamData) : null;
   var inviteLink = "https://spiegel.erikvandongen.eu?team="+teamCode;
   var shareMsg = "Hoi! Wil je de Team Energie Spiegel invullen voor "+meta.teamName+"?\n\n"+inviteLink;
@@ -1214,10 +1206,7 @@ function OwnerDashboard(props) {
           <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,marginBottom:3,marginTop:0,textTransform:"uppercase",letterSpacing:"0.06em"}}>Voortgang</p>
           <p style={{fontFamily:FONT_BODY,fontSize:26,fontWeight:700,color:C.charcoal,marginTop:0,marginBottom:0}}>{completed} <span style={{fontSize:14,fontWeight:400,color:C.muted}}>/ {target} teamleden</span></p>
         </div>
-        <div style={{textAlign:"right"}}>
-          <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,marginBottom:3,marginTop:0,textTransform:"uppercase",letterSpacing:"0.06em"}}>Deadline</p>
-          <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:600,color:C.charcoal,marginTop:0,marginBottom:0}}>{deadlineDate}</p>
-        </div>
+
       </div>
       <div style={{height:8,background:"rgba(69,84,59,0.2)",borderRadius:4,overflow:"hidden",marginBottom:8}}>
         <div style={{height:"100%",width:progressPct+"%",background:C.olive,borderRadius:4,transition:"width 0.5s ease"}}/>
@@ -1388,7 +1377,7 @@ function AdminDashboard() {
 
       <Card style={{background:C.warm,border:"none"}}>
         <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
-          {[["Verwacht",t.memberCount],["Ingevuld",t.entries.length],["Deadline",t.deadlineDays+" dagen"]].map(function(item){
+          {[["Verwacht",t.memberCount],["Ingevuld",t.entries.length],].map(function(item){
             return <div key={item[0]}>
               <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,margin:"0 0 2px",textTransform:"uppercase",letterSpacing:"0.06em"}}>{item[0]}</p>
               <p style={{fontFamily:FONT_BODY,fontSize:20,fontWeight:700,color:C.charcoal,margin:0}}>{item[1]}</p>
