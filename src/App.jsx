@@ -472,14 +472,17 @@ function EmailCapture(props) {
   </div>;
 }
 function ProgressBar(props) {
-  var pct = (props.current/props.total)*100;
-  return <div style={{marginBottom:26}}>
-    <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-      <span style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,letterSpacing:"0.08em",textTransform:"uppercase"}}>Vraag {props.current} van {props.total}</span>
-      <span style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted}}>{Math.round(pct)}%</span>
+  var pct = (props.current / props.total) * 100;
+  var cats = ['Vertrouwen','Eigenaarschap','Samenwerking','Richting','Tempo'];
+  var q = QUESTIONS[props.current - 1];
+  var cat = q ? q.category : '';
+  return <div style={{marginBottom:28}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+      <span style={{fontFamily:FONT_BODY,fontSize:12,color:C.olive,fontWeight:600,letterSpacing:'0.06em',textTransform:'uppercase'}}>{cat}</span>
+      <span style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted}}>{props.current} / {props.total}</span>
     </div>
-    <div style={{height:3,background:C.warm,borderRadius:2,overflow:"hidden"}}>
-      <div style={{height:"100%",width:pct+"%",background:C.olive,borderRadius:2,transition:"width 0.4s ease"}}/>
+    <div style={{height:5,background:'rgba(69,84,59,0.15)',borderRadius:3,overflow:'hidden'}}>
+      <div style={{height:'100%',width:pct+'%',background:C.olive,borderRadius:3,transition:'width 0.35s ease'}}/>
     </div>
   </div>;
 }
@@ -625,6 +628,34 @@ function StartPage(props) {
 }
 
 // ─── QUESTIONS PAGE ───────────────────────────────────────────────────────────
+
+// ─── WELCOME TEAM SCREEN ──────────────────────────────────────────────────────
+function WelcomeTeamScreen(props) {
+  var meta = props.meta;
+  var onStart = props.onStart;
+  return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
+    <div style={{background:C.olive,borderRadius:20,padding:"32px 28px",marginBottom:24,textAlign:"center"}}>
+      <p style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase",margin:"0 0 10px"}}>Uitnodiging</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.5rem,5vw,2.2rem)",color:C.white,margin:"0 0 8px",lineHeight:1.2,fontWeight:400}}>{meta.teamName}</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:"#b8c9a3",margin:0}}>Uitgenodigd door {meta.ownerName}</p>
+    </div>
+    <Card>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.25rem",color:C.charcoal,margin:"0 0 12px",lineHeight:1.4,fontWeight:400}}>Je bent uitgenodigd om de Team Energie Spiegel in te vullen.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.7,margin:"0 0 20px"}}>Je antwoorden zijn volledig <strong style={{color:C.charcoal}}>anoniem</strong> — alleen het teamgemiddelde is zichtbaar voor anderen. Het duurt ongeveer 3 minuten.</p>
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {[["⏱","3 minuten"],["🔒","Jouw antwoorden zijn anoniem"],["📊","Je ziet je eigen score direct"],["👥","Bijdrage aan het teamgemiddelde"]].map(function(item,i){
+          return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"8px 0",borderBottom:i<3?"1px solid "+C.warm:"none"}}>
+            <span style={{fontSize:18,width:24,textAlign:"center"}}>{item[0]}</span>
+            <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal}}>{item[1]}</span>
+          </div>;
+        })}
+      </div>
+    </Card>
+    <Btn onClick={onStart} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px"}}>Start de spiegel →</Btn>
+    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
+  </div>;
+}
+
 function QuestionsPage(props) {
   var [current, setCurrent] = useState(0);
   var [answers, setAnswers] = useState({});
@@ -764,7 +795,7 @@ function AnalysisPage(props) {
     <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.neutral,textAlign:"center",marginTop:22,marginBottom:80,lineHeight:1.6}}>De analyse wordt ondersteund door AI en gebaseerd op jouw antwoorden. De uitkomst is bedoeld als reflectie en gesprekstarter.</p>
 
     {/* Floating CTA */}
-    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,padding:"16px 24px",background:"linear-gradient(to top, rgba(245,240,232,1) 60%, rgba(245,240,232,0))",pointerEvents:"none"}}>
+    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,padding:"12px 16px",background:"linear-gradient(to top, rgba(245,240,232,1) 60%, rgba(245,240,232,0))",pointerEvents:"none"}}>
       <div style={{maxWidth:640,margin:"0 auto",pointerEvents:"all"}}>
         {prefilledCode
           ? <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(69,84,59,0.25)",flexWrap:"wrap"}}>
@@ -776,10 +807,10 @@ function AnalysisPage(props) {
             </div>
           : <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(69,84,59,0.25)",flexWrap:"wrap"}}>
               <div>
-                <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 2px",lineHeight:1.3}}>Laat je team ook de spiegel invullen</p>
-                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>Zie waar jullie beleving overeenkomt — en waar niet.</p>
+                <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 4px",lineHeight:1.3}}>Wil je weten hoe je team dit ervaart?</p>
+                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>Maak een team aan en nodig je collega's uit — gratis en anoniem.</p>
               </div>
-              <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Vergelijk met je team →</Btn>
+              <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Maak een team aan →</Btn>
             </div>
         }
       </div>
@@ -1219,7 +1250,7 @@ function OwnerDashboard(props) {
     {completed>0&&<Card>
       <SectionLabel>Deelnemers ({completed})</SectionLabel>
       <div style={{overflowX:"auto"}}>
-        <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
+        <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13,minWidth:420}}>
           <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
             <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>#</th>
             <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
@@ -1438,7 +1469,7 @@ function AdminDashboard() {
       <Heading size={2}>Alle teams & sessies</Heading>
     </div>
 
-    <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:12,marginBottom:20}}>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))",gap:12,marginBottom:20}}>
       {[["Teams",data.totalTeams],["Sessies",data.totalSessions],["Subscribers",(data.subscribers||[]).length],["Conversie",(data.totalTeams?Math.round((data.totalEntries/data.teams.reduce(function(a,t){return a+t.memberCount;},0))*100):0)+"%"]].map(function(item){
         return <Card key={item[0]} style={{textAlign:"center",padding:"16px"}}>
           <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,margin:"0 0 4px",textTransform:"uppercase",letterSpacing:"0.06em"}}>{item[0]}</p>
@@ -1539,6 +1570,7 @@ export default function App() {
   var isAdmin = urlParams.admin === "true";
   var [page, setPage] = useState("start");
   var [feedbackDone, setFeedbackDone] = useState(false);
+  var [welcomeMeta, setWelcomeMeta] = useState(null);
   var [answers, setAnswers] = useState({});
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
@@ -1576,10 +1608,17 @@ export default function App() {
       ? <OwnerDashboard teamCode={urlParams.team} isDemo={demoMode}/>
       : <>
           {page==="start"    &&(!ownerView&&urlParams.team
-            ? <StartPage onStart={function(code){setPrefilledCode(code);setPage("questions");}} inviteContext={{code:urlParams.team}} onDemo={function(){setDemoMode(true);}}/>
+            ? <StartPage onStart={function(code){
+                setPrefilledCode(code);
+                apiGetTeam(code).then(function(m){ if(m){ setWelcomeMeta(m); setPage("welcome"); } else { setPage("questions"); } });
+              }} inviteContext={{code:urlParams.team}} onDemo={function(){setDemoMode(true);}}/>
             : <StartPage onStart={function(code){setPrefilledCode(code);setPage("teamcode");}} inviteContext={null} onDemo={function(){setDemoMode(true);}}/>
           )}
-          {page==="teamcode"  &&<TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>}
+          {page==="welcome"   &&welcomeMeta&&<WelcomeTeamScreen meta={welcomeMeta} onStart={function(){setPage("questions");}}/>}
+          {page==="teamcode"  &&<TeamCodePage onStart={function(code){
+            setPrefilledCode(code);
+            apiGetTeam(code).then(function(m){ if(m){ setWelcomeMeta(m); setPage("welcome"); } else { setPage("questions"); } });
+          }}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
           {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage(!prefilledCode?"feedback":"team");}}/>}
           {page==="feedback" &&(feedbackDone ? (function(){ setTimeout(function(){setPage("team");},0); return null; })() : <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}}/>)}
@@ -1588,3 +1627,4 @@ export default function App() {
     }
   </div>;
 }
+
