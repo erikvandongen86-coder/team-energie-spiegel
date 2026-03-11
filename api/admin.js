@@ -21,12 +21,10 @@ export default async function handler(req, res) {
              member_count, deadline_days, share_with_all, created_at, analysis, analysis_at
       FROM teams ORDER BY created_at DESC
     `
-
     const entries = await sql`
       SELECT team_code, session_id, scores, email, name, submitted_at
       FROM entries ORDER BY submitted_at DESC
     `
-
     const feedback = await sql`
       SELECT session_id, page, rating, comment, would_use, created_at
       FROM feedback ORDER BY created_at DESC
@@ -60,14 +58,19 @@ export default async function handler(req, res) {
       teams: result,
       totalTeams: teams.length,
       totalEntries: entries.length,
-      feedback: feedback.map(f => ({
-        sessionId: f.session_id,
-        page: f.page,
-        rating: f.rating,
-        comment: f.comment,
-        wouldUse: f.would_use,
-        createdAt: new Date(f.created_at).getTime(),
-      }))
+      feedback: feedback.map(f => {
+        const entry = entries.find(e => e.session_id === f.session_id)
+        return {
+          sessionId: f.session_id,
+          name: entry?.name || null,
+          email: entry?.email || null,
+          page: f.page,
+          rating: f.rating,
+          comment: f.comment,
+          wouldUse: f.would_use,
+          createdAt: new Date(f.created_at).getTime(),
+        }
+      })
     })
   } catch (err) {
     console.error('admin error:', err)
