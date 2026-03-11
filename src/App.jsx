@@ -81,10 +81,10 @@ async function apiValidateOwner(teamCode, ownerToken) {
     return data.valid === true;
   } catch(e) { return false; }
 }
-async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis) {
+async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis, analysis) {
   const res = await fetch("/api/subscribe", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ teamCode, sessionId, name, email, wantsTeamAnalysis }),
+    body: JSON.stringify({ teamCode, sessionId, name, email, wantsTeamAnalysis, analysis }),
   });
   if (!res.ok) throw new Error("Opslaan email mislukt");
   return res.json();
@@ -141,6 +141,14 @@ async function fetchAIAnalysis(categoryScores, memberCount, isTeam) {
     return data;
   } catch(e) {
     return {
+      diagnose:"Op basis van de antwoorden zien we een team dat hard werkt, maar waar een aantal dynamieken energie kosten.",
+      betekenis:"Dit patroon is herkenbaar in veel teams die in een groeifase zitten of onder druk werken.",
+      geenVerandering:"Als dit patroon aanhoudt, is de kans groot dat stille frustraties groter worden.",
+      gespreksvragen:["Welk onderwerp vermijden we al te lang?","Wie voelt zich het minst gehoord?","Wat zou er veranderen als we écht transparant zouden zijn?"],
+    };
+  }
+}
+
 // ─── EXPORT HELPERS ───────────────────────────────────────────────────────────
 function exportTeamCSV(meta, entries, avg, analysis) {
   const cats = ['Vertrouwen', 'Eigenaarschap', 'Samenwerking', 'Richting', 'Tempo'];
@@ -234,13 +242,6 @@ function exportTeamPDF(meta, entries, avg, analysis) {
   </body></html>`;
   const w = window.open('','_blank');
   w.document.write(html); w.document.close();
-}
-      diagnose:"Op basis van de antwoorden zien we een team dat hard werkt, maar waar een aantal dynamieken energie kosten.",
-      betekenis:"Dit patroon is herkenbaar in veel teams die in een groeifase zitten of onder druk werken.",
-      geenVerandering:"Als dit patroon aanhoudt, is de kans groot dat stille frustraties groter worden.",
-      gespreksvragen:["Welk onderwerp vermijden we al te lang?","Wie voelt zich het minst gehoord?","Wat zou er veranderen als we écht transparant zouden zijn?"],
-    };
-  }
 }
 
 // ─── Shared UI components ─────────────────────────────────────────────────────
@@ -615,7 +616,7 @@ function AnalysisPage(props) {
       {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : analysis&&<AnalysisBlock analysis={analysis} isTeam={false} cta={
         !emailSubmitted
           ? <EmailDropdown canReceiveTeamAnalysis={canReceiveTeamAnalysis} onSubmit={function(name,email){
-              apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
+              apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis, analysis).finally(function(){ setEmailSubmitted(true); });
             }}/>
           : <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#E8EDE3",borderRadius:12}}>
               <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,fontWeight:600,margin:0}}>Genoteerd ✓ je ontvangt je resultaten per e-mail.</p>
@@ -1046,35 +1047,10 @@ function OwnerDashboard(props) {
   useEffect(function(){
     if(isDemo) return;
     function loadData() {
-      apiGetTeam(teamCode).then(function(m){ if(m) setMeta(m); });
-      apiGetEntries(teamCode).then(function(entries){ setTeamData(entries); setLoading(false); });
-    }
-    loadData();
-    var iv = setInterval(loadData, 8000);
-    return function(){ clearInterval(iv); };
-  },[]);
-// ─── OWNER DASHBOARD ─────────────────────────────────────────────────────────
-function OwnerDashboard(props) {
-  var isDemo = !!props.isDemo;
-  var teamCode = isDemo ? DEMO_CODE : props.teamCode;
-  var [meta, setMeta] = useState(isDemo ? DEMO_META : null);
-  var [teamData, setTeamData] = useState(isDemo ? DEMO_ENTRIES : []);
-  var [teamAnalysis, setTeamAnalysis] = useState(null);
-  var [teamAnalysisLoading, setTeamAnalysisLoading] = useState(false);
-  var [teamAnalysisLoaded, setTeamAnalysisLoaded] = useState(false);
-  var [loading, setLoading] = useState(!isDemo);
-
-  useEffect(function(){
-    if(isDemo) return;
-    function loadData() {
       apiGetTeam(teamCode).then(function(m){
         if(m) {
           setMeta(m);
-          // Herstel opgeslagen teamanalyse
-          if(m.analysis && !teamAnalysisLoaded) {
-            setTeamAnalysis(m.analysis);
-            setTeamAnalysisLoaded(true);
-          }
+          if(m.analysis && !teamAnalysisLoaded) { setTeamAnalysis(m.analysis); setTeamAnalysisLoaded(true); }
         }
       });
       apiGetEntries(teamCode).then(function(entries){ setTeamData(entries); setLoading(false); });
@@ -1099,11 +1075,7 @@ function OwnerDashboard(props) {
 
   async function handleSaveTeamAnalysis(analysis) {
     try {
-      await fetch("/api/teams", {
-        method:"PATCH",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({teamCode, analysis})
-      });
+      await fetch("/api/teams", { method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify({teamCode, analysis}) });
     } catch(e){ console.error(e); }
   }
 
@@ -1124,7 +1096,6 @@ function OwnerDashboard(props) {
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Aangemaakt door {meta.ownerName} · {meta.ownerEmail}</p>
     </div>
 
-    {/* Progress */}
     <Card style={{background:C.warm,border:"none"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
         <div>
@@ -1144,56 +1115,41 @@ function OwnerDashboard(props) {
         : <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0}}>Nog {target-completed} {target-completed===1?"teamlid":"teamleden"} te gaan. Pagina ververst automatisch.</p>}
     </Card>
 
-    {/* Sessie-overzicht */}
     {completed>0&&<Card>
       <SectionLabel>Deelnemers ({completed})</SectionLabel>
       <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
-          <thead>
-            <tr style={{borderBottom:"2px solid "+C.warm}}>
-              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>#</th>
-              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
-              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>E-mail</th>
-              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Ingevuld op</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teamData.map(function(e,i){
-              return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
-                <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
-                <td style={{padding:"8px 10px",color:C.charcoal,fontWeight:e.name?600:400}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
-                <td style={{padding:"8px 10px",color:C.muted}}>{e.email||"—"}</td>
-                <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL",{day:"numeric",month:"short",year:"numeric"})}</td>
-              </tr>;
-            })}
-          </tbody>
+          <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>#</th>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>E-mail</th>
+            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Ingevuld op</th>
+          </tr></thead>
+          <tbody>{teamData.map(function(e,i){
+            return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
+              <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
+              <td style={{padding:"8px 10px",color:C.charcoal,fontWeight:e.name?600:400}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
+              <td style={{padding:"8px 10px",color:C.muted}}>{e.email||"—"}</td>
+              <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL",{day:"numeric",month:"short",year:"numeric"})}</td>
+            </tr>;
+          })}</tbody>
         </table>
       </div>
     </Card>}
 
-    {/* Share toggle */}
     <Card>
       <SectionLabel>Teamresultaten delen met deelnemers</SectionLabel>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>
-        {meta.shareWithAll
-          ? "Deelnemers kunnen de teamresultaten momenteel inzien. Je kunt dit uitschakelen."
-          : "Deelnemers zien nu alleen hun eigen resultaten. Schakel in om de teamresultaten ook met hen te delen."}
+        {meta.shareWithAll ? "Deelnemers kunnen de teamresultaten momenteel inzien. Je kunt dit uitschakelen." : "Deelnemers zien nu alleen hun eigen resultaten. Schakel in om de teamresultaten ook met hen te delen."}
       </p>
       <Btn variant={meta.shareWithAll?"ghost":"primary"} onClick={async function(){
         try {
-          await fetch("/api/teams", {
-            method:"PATCH",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({teamCode, shareWithAll:!meta.shareWithAll})
-          });
+          await fetch("/api/teams",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({teamCode,shareWithAll:!meta.shareWithAll})});
           setMeta(Object.assign({},meta,{shareWithAll:!meta.shareWithAll}));
         } catch(e){ console.error(e); }
-      }}>
-        {meta.shareWithAll ? "🔒 Resultaten verbergen voor deelnemers" : "🔓 Resultaten zichtbaar maken voor deelnemers"}
-      </Btn>
+      }}>{meta.shareWithAll ? "🔒 Resultaten verbergen voor deelnemers" : "🔓 Resultaten zichtbaar maken voor deelnemers"}</Btn>
     </Card>
 
-    {/* Results */}
     {avg ? <>
       <Card>
         <SectionLabel>Gemiddelde teamscores ({completed} deelnemer{completed!==1?"s":""})</SectionLabel>
@@ -1208,39 +1164,27 @@ function OwnerDashboard(props) {
           <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>Genereer een AI-analyse op basis van de {completed} resultaten die nu beschikbaar zijn.</p>
           <Btn onClick={function(){
             setTeamAnalysisLoading(true);
-            fetchAIAnalysis(avg, completed, true).then(function(r){
-              setTeamAnalysis(r);
-              setTeamAnalysisLoading(false);
-              setTeamAnalysisLoaded(true);
-              handleSaveTeamAnalysis(r);
-            });
+            fetchAIAnalysis(avg, completed, true).then(function(r){ setTeamAnalysis(r); setTeamAnalysisLoading(false); setTeamAnalysisLoaded(true); handleSaveTeamAnalysis(r); });
           }}>Genereer teamanalyse</Btn>
         </>}
         {teamAnalysisLoading&&<><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Teamanalyse wordt gegenereerd...</p><LoadingDots/></>}
         {teamAnalysisLoaded&&teamAnalysis&&<>
           <AnalysisBlock analysis={teamAnalysis} isTeam={true}/>
-          <div style={{marginTop:12,display:"flex",gap:8,flexWrap:"wrap"}}>
-            <Btn variant="ghost" style={{fontSize:13,padding:"8px 18px"}} onClick={function(){
-              setTeamAnalysisLoaded(false); setTeamAnalysis(null);
-            }}>↺ Opnieuw genereren</Btn>
-          </div>
+          <div style={{marginTop:12}}><Btn variant="ghost" style={{fontSize:13,padding:"8px 18px"}} onClick={function(){ setTeamAnalysisLoaded(false); setTeamAnalysis(null); }}>↺ Opnieuw genereren</Btn></div>
         </>}
       </Card>
-
-      {/* Export */}
-      {avg&&<Card>
+      <Card>
         <SectionLabel>Exporteren</SectionLabel>
         <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>Download de teamresultaten inclusief deelnemersoverzicht{teamAnalysis?" en AI-analyse":""} als CSV of PDF.</p>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
           <Btn variant="secondary" onClick={function(){ exportTeamCSV(meta, teamData, avg, teamAnalysis); }}>↓ Download CSV</Btn>
           <Btn variant="secondary" onClick={function(){ exportTeamPDF(meta, teamData, avg, teamAnalysis); }}>↓ Download PDF</Btn>
         </div>
-      </Card>}
+      </Card>
     </> : <Card>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.muted,lineHeight:1.6,margin:0,textAlign:"center",padding:"16px 0"}}>Nog geen resultaten — stuur de uitnodigingslink naar je team.</p>
     </Card>}
 
-    {/* Invite reminder */}
     <Card>
       <SectionLabel>Uitnodigingslink voor teamleden</SectionLabel>
       <div style={{background:C.warm,borderRadius:10,padding:"10px 14px",marginBottom:14,fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,wordBreak:"break-all"}}>{inviteLink}</div>
@@ -1249,8 +1193,6 @@ function OwnerDashboard(props) {
         <Btn variant="green" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent("Reminder voor team "+meta.teamName+": "+inviteLink));}}>✓ WhatsApp</Btn>
       </div>
     </Card>
-
-    {/* CTA */}
     <Card style={{background:C.olive,border:"none"}}>
       <div style={{display:"inline-block",background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"3px 13px",marginBottom:16}}>
         <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Van diagnose naar beweging</span>
@@ -1268,43 +1210,8 @@ function OwnerDashboard(props) {
     <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
   </div>;
 }
-// ─── DEMO DATA ────────────────────────────────────────────────────────────────
-var DEMO_CODE = "TEAM-DEMO";
-var DEMO_TOKEN = "demo-owner-token";
-var DEMO_META = {
-  ownerName:"Erik van Dongen", ownerEmail:"erik@erikvandongen.eu",
-  teamName:"MT Commercie", memberCount:6, deadlineDays:7,
-  shareWithAll:false, ownerToken:DEMO_TOKEN,
-  createdAt: Date.now() - 3*86400000,
-};
-var DEMO_ENTRIES = [
-  {scores:{Vertrouwen:4.0,Eigenaarschap:3.7,Samenwerking:4.5,Richting:3.0,Tempo:4.2},sid:"s1",email:null,ts:Date.now()-2*86400000},
-  {scores:{Vertrouwen:3.5,Eigenaarschap:4.0,Samenwerking:3.5,Richting:3.5,Tempo:3.8},sid:"s2",email:null,ts:Date.now()-1.5*86400000},
-  {scores:{Vertrouwen:4.5,Eigenaarschap:3.3,Samenwerking:4.0,Richting:2.5,Tempo:4.5},sid:"s3",email:null,ts:Date.now()-1*86400000},
-  {scores:{Vertrouwen:2.5,Eigenaarschap:3.0,Samenwerking:3.5,Richting:3.0,Tempo:3.0},sid:"s4",email:"anna@bedrijf.nl",ts:Date.now()-0.5*86400000},
-];
 
-// ─── OWNER DASHBOARD ─────────────────────────────────────────────────────────
-function OwnerDashboard(props) {
-  var isDemo = !!props.isDemo;
-  var teamCode = isDemo ? DEMO_CODE : props.teamCode;
-  var [meta, setMeta] = useState(isDemo ? DEMO_META : null);
-  var [teamData, setTeamData] = useState(isDemo ? DEMO_ENTRIES : []);
-  var [teamAnalysis, setTeamAnalysis] = useState(null);
-  var [teamAnalysisLoading, setTeamAnalysisLoading] = useState(false);
-  var [teamAnalysisLoaded, setTeamAnalysisLoaded] = useState(false);
-  var [loading, setLoading] = useState(!isDemo);
-
-  useEffect(function(){
-    if(isDemo) return;
-    function loadData() {
-      apiGetTeam(teamCode).then(function(m){ if(m) setMeta(m); });
-      apiGetEntries(teamCode).then(function(entries){ setTeamData(entries); setLoading(false); });
-    }
-    loadData();
-    var iv = setInterval(loadData, 8000);
-    return function(){ clearInterval(iv); };
-  },[]);
+// ─── APP SHELL ────────────────────────────────────────────────────────────────
 export default function App() {
   var [urlParams] = useState(function(){
     try {
