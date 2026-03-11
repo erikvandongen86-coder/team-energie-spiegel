@@ -462,7 +462,7 @@ function EmailCapture(props) {
   var valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && name.trim().length > 0;
   if (props.submitted) return <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#E8EDE3",borderRadius:12}}>
     <span style={{fontSize:16}}>✓</span>
-    <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,margin:0,fontWeight:600}}>{props.submittedMsg||"Genoteerd — we sturen je de resultaten zodra ze beschikbaar zijn."}</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,margin:0,fontWeight:600}}>{props.submittedMsg||"Genoteerd, we sturen je de resultaten zodra ze beschikbaar zijn."}</p>
   </div>;
   return <div>
     {props.label && <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.6,marginBottom:14,marginTop:0}}>{props.label}</p>}
@@ -497,7 +497,7 @@ function SliderQ(props) {
     <div style={{display:"flex",justifyContent:"space-between"}}>
       {[1,2,3,4,5].map(function(n){return <div key={n} style={{textAlign:"center",flex:1}}>
         <div style={{width:30,height:30,borderRadius:"50%",margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",background:props.value===n?C.olive:C.warm,color:props.value===n?C.white:C.muted,fontFamily:FONT_BODY,fontSize:13,fontWeight:600,cursor:"pointer",transition:"all 0.2s"}} onClick={function(){props.onChange(n);}}>{n}</div>
-        <span style={{fontFamily:FONT_BODY,fontSize:9,color:C.muted,display:"block",lineHeight:1.3}}>{n===1?"Helemaal\nniet":n===3?"Deels":n===5?"Zeer\nherkenbaar":""}</span>
+        <span style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,display:"block",lineHeight:1.3}}>{n===1?"Helemaal\nniet":n===3?"Deels":n===5?"Zeer\nherkenbaar":""}</span>
       </div>;})}
     </div>
     <style>{`input[type='range']::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:${C.olive};border:3px solid ${C.white};box-shadow:0 2px 8px rgba(69,84,59,0.3);cursor:pointer}input[type='range']::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:${C.olive};border:3px solid ${C.white};cursor:pointer}`}</style>
@@ -600,7 +600,7 @@ function StartPage(props) {
 
     <SectionLabel>Team Energie Spiegel</SectionLabel>
     <Heading size={1}>Waar zit de energie in jouw team en waar lekt die weg?</Heading>
-    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>In 12 vragen scan je waar energie stroomt en waar het stokt in jullie team. Anoniem en geen account nodig. Nodig daarna eventueel je teamleden uit — zij vullen dezelfde scan in en jullie zien automatisch het teamgemiddelde. Een eerlijke, anonieme spiegel als vertrekpunt voor een goed gesprek.</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>In 12 vragen scan je waar energie stroomt en waar het stokt in jullie team. Anoniem en geen account nodig. Nodig daarna eventueel je teamleden uit, zij vullen dezelfde scan in en jullie zien automatisch het teamgemiddelde. Een eerlijke, anonieme spiegel als vertrekpunt voor een goed gesprek.</p>
 
     <div style={{background:C.warm,borderRadius:16,padding:"22px 26px",marginBottom:32}}>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,lineHeight:1.8,marginBottom:12,marginTop:0}}>Teams werken hard. Er worden plannen gemaakt, doelen gesteld en overleggen gepland. En toch voelt het soms alsof er iets blijft hangen.</p>
@@ -641,12 +641,17 @@ function WelcomeTeamScreen(props) {
     </div>
     <Card>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.25rem",color:C.charcoal,margin:"0 0 12px",lineHeight:1.4,fontWeight:400}}>Je bent uitgenodigd om de Team Energie Spiegel in te vullen.</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.7,margin:"0 0 20px"}}>Je antwoorden zijn volledig <strong style={{color:C.charcoal}}>anoniem</strong> — alleen het teamgemiddelde is zichtbaar voor anderen. Het duurt ongeveer 3 minuten.</p>
-      <div style={{display:"flex",flexDirection:"column",gap:10}}>
-        {[["⏱","3 minuten"],["🔒","Jouw antwoorden zijn anoniem"],["📊","Je ziet je eigen score direct"],["👥","Bijdrage aan het teamgemiddelde"]].map(function(item,i){
-          return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"8px 0",borderBottom:i<3?"1px solid "+C.warm:"none"}}>
-            <span style={{fontSize:18,width:24,textAlign:"center"}}>{item[0]}</span>
-            <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal}}>{item[1]}</span>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.7,margin:"0 0 20px"}}>
+        Je antwoorden zijn volledig <strong style={{color:C.charcoal}}>anoniem</strong>{props.meta&&props.meta.shareWithAll
+          ? " en alleen het teamgemiddelde is zichtbaar voor anderen."
+          : " en alleen voor jou zichtbaar. Het teamgemiddelde is niet gedeeld door de aanmaker."
+        } Het duurt ongeveer 3 minuten.
+      </p>
+      <div style={{display:"flex",flexDirection:"column",gap:0}}>
+        {["3 minuten","Jouw antwoorden zijn anoniem","Je ziet je eigen score direct","Bijdrage aan het teamgemiddelde"].map(function(item,i){
+          return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:i<3?"1px solid "+C.warm:"none"}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:C.olive,flexShrink:0}}/>
+            <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal}}>{item}</span>
           </div>;
         })}
       </div>
@@ -740,7 +745,7 @@ function AnalysisPage(props) {
     {prefilledCode&&meta&&<div style={{background:C.warm,borderRadius:12,padding:"13px 17px",marginBottom:16,display:"flex",alignItems:"flex-start",gap:10}}>
       <div style={{width:7,height:7,borderRadius:"50%",background:C.olive,flexShrink:0,marginTop:5}}/>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,margin:0,lineHeight:1.6}}>
-        Dit is jouw <strong>individuele analyse</strong> — gebaseerd op jouw eigen antwoorden.
+        Dit is jouw <strong>individuele analyse</strong>, gebaseerd op jouw eigen antwoorden.
         Jouw antwoorden zijn <strong>anoniem</strong> en worden samengevoegd met die van je teamgenoten voor het teamgemiddelde.
       </p>
     </div>}
@@ -808,7 +813,7 @@ function AnalysisPage(props) {
           : <div style={{background:C.olive,borderRadius:16,padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,boxShadow:"0 4px 24px rgba(69,84,59,0.25)",flexWrap:"wrap"}}>
               <div>
                 <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.white,margin:"0 0 4px",lineHeight:1.3}}>Wil je weten hoe je team dit ervaart?</p>
-                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>Maak een team aan en nodig je collega's uit — gratis en anoniem.</p>
+                <p style={{fontFamily:FONT_BODY,fontSize:13,color:"#b8c9a3",margin:0}}>Maak een team aan en nodig je collega's uit, gratis en anoniem.</p>
               </div>
               <Btn variant="white" onClick={props.onDone} style={{flexShrink:0,fontSize:15,whiteSpace:"nowrap"}}>Maak een team aan →</Btn>
             </div>
@@ -875,7 +880,7 @@ function TeamPage(props) {
 
   var inviteLink = "https://spiegel.erikvandongen.eu?team=" + teamCode;
   var shareMsg = meta
-    ? meta.ownerName+" nodigt je uit voor de Team Energie Spiegel van team "+meta.teamName+".\n\nOpen deze link — de teamcode wordt automatisch ingevuld:\n"+inviteLink+"\n\nOf gebruik code "+teamCode+" op erikvandongen.eu/spiegel"
+    ? meta.ownerName+" nodigt je uit voor de Team Energie Spiegel van team "+meta.teamName+".\n\nOpen deze link, de teamcode wordt automatisch ingevuld:\n"+inviteLink+"\n\nOf gebruik code "+teamCode+" op erikvandongen.eu/spiegel"
     : "Doe de Team Energie Spiegel met teamcode "+teamCode+": "+inviteLink;
 
   async function handleCreate() {
@@ -933,7 +938,7 @@ function TeamPage(props) {
     {step==="intro"&&<>
       <SectionLabel>Teamvergelijking</SectionLabel>
       <Heading size={2}>Vergelijk met je team</Heading>
-      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.muted,lineHeight:1.7,marginBottom:26,marginTop:0}}>Laat teamleden dezelfde spiegel invullen. Zo zie je waar jullie beleving overeenkomt — en waar percepties uiteen lopen.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.muted,lineHeight:1.7,marginBottom:26,marginTop:0}}>Laat teamleden dezelfde spiegel invullen. Zo zie je waar jullie beleving overeenkomt en waar percepties uiteen lopen.</p>
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         <Btn onClick={function(){setStep("create");}}>Maak een team aan en nodig teamleden uit</Btn>
         <Btn variant="ghost" onClick={function(){setStep("join");}}>Ik heb al een teamcode</Btn>
@@ -1003,7 +1008,7 @@ function TeamPage(props) {
           <SectionLabel color={C.olive}>Jouw persoonlijke beheerlink</SectionLabel>
         </div>
         <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.6,marginBottom:12,marginTop:0}}>
-          Sla deze link op — hiermee bekijk je op elk moment de tussentijdse resultaten. Je hoeft de spiegel <strong>niet</strong> opnieuw in te vullen. <strong>We hebben deze link ook naar {createdMeta.ownerEmail} gestuurd</strong>, zodat je hem altijd terug kunt vinden in je inbox.
+          Sla deze link op, hiermee bekijk je op elk moment de tussentijdse resultaten. Je hoeft de spiegel <strong>niet</strong> opnieuw in te vullen. <strong>We hebben deze link ook naar {createdMeta.ownerEmail} gestuurd</strong>, zodat je hem altijd terug kunt vinden in je inbox.
         </p>
         <div style={{background:C.white,borderRadius:10,padding:"10px 14px",marginBottom:12,fontFamily:FONT_BODY,fontSize:12,color:C.charcoal,wordBreak:"break-all",lineHeight:1.6,border:"1px solid "+C.warm}}>
           {"https://spiegel.erikvandongen.eu?team="+teamCode+"&owner="+createdToken}
@@ -1014,7 +1019,7 @@ function TeamPage(props) {
             navigator.clipboard.writeText(link).then(function(){ alert("Beheerlink gekopieerd naar klembord!"); });
           } catch(e) { alert("Kopieer handmatig: "+link); }
         }}>📋 Kopieer beheerlink</Btn>
-        <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,marginTop:10,marginBottom:0}}>⚠ Deze link is alleen voor jou — deel hem niet met je teamleden.</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,marginTop:10,marginBottom:0}}>⚠ Deze link is alleen voor jou, deel hem niet met je teamleden.</p>
       </Card>
 
       <Card style={{background:"#E8EDE3",border:"none"}}>
@@ -1033,7 +1038,7 @@ function TeamPage(props) {
 
       <Card>
         <SectionLabel>Uitnodigingslink voor teamleden</SectionLabel>
-        <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:12,marginTop:0}}>Stuur deze link naar je teamleden. De teamcode wordt automatisch ingevuld — ze hoeven alleen nog maar op start te klikken.</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:12,marginTop:0}}>Stuur deze link naar je teamleden. De teamcode wordt automatisch ingevuld, ze hoeven alleen nog maar op start te klikken.</p>
         <div style={{background:C.warm,borderRadius:10,padding:"11px 15px",marginBottom:14,fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,wordBreak:"break-all",lineHeight:1.5}}>{inviteLink}</div>
         <div style={{background:C.cream,borderRadius:10,padding:"11px 15px",marginBottom:18,fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,lineHeight:1.6,whiteSpace:"pre-line"}}>{shareMsg}</div>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
@@ -1129,12 +1134,12 @@ function TeamPage(props) {
     {meta&&meta.shareWithAll&&<Card>
         <SectionLabel>Ontvang de teamanalyse per e-mail</SectionLabel>
         <EmailCapture
-          label={"De teamaanmaker heeft ingesteld dat iedereen de teamanalyse mag ontvangen. Laat je e-mailadres achter — je ontvangt de analyse zodra ze beschikbaar is."}
+          label={"De teamaanmaker heeft ingesteld dat iedereen de teamanalyse mag ontvangen. Laat je e-mailadres achter, je ontvangt de analyse zodra ze beschikbaar is."}
           hint="Alleen de teamanalyse. Geen spam."
           buttonLabel="Stuur mij de teamanalyse"
           onSubmit={function(name,email){ apiSaveEmail(teamCode, getSessionId(), name, email, true).finally(function(){ setTeamEmailSubmitted(true); }); }}
           submitted={teamEmailSubmitted}
-          submittedMsg="Genoteerd ✓ — je ontvangt de teamanalyse zodra die beschikbaar is."
+          submittedMsg="Genoteerd ✓, je ontvangt de teamanalyse zodra die beschikbaar is."
         />
       </Card>}
 
@@ -1219,7 +1224,7 @@ function OwnerDashboard(props) {
       <span style={{fontSize:18,flexShrink:0}}>👀</span>
       <div>
         <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:700,color:C.white,marginBottom:3,marginTop:0}}>Dit is een voorbeeldweergave</p>
-        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(255,255,255,0.85)",marginBottom:0,marginTop:0,lineHeight:1.5}}>Je ziet hoe het dashboard eruitziet als teamaanmaker — met 4 van 6 ingevulde resultaten. Alle data is fictief.</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(255,255,255,0.85)",marginBottom:0,marginTop:0,lineHeight:1.5}}>Je ziet hoe het dashboard eruitziet als teamaanmaker, met 4 van 6 ingevulde resultaten. Alle data is fictief.</p>
       </div>
     </div>}
     <div style={{marginBottom:28}}>
@@ -1314,7 +1319,7 @@ function OwnerDashboard(props) {
         </div>
       </Card>
     </> : <Card>
-      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.muted,lineHeight:1.6,margin:0,textAlign:"center",padding:"16px 0"}}>Nog geen resultaten — stuur de uitnodigingslink naar je team.</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.muted,lineHeight:1.6,margin:0,textAlign:"center",padding:"16px 0"}}>Nog geen resultaten, stuur de uitnodigingslink naar je team.</p>
     </Card>}
 
     <Card>
