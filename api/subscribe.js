@@ -24,18 +24,18 @@ export default async function handler(req, res) {
       `
     }
 
-    if (process.env.RESEND_API_KEY) {
-      await fetch('https://api.resend.com/emails', {
+    if (process.env.BREVO_API_KEY) {
+      await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'api-key': process.env.BREVO_API_KEY,
         },
         body: JSON.stringify({
-          from: 'Team Energie Spiegel <info@erikvandongen.eu>',
-          to: email,
+          sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+          to: [{ email }],
           subject: 'Jouw Team Energie Spiegel resultaten',
-          html: `
+          htmlContent: `
             <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 560px; margin: 0 auto; color: #2C2C2A;">
               <div style="background: #5C6B3A; padding: 28px 32px; border-radius: 12px 12px 0 0;">
                 <p style="color: #F5F0E8; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">erikvandongen.eu</p>
