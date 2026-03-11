@@ -81,10 +81,10 @@ async function apiValidateOwner(teamCode, ownerToken) {
     return data.valid === true;
   } catch(e) { return false; }
 }
-async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis, analysis) {
+async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis) {
   const res = await fetch("/api/subscribe", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ teamCode, sessionId, name, email, wantsTeamAnalysis, analysis }),
+    body: JSON.stringify({ teamCode, sessionId, name, email, wantsTeamAnalysis }),
   });
   if (!res.ok) throw new Error("Opslaan email mislukt");
   return res.json();
@@ -141,6 +141,100 @@ async function fetchAIAnalysis(categoryScores, memberCount, isTeam) {
     return data;
   } catch(e) {
     return {
+// ─── EXPORT HELPERS ───────────────────────────────────────────────────────────
+function exportTeamCSV(meta, entries, avg, analysis) {
+  const cats = ['Vertrouwen', 'Eigenaarschap', 'Samenwerking', 'Richting', 'Tempo'];
+  const rows = [];
+  rows.push(['Team Energie Spiegel — Export']);
+  rows.push(['Team', meta.teamName]);
+  rows.push(['Aanmaker', meta.ownerName]);
+  rows.push(['E-mail aanmaker', meta.ownerEmail]);
+  rows.push(['Aangemaakt', new Date(meta.createdAt).toLocaleDateString('nl-NL')]);
+  rows.push(['Deelnemers ingevuld', entries.length]);
+  rows.push([]);
+  rows.push(['TEAMGEMIDDELDEN (anoniem)']);
+  rows.push(['Categorie', 'Score', 'Status']);
+  cats.forEach(cat => {
+    const sc = avg[cat];
+    const status = sc <= 2 ? 'Kracht' : sc <= 3 ? 'Neutraal' : 'Energielek';
+    rows.push([cat, sc.toFixed(2), status]);
+  });
+  rows.push([]);
+  rows.push(['DEELNEMERS']);
+  rows.push(['#', 'Naam', 'E-mail', 'Datum ingevuld']);
+  entries.forEach((e, i) => {
+    rows.push([i+1, e.name || '—', e.email || '—', new Date(e.ts).toLocaleDateString('nl-NL')]);
+  });
+  if (analysis) {
+    rows.push([]);
+    rows.push(['AI TEAMANALYSE']);
+    rows.push(['Diagnose', analysis.diagnose]);
+    rows.push(['Betekenis', analysis.betekenis]);
+    rows.push(['Als er niets verandert', analysis.geenVerandering]);
+    rows.push(['Gespreksvragen']);
+    (analysis.gespreksvragen || []).forEach((v, i) => rows.push([i+1, v]));
+  }
+  const csv = rows.map(r => r.map(c => '"' + String(c||'').replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'team-energie-spiegel-' + meta.teamName.toLowerCase().replace(/\s+/g,'-') + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function exportTeamPDF(meta, entries, avg, analysis) {
+  const cats = ['Vertrouwen', 'Eigenaarschap', 'Samenwerking', 'Richting', 'Tempo'];
+  const scoreRows = cats.map(cat => {
+    const sc = avg[cat];
+    const status = sc <= 2 ? 'Kracht' : sc <= 3 ? 'Neutraal' : 'Energielek';
+    const color = sc <= 2 ? '#45543B' : sc <= 3 ? '#766960' : '#9D6D58';
+    return `<tr><td style="padding:8px 12px;border-bottom:1px solid #EFEBE7;">${cat}</td><td style="padding:8px 12px;border-bottom:1px solid #EFEBE7;font-weight:700;">${sc.toFixed(2)}/5</td><td style="padding:8px 12px;border-bottom:1px solid #EFEBE7;color:${color};font-weight:600;">${status}</td></tr>`;
+  }).join('');
+  const memberRows = entries.map((e, i) =>
+    `<tr><td style="padding:6px 12px;border-bottom:1px solid #EFEBE7;">${i+1}</td><td style="padding:6px 12px;border-bottom:1px solid #EFEBE7;">${e.name||'—'}</td><td style="padding:6px 12px;border-bottom:1px solid #EFEBE7;">${e.email||'—'}</td><td style="padding:6px 12px;border-bottom:1px solid #EFEBE7;">${new Date(e.ts).toLocaleDateString('nl-NL')}</td></tr>`
+  ).join('');
+  const analysisHtml = analysis ? `
+    <div style="margin-top:28px;">
+      <h2 style="font-family:Georgia,serif;color:#45543B;font-size:18px;margin-bottom:16px;">AI Teamanalyse</h2>
+      <div style="background:#F5F3EF;border-radius:8px;padding:16px;margin-bottom:12px;">
+        <strong style="color:#9D6D58;">Diagnose</strong>
+        <p style="margin:6px 0 0;">${analysis.diagnose}</p>
+      </div>
+      <div style="background:#F5F3EF;border-radius:8px;padding:16px;margin-bottom:12px;">
+        <strong>Wat dit betekent</strong>
+        <p style="margin:6px 0 0;">${analysis.betekenis}</p>
+      </div>
+      <div style="background:#F5F3EF;border-radius:8px;padding:16px;margin-bottom:12px;">
+        <strong>Als er niets verandert</strong>
+        <p style="margin:6px 0 0;">${analysis.geenVerandering}</p>
+      </div>
+      <div style="background:#F5F3EF;border-radius:8px;padding:16px;">
+        <strong style="color:#45543B;">Gespreksvragen</strong>
+        <ol style="margin:8px 0 0;padding-left:20px;">${(analysis.gespreksvragen||[]).map(v=>`<li style="margin-bottom:6px;">${v}</li>`).join('')}</ol>
+      </div>
+    </div>` : '';
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Team Energie Spiegel — ${meta.teamName}</title>
+  <style>body{font-family:'Helvetica Neue',sans-serif;color:#332D28;max-width:800px;margin:0 auto;padding:40px;}table{width:100%;border-collapse:collapse;}@media print{body{padding:20px;}}</style>
+  </head><body>
+  <div style="background:#45543B;padding:28px 32px;border-radius:12px;margin-bottom:28px;">
+    <p style="color:#EFEBE7;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 6px;">Team Energie Spiegel</p>
+    <h1 style="font-family:Georgia,serif;font-weight:400;font-size:28px;color:#F5F3EF;margin:0;">${meta.teamName}</h1>
+  </div>
+  <table style="margin-bottom:8px;"><tr><td style="color:#766960;font-size:13px;padding:3px 0;width:160px;">Aanmaker</td><td style="font-size:14px;">${meta.ownerName}</td></tr>
+  <tr><td style="color:#766960;font-size:13px;padding:3px 0;">E-mail</td><td style="font-size:14px;">${meta.ownerEmail}</td></tr>
+  <tr><td style="color:#766960;font-size:13px;padding:3px 0;">Deelnemers</td><td style="font-size:14px;">${entries.length} ingevuld</td></tr>
+  <tr><td style="color:#766960;font-size:13px;padding:3px 0;">Datum export</td><td style="font-size:14px;">${new Date().toLocaleDateString('nl-NL')}</td></tr></table>
+  <h2 style="font-family:Georgia,serif;color:#45543B;font-size:18px;margin:28px 0 12px;">Teamgemiddelden (anoniem)</h2>
+  <table><thead><tr style="background:#EFEBE7;"><th style="padding:8px 12px;text-align:left;">Categorie</th><th style="padding:8px 12px;text-align:left;">Score</th><th style="padding:8px 12px;text-align:left;">Status</th></tr></thead><tbody>${scoreRows}</tbody></table>
+  <h2 style="font-family:Georgia,serif;color:#45543B;font-size:18px;margin:28px 0 12px;">Deelnemers</h2>
+  <table><thead><tr style="background:#EFEBE7;"><th style="padding:6px 12px;text-align:left;">#</th><th style="padding:6px 12px;text-align:left;">Naam</th><th style="padding:6px 12px;text-align:left;">E-mail</th><th style="padding:6px 12px;text-align:left;">Datum</th></tr></thead><tbody>${memberRows}</tbody></table>
+  ${analysisHtml}
+  <p style="font-size:11px;color:#9E9688;margin-top:40px;text-align:center;">Team Energie Spiegel · erikvandongen.eu</p>
+  <script>window.onload=function(){window.print();}</script>
+  </body></html>`;
+  const w = window.open('','_blank');
+  w.document.write(html); w.document.close();
+}
       diagnose:"Op basis van de antwoorden zien we een team dat hard werkt, maar waar een aantal dynamieken energie kosten.",
       betekenis:"Dit patroon is herkenbaar in veel teams die in een groeifase zitten of onder druk werken.",
       geenVerandering:"Als dit patroon aanhoudt, is de kans groot dat stille frustraties groter worden.",
@@ -521,7 +615,7 @@ function AnalysisPage(props) {
       {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : analysis&&<AnalysisBlock analysis={analysis} isTeam={false} cta={
         !emailSubmitted
           ? <EmailDropdown canReceiveTeamAnalysis={canReceiveTeamAnalysis} onSubmit={function(name,email){
-              apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis, analysis).finally(function(){ setEmailSubmitted(true); });
+              apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
             }}/>
           : <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#E8EDE3",borderRadius:12}}>
               <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,fontWeight:600,margin:0}}>Genoteerd ✓ je ontvangt je resultaten per e-mail.</p>
@@ -959,6 +1053,36 @@ function OwnerDashboard(props) {
     var iv = setInterval(loadData, 8000);
     return function(){ clearInterval(iv); };
   },[]);
+// ─── OWNER DASHBOARD ─────────────────────────────────────────────────────────
+function OwnerDashboard(props) {
+  var isDemo = !!props.isDemo;
+  var teamCode = isDemo ? DEMO_CODE : props.teamCode;
+  var [meta, setMeta] = useState(isDemo ? DEMO_META : null);
+  var [teamData, setTeamData] = useState(isDemo ? DEMO_ENTRIES : []);
+  var [teamAnalysis, setTeamAnalysis] = useState(null);
+  var [teamAnalysisLoading, setTeamAnalysisLoading] = useState(false);
+  var [teamAnalysisLoaded, setTeamAnalysisLoaded] = useState(false);
+  var [loading, setLoading] = useState(!isDemo);
+
+  useEffect(function(){
+    if(isDemo) return;
+    function loadData() {
+      apiGetTeam(teamCode).then(function(m){
+        if(m) {
+          setMeta(m);
+          // Herstel opgeslagen teamanalyse
+          if(m.analysis && !teamAnalysisLoaded) {
+            setTeamAnalysis(m.analysis);
+            setTeamAnalysisLoaded(true);
+          }
+        }
+      });
+      apiGetEntries(teamCode).then(function(entries){ setTeamData(entries); setLoading(false); });
+    }
+    loadData();
+    var iv = setInterval(loadData, 8000);
+    return function(){ clearInterval(iv); };
+  },[]);
 
   if(loading) return <div style={{maxWidth:560,margin:"80px auto",padding:"0 24px",textAlign:"center"}}><LoadingDots/></div>;
   if(!meta) return <div style={{maxWidth:560,margin:"80px auto",padding:"0 24px",textAlign:"center"}}>
@@ -971,6 +1095,17 @@ function OwnerDashboard(props) {
   var deadlineDate = new Date(meta.createdAt+meta.deadlineDays*86400000).toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
   var avg = completed ? calcAvgScores(teamData) : null;
   var inviteLink = "https://spiegel.erikvandongen.eu?team="+teamCode;
+  var shareMsg = "Hoi! Wil je de Team Energie Spiegel invullen voor "+meta.teamName+"?\n\n"+inviteLink;
+
+  async function handleSaveTeamAnalysis(analysis) {
+    try {
+      await fetch("/api/teams", {
+        method:"PATCH",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({teamCode, analysis})
+      });
+    } catch(e){ console.error(e); }
+  }
 
   return <div style={{maxWidth:640,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
     {isDemo&&<div style={{background:C.terra,borderRadius:14,padding:"14px 20px",marginBottom:24,display:"flex",alignItems:"flex-start",gap:12}}>
@@ -986,7 +1121,7 @@ function OwnerDashboard(props) {
         <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.olive,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>Beheerdersdashboard</span>
       </div>
       <Heading size={2}>{meta.teamName}</Heading>
-      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Aangemaakt door {meta.ownerName} · resultaten naar {meta.shareWithAll?"iedereen":"alleen jou"}</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Aangemaakt door {meta.ownerName} · {meta.ownerEmail}</p>
     </div>
 
     {/* Progress */}
@@ -1008,6 +1143,33 @@ function OwnerDashboard(props) {
         ? <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600,margin:0}}>✓ Iedereen heeft de spiegel ingevuld!</p>
         : <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0}}>Nog {target-completed} {target-completed===1?"teamlid":"teamleden"} te gaan. Pagina ververst automatisch.</p>}
     </Card>
+
+    {/* Sessie-overzicht */}
+    {completed>0&&<Card>
+      <SectionLabel>Deelnemers ({completed})</SectionLabel>
+      <div style={{overflowX:"auto"}}>
+        <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
+          <thead>
+            <tr style={{borderBottom:"2px solid "+C.warm}}>
+              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>#</th>
+              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
+              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>E-mail</th>
+              <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Ingevuld op</th>
+            </tr>
+          </thead>
+          <tbody>
+            {teamData.map(function(e,i){
+              return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
+                <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
+                <td style={{padding:"8px 10px",color:C.charcoal,fontWeight:e.name?600:400}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
+                <td style={{padding:"8px 10px",color:C.muted}}>{e.email||"—"}</td>
+                <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL",{day:"numeric",month:"short",year:"numeric"})}</td>
+              </tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
+    </Card>}
 
     {/* Share toggle */}
     <Card>
@@ -1031,7 +1193,7 @@ function OwnerDashboard(props) {
       </Btn>
     </Card>
 
-    {/* Results or placeholder */}
+    {/* Results */}
     {avg ? <>
       <Card>
         <SectionLabel>Gemiddelde teamscores ({completed} deelnemer{completed!==1?"s":""})</SectionLabel>
@@ -1041,17 +1203,39 @@ function OwnerDashboard(props) {
         <SectionLabel>Per categorie</SectionLabel>
         {Object.entries(avg).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})}</Card>
       <Card style={{background:C.warm,border:"none"}}>
-        <SectionLabel>Tussentijdse teamanalyse</SectionLabel>
+        <SectionLabel>Teamanalyse</SectionLabel>
         {!teamAnalysisLoaded&&!teamAnalysisLoading&&<>
           <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>Genereer een AI-analyse op basis van de {completed} resultaten die nu beschikbaar zijn.</p>
           <Btn onClick={function(){
             setTeamAnalysisLoading(true);
-            fetchAIAnalysis(avg, completed, true).then(function(r){ setTeamAnalysis(r); setTeamAnalysisLoading(false); setTeamAnalysisLoaded(true); });
-          }}>Genereer tussentijdse analyse</Btn>
+            fetchAIAnalysis(avg, completed, true).then(function(r){
+              setTeamAnalysis(r);
+              setTeamAnalysisLoading(false);
+              setTeamAnalysisLoaded(true);
+              handleSaveTeamAnalysis(r);
+            });
+          }}>Genereer teamanalyse</Btn>
         </>}
-        {teamAnalysisLoading&&<><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></>}
-        {teamAnalysisLoaded&&teamAnalysis&&<AnalysisBlock analysis={teamAnalysis} isTeam={true}/>}
+        {teamAnalysisLoading&&<><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Teamanalyse wordt gegenereerd...</p><LoadingDots/></>}
+        {teamAnalysisLoaded&&teamAnalysis&&<>
+          <AnalysisBlock analysis={teamAnalysis} isTeam={true}/>
+          <div style={{marginTop:12,display:"flex",gap:8,flexWrap:"wrap"}}>
+            <Btn variant="ghost" style={{fontSize:13,padding:"8px 18px"}} onClick={function(){
+              setTeamAnalysisLoaded(false); setTeamAnalysis(null);
+            }}>↺ Opnieuw genereren</Btn>
+          </div>
+        </>}
       </Card>
+
+      {/* Export */}
+      {avg&&<Card>
+        <SectionLabel>Exporteren</SectionLabel>
+        <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>Download de teamresultaten inclusief deelnemersoverzicht{teamAnalysis?" en AI-analyse":""} als CSV of PDF.</p>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <Btn variant="secondary" onClick={function(){ exportTeamCSV(meta, teamData, avg, teamAnalysis); }}>↓ Download CSV</Btn>
+          <Btn variant="secondary" onClick={function(){ exportTeamPDF(meta, teamData, avg, teamAnalysis); }}>↓ Download PDF</Btn>
+        </div>
+      </Card>}
     </> : <Card>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.muted,lineHeight:1.6,margin:0,textAlign:"center",padding:"16px 0"}}>Nog geen resultaten — stuur de uitnodigingslink naar je team.</p>
     </Card>}
@@ -1065,6 +1249,7 @@ function OwnerDashboard(props) {
         <Btn variant="green" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent("Reminder voor team "+meta.teamName+": "+inviteLink));}}>✓ WhatsApp</Btn>
       </div>
     </Card>
+
     {/* CTA */}
     <Card style={{background:C.olive,border:"none"}}>
       <div style={{display:"inline-block",background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"3px 13px",marginBottom:16}}>
@@ -1083,8 +1268,43 @@ function OwnerDashboard(props) {
     <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
   </div>;
 }
+// ─── DEMO DATA ────────────────────────────────────────────────────────────────
+var DEMO_CODE = "TEAM-DEMO";
+var DEMO_TOKEN = "demo-owner-token";
+var DEMO_META = {
+  ownerName:"Erik van Dongen", ownerEmail:"erik@erikvandongen.eu",
+  teamName:"MT Commercie", memberCount:6, deadlineDays:7,
+  shareWithAll:false, ownerToken:DEMO_TOKEN,
+  createdAt: Date.now() - 3*86400000,
+};
+var DEMO_ENTRIES = [
+  {scores:{Vertrouwen:4.0,Eigenaarschap:3.7,Samenwerking:4.5,Richting:3.0,Tempo:4.2},sid:"s1",email:null,ts:Date.now()-2*86400000},
+  {scores:{Vertrouwen:3.5,Eigenaarschap:4.0,Samenwerking:3.5,Richting:3.5,Tempo:3.8},sid:"s2",email:null,ts:Date.now()-1.5*86400000},
+  {scores:{Vertrouwen:4.5,Eigenaarschap:3.3,Samenwerking:4.0,Richting:2.5,Tempo:4.5},sid:"s3",email:null,ts:Date.now()-1*86400000},
+  {scores:{Vertrouwen:2.5,Eigenaarschap:3.0,Samenwerking:3.5,Richting:3.0,Tempo:3.0},sid:"s4",email:"anna@bedrijf.nl",ts:Date.now()-0.5*86400000},
+];
 
-// ─── APP SHELL ────────────────────────────────────────────────────────────────
+// ─── OWNER DASHBOARD ─────────────────────────────────────────────────────────
+function OwnerDashboard(props) {
+  var isDemo = !!props.isDemo;
+  var teamCode = isDemo ? DEMO_CODE : props.teamCode;
+  var [meta, setMeta] = useState(isDemo ? DEMO_META : null);
+  var [teamData, setTeamData] = useState(isDemo ? DEMO_ENTRIES : []);
+  var [teamAnalysis, setTeamAnalysis] = useState(null);
+  var [teamAnalysisLoading, setTeamAnalysisLoading] = useState(false);
+  var [teamAnalysisLoaded, setTeamAnalysisLoaded] = useState(false);
+  var [loading, setLoading] = useState(!isDemo);
+
+  useEffect(function(){
+    if(isDemo) return;
+    function loadData() {
+      apiGetTeam(teamCode).then(function(m){ if(m) setMeta(m); });
+      apiGetEntries(teamCode).then(function(entries){ setTeamData(entries); setLoading(false); });
+    }
+    loadData();
+    var iv = setInterval(loadData, 8000);
+    return function(){ clearInterval(iv); };
+  },[]);
 export default function App() {
   var [urlParams] = useState(function(){
     try {
