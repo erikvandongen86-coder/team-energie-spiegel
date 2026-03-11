@@ -81,10 +81,10 @@ async function apiValidateOwner(teamCode, ownerToken) {
     return data.valid === true;
   } catch(e) { return false; }
 }
-async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis) {
+async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis, analysis) {
   const res = await fetch("/api/subscribe", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ teamCode, sessionId, name, email, wantsTeamAnalysis }),
+    body: JSON.stringify({ teamCode, sessionId, name, email, wantsTeamAnalysis, analysis }),
   });
   if (!res.ok) throw new Error("Opslaan email mislukt");
   return res.json();
@@ -521,7 +521,7 @@ function AnalysisPage(props) {
       {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : analysis&&<AnalysisBlock analysis={analysis} isTeam={false} cta={
         !emailSubmitted
           ? <EmailDropdown canReceiveTeamAnalysis={canReceiveTeamAnalysis} onSubmit={function(name,email){
-              apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis).finally(function(){ setEmailSubmitted(true); });
+              apiSaveEmail(prefilledCode||"", getSessionId(), name, email, canReceiveTeamAnalysis, analysis).finally(function(){ setEmailSubmitted(true); });
             }}/>
           : <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#E8EDE3",borderRadius:12}}>
               <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,fontWeight:600,margin:0}}>Genoteerd ✓ je ontvangt je resultaten per e-mail.</p>
