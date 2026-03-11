@@ -8,6 +8,7 @@ const C = {
   white:"#FFFFFF", neutral:"#DED7CF",
 };
 const FONT_DISPLAY = "'Cormorant Garamond', Georgia, serif";
+const FEEDBACK_MODE = true; // zet op false om feedback uit te schakelen
 const FONT_BODY    = "'Source Sans Pro', 'Helvetica Neue', sans-serif";
 
 // ─── Questions & categories ───────────────────────────────────────────────────
@@ -147,6 +148,117 @@ async function fetchAIAnalysis(categoryScores, memberCount, isTeam) {
       gespreksvragen:["Welk onderwerp vermijden we al te lang?","Wie voelt zich het minst gehoord?","Wat zou er veranderen als we écht transparant zouden zijn?"],
     };
   }
+}
+
+
+// ─── FEEDBACK COMPONENTS ──────────────────────────────────────────────────────
+function FeedbackButton(props) {
+  var page = props.page;
+  var [open, setOpen] = useState(false);
+  var [comment, setComment] = useState("");
+  var [sent, setSent] = useState(false);
+
+  if (!FEEDBACK_MODE) return null;
+
+  async function handleSend() {
+    if (!comment.trim()) return;
+    try {
+      await fetch("/api/feedback", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ sessionId: getSessionId(), page, comment })
+      });
+      setSent(true);
+      setTimeout(function(){ setOpen(false); setSent(false); setComment(""); }, 1500);
+    } catch(e) { console.error(e); }
+  }
+
+  return <>
+    <div style={{position:"fixed",bottom:24,right:24,zIndex:1000}}>
+      {open && <div style={{background:C.white,borderRadius:16,boxShadow:"0 8px 40px rgba(44,44,42,0.15)",padding:"20px",width:280,marginBottom:12,border:"1px solid "+C.warm}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <p style={{fontFamily:FONT_BODY,fontSize:13,fontWeight:600,color:C.charcoal,margin:0}}>Feedback — {page}</p>
+          <button onClick={function(){setOpen(false);setComment("");}} style={{background:"none",border:"none",cursor:"pointer",color:C.muted,fontSize:18,padding:0,lineHeight:1}}>×</button>
+        </div>
+        {sent ? <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,margin:0,textAlign:"center",padding:"8px 0"}}>✓ Verstuurd, dankjewel!</p> : <>
+          <textarea
+            value={comment} onChange={function(e){setComment(e.target.value);}}
+            placeholder="Wat valt je op op deze pagina?"
+            style={{width:"100%",padding:"10px 12px",borderRadius:10,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,resize:"vertical",minHeight:80,boxSizing:"border-box",outline:"none"}}
+          />
+          <button onClick={handleSend} disabled={!comment.trim()} style={{marginTop:10,width:"100%",background:C.olive,color:C.white,border:"none",borderRadius:50,padding:"10px",fontFamily:FONT_BODY,fontSize:13,fontWeight:600,cursor:comment.trim()?"pointer":"not-allowed",opacity:comment.trim()?1:0.5}}>
+            Verstuur feedback
+          </button>
+        </>}
+      </div>}
+      <button onClick={function(){setOpen(function(o){return !o;});}} style={{background:C.olive,color:C.white,border:"none",borderRadius:50,padding:"10px 18px",fontFamily:FONT_BODY,fontSize:13,fontWeight:600,cursor:"pointer",boxShadow:"0 4px 16px rgba(69,84,59,0.3)",display:"flex",alignItems:"center",gap:8}}>
+        💬 Feedback
+      </button>
+    </div>
+  </>;
+}
+
+function FeedbackEndScreen(props) {
+  var onDone = props.onDone;
+  var [rating, setRating] = useState(0);
+  var [comment, setComment] = useState("");
+  var [wouldUse, setWouldUse] = useState(null);
+  var [sent, setSent] = useState(false);
+  var [loading, setLoading] = useState(false);
+
+  if (!FEEDBACK_MODE) { onDone(); return null; }
+
+  async function handleSubmit() {
+    setLoading(true);
+    try {
+      await fetch("/api/feedback", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ sessionId: getSessionId(), page: "einde", rating, comment, wouldUse })
+      });
+      setSent(true);
+      setTimeout(onDone, 2000);
+    } catch(e) { console.error(e); setLoading(false); }
+  }
+
+  return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
+    <div style={{background:C.olive,borderRadius:16,padding:"28px 32px",marginBottom:24,textAlign:"center"}}>
+      <p style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase",margin:"0 0 8px"}}>MVP Test</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.4rem,4vw,2rem)",color:C.white,margin:0,lineHeight:1.3}}>Wat vond je van de tool?</p>
+    </div>
+    {sent ? <Card style={{textAlign:"center",padding:"40px"}}>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.5rem",color:C.olive,margin:"0 0 8px"}}>Dankjewel! 🙏</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Je feedback is opgeslagen. Je gaat nu naar de resultaten.</p>
+    </Card> : <>
+      <Card>
+        <SectionLabel>Hoe was je ervaring?</SectionLabel>
+        <div style={{display:"flex",gap:8,marginBottom:4}}>
+          {[1,2,3,4,5].map(function(s){
+            return <button key={s} onClick={function(){setRating(s);}} style={{fontSize:28,background:"none",border:"none",cursor:"pointer",opacity:s<=rating?1:0.3,transition:"opacity 0.15s",padding:"4px"}}>⭐</button>;
+          })}
+        </div>
+      </Card>
+      <Card>
+        <SectionLabel>Wat miste je of werkte niet goed?</SectionLabel>
+        <textarea value={comment} onChange={function(e){setComment(e.target.value);}}
+          placeholder="Optioneel — elke opmerking helpt"
+          style={{width:"100%",padding:"10px 12px",borderRadius:10,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,resize:"vertical",minHeight:90,boxSizing:"border-box",outline:"none"}}
+        />
+      </Card>
+      <Card>
+        <SectionLabel>Zou je dit inzetten met jouw team?</SectionLabel>
+        <div style={{display:"flex",gap:10}}>
+          {["Ja","Misschien","Nee"].map(function(opt){
+            return <button key={opt} onClick={function(){setWouldUse(opt);}} style={{flex:1,padding:"10px",borderRadius:10,border:"2px solid "+(wouldUse===opt?C.olive:C.warm),background:wouldUse===opt?"#E8EDE3":C.white,fontFamily:FONT_BODY,fontSize:14,fontWeight:wouldUse===opt?600:400,color:wouldUse===opt?C.olive:C.charcoal,cursor:"pointer",transition:"all 0.15s"}}>{opt}</button>;
+          })}
+        </div>
+      </Card>
+      <div style={{display:"flex",gap:10}}>
+        <Btn variant="ghost" onClick={onDone} style={{flex:1,justifyContent:"center"}}>Overslaan</Btn>
+        <Btn onClick={handleSubmit} disabled={loading||(!rating&&!comment&&!wouldUse)} style={{flex:2,justifyContent:"center"}}>
+          {loading?"Opslaan...":"Verstuur feedback"}
+        </Btn>
+      </div>
+    </>}
+  </div>;
 }
 
 // ─── EXPORT HELPERS ───────────────────────────────────────────────────────────
@@ -1346,6 +1458,28 @@ function AdminDashboard() {
       })}
     </div>
 
+    {data.feedback&&data.feedback.length>0&&<Card style={{marginBottom:20}}>
+      <SectionLabel>Feedback ({data.feedback.length})</SectionLabel>
+      <table style={{width:"100%",borderCollapse:"collapse",fontFamily:FONT_BODY,fontSize:13}}>
+        <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Pagina</th>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Score</th>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Zou gebruiken</th>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Opmerking</th>
+          <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Datum</th>
+        </tr></thead>
+        <tbody>{data.feedback.map(function(f,i){
+          return <tr key={i} style={{borderBottom:"1px solid "+C.warm}}>
+            <td style={{padding:"8px 10px",color:C.muted}}>{f.page||"—"}</td>
+            <td style={{padding:"8px 10px"}}>{f.rating ? "⭐".repeat(f.rating) : "—"}</td>
+            <td style={{padding:"8px 10px",color:f.wouldUse==="Ja"?C.olive:f.wouldUse==="Nee"?C.terra:C.muted}}>{f.wouldUse||"—"}</td>
+            <td style={{padding:"8px 10px",color:C.charcoal,maxWidth:240}}>{f.comment||<span style={{color:C.muted,fontStyle:"italic"}}>—</span>}</td>
+            <td style={{padding:"8px 10px",color:C.muted}}>{new Date(f.createdAt).toLocaleDateString("nl-NL")}</td>
+          </tr>;
+        })}</tbody>
+      </table>
+    </Card>}
+
     {data.teams.map(function(t){
       var pct = t.memberCount ? Math.round((t.entries.length/t.memberCount)*100) : 0;
       return <Card key={t.teamCode} style={{cursor:"pointer",transition:"box-shadow 0.2s"}} onClick={function(){setSelectedTeam(t);}}>
@@ -1395,6 +1529,7 @@ export default function App() {
 
   var isAdmin = urlParams.admin === "true";
   var [page, setPage] = useState("start");
+  var [feedbackDone, setFeedbackDone] = useState(false);
   var [answers, setAnswers] = useState({});
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
@@ -1427,6 +1562,7 @@ export default function App() {
         {(showingDashboard||page!=="start"&&page!=="teamcode")&&<button onClick={handleReset} style={{background:"none",border:"1px solid "+C.warm,borderRadius:20,padding:"6px 14px",cursor:"pointer",fontFamily:FONT_BODY,fontSize:13,color:C.muted}}>← Terug naar home</button>}
       </div>
     </div>
+    <FeedbackButton page={page}/>
     {showingDashboard
       ? <OwnerDashboard teamCode={urlParams.team} isDemo={demoMode}/>
       : <>
@@ -1436,7 +1572,8 @@ export default function App() {
           )}
           {page==="teamcode"  &&<TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
-          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("team");}}/>}
+          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("feedback");}}/>}
+          {page==="feedback" &&(!feedbackDone ? <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}}/>  : null)}
           {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} onBack={function(){setPage("analysis");}}/>}
         </>
     }
