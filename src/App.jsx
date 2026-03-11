@@ -268,7 +268,7 @@ function Btn(props) {
 }
 function Card(props) {
   var style = Object.assign({background:C.white,borderRadius:16,border:"1px solid "+C.warm,padding:"22px 26px",boxShadow:"0 2px 20px rgba(44,44,42,0.05)",marginBottom:14}, props.style||{});
-  return <div style={style}>{props.children}</div>;
+  return <div style={style} onClick={props.onClick}>{props.children}</div>;
 }
 function FormInput(props) {
   var [focused, setFocused] = useState(false);
