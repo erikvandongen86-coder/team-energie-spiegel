@@ -25,6 +25,12 @@ export default async function handler(req, res) {
       SELECT team_code, session_id, scores, email, name, submitted_at
       FROM entries ORDER BY submitted_at DESC
     `
+    const subscribers = await sql`
+      SELECT DISTINCT name, email, submitted_at
+      FROM entries
+      WHERE email IS NOT NULL
+      ORDER BY submitted_at DESC
+    `
     const feedback = await sql`
       SELECT session_id, page, rating, comment, would_use, created_at
       FROM feedback ORDER BY created_at DESC
@@ -58,6 +64,12 @@ export default async function handler(req, res) {
       teams: result,
       totalTeams: teams.length,
       totalEntries: entries.length,
+      totalSessions: entries.length,
+      subscribers: subscribers.map(s => ({
+        name: s.name || '—',
+        email: s.email,
+        date: new Date(s.submitted_at).getTime(),
+      })),
       feedback: feedback.map(f => {
         const entry = entries.find(e => e.session_id === f.session_id)
         return {
