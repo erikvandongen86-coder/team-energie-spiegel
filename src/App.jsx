@@ -1572,7 +1572,7 @@ export default function App() {
           )}
           {page==="teamcode"  &&<TeamCodePage onStart={function(code){setPrefilledCode(code);setPage("questions");}}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
-          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("feedback");}}/>}
+          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage(!prefilledCode?"feedback":"team");}}/>}
           {page==="feedback" &&(!feedbackDone ? <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}}/>  : null)}
           {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} onBack={function(){setPage("analysis");}}/>}
         </>
