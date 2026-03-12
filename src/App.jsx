@@ -1380,6 +1380,7 @@ function AdminDashboard() {
   var [loading, setLoading] = useState(false);
   var [data, setData] = useState(null);
   var [selectedTeam, setSelectedTeam] = useState(null);
+  var [selectedTester, setSelectedTester] = useState(null);
 
   function calcAvg(entries) {
     if (!entries.length) return null;
@@ -1420,6 +1421,52 @@ function AdminDashboard() {
       </Btn>
     </div>
   </div>;
+
+  if (selectedTester) {
+    var tr = selectedTester;
+    var naam = tr.anonymous || !tr.name ? "Anoniem" : tr.name;
+    return <div style={{maxWidth:800,margin:"0 auto",padding:"clamp(22px,5vw,48px) 24px"}}>
+      <button onClick={function(){setSelectedTester(null);}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.muted,marginBottom:20,padding:0}}>← Terug naar overzicht</button>
+      <div style={{marginBottom:24}}>
+        <SectionLabel>Testersfeedback</SectionLabel>
+        <Heading size={2}>{naam}</Heading>
+        <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"4px 0 0"}}>{new Date(tr.created_at).toLocaleDateString("nl-NL")} · {tr.team_getest==="ja"?"Heeft team getest":"Alleen scan ingevuld"}</p>
+      </div>
+      {[
+        ["Eerste indruk",""],
+        ["Wat was je eerste reactie?", tr.eerste_reactie],
+        ["Voor welk type team?", tr.doelgroep],
+        ["Ervaring",""],
+        ["Invul ervaring", tr.invul_ervaring ? tr.invul_ervaring+"/5"+(tr.invul_toelichting?" — "+tr.invul_toelichting:"") : null],
+        ["Aantal vragen", tr.aantal_vragen+(tr.aantal_vragen_opmerking?" — "+tr.aantal_vragen_opmerking:"")],
+        ["12 vragen betrouwbaar?", tr.aantal_vragen_betrouwbaar+(tr.aantal_vragen_advies?" — "+tr.aantal_vragen_advies:"")],
+        ["Blokkade", tr.blokkade],
+        ["Sterkste onderdeel", tr.sterkste],
+        ["Analyse",""],
+        ["Persoonlijke analyse lengte", tr.analyse_lengte],
+        ["Persoonlijke analyse taal", tr.analyse_taal],
+        ["Opmerkingen analyse", tr.analyse_opmerking],
+        ["Teamanalyse lengte", tr.team_analyse_lengte],
+        ["Teamanalyse taal", tr.team_analyse_taal],
+        ["Team aanmaken", tr.team_aanmaken ? tr.team_aanmaken+"/5"+(tr.team_aanmaken_toelichting?" — "+tr.team_aanmaken_toelichting:"") : null],
+        ["Waarde",""],
+        ["Inzetten voor eigen team", tr.inzetten_keuze+(tr.inzetten?" — "+tr.inzetten:"")],
+        ["Verbeteringen",""],
+        ["Wat mist", tr.mist],
+        ["Overig", tr.overig],
+      ].map(function(row, i) {
+        if (!row[1]) {
+          if (row[0] && !row[1] && row[1]!=="") return null;
+          // sectieheader
+          return <p key={i} style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,margin:"24px 0 8px"}}>{row[0]}</p>;
+        }
+        return <Card key={i} style={{marginBottom:8,padding:"14px 18px"}}>
+          <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em",margin:"0 0 4px"}}>{row[0]}</p>
+          <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,margin:0,lineHeight:1.6}}>{row[1]}</p>
+        </Card>;
+      })}
+    </div>;
+  }
 
   if (selectedTeam) {
     const t = selectedTeam;
@@ -1548,46 +1595,24 @@ function AdminDashboard() {
       </table>
     </Card>}
 
-    {data.testers&&data.testers.length>0&&<Card style={{marginBottom:20}}>
+    {data.testers&&data.testers.length>0&&<>
       <SectionLabel>Testersfeedback ({data.testers.length})</SectionLabel>
       {data.testers.map(function(t,i){
-        return <div key={i} style={{padding:"16px 0",borderBottom:i<data.testers.length-1?"1px solid "+C.warm:"none"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-            <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:600,color:C.charcoal,margin:0}}>{t.anonymous||!t.name?<span style={{color:C.muted,fontStyle:"italic",fontWeight:400}}>Anoniem</span>:t.name}</p>
-            <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,margin:0}}>{new Date(t.created_at).toLocaleDateString("nl-NL")}</p>
+        var naam = t.anonymous||!t.name ? "Anoniem" : t.name;
+        return <Card key={i} style={{cursor:"pointer",marginBottom:10,transition:"box-shadow 0.2s"}} onClick={function(){setSelectedTester(t);}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
+            <div>
+              <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.1rem",color:C.charcoal,margin:"0 0 3px",fontWeight:400}}>{naam}</p>
+              <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0}}>{t.team_getest==="ja"?"Heeft team getest":"Alleen scan ingevuld"}{t.invul_ervaring?" · Ervaring: "+t.invul_ervaring+"/5":""}</p>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0}}>
+              <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,margin:"0 0 4px"}}>{new Date(t.created_at).toLocaleDateString("nl-NL")}</p>
+              {t.inzetten_keuze&&<span style={{fontFamily:FONT_BODY,fontSize:11,background:t.inzetten_keuze==="ja"?"#E8EDE3":"#FBF0EA",color:t.inzetten_keuze==="ja"?C.olive:C.terra,borderRadius:20,padding:"2px 10px",fontWeight:600}}>Inzetten: {t.inzetten_keuze}</span>}
+            </div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 20px"}}>
-            {[
-              ["Team getest",t.team_getest],
-              ["Invul ervaring",t.invul_ervaring?t.invul_ervaring+"/5":null],
-              ["Aantal vragen",t.aantal_vragen],
-              ["Analyse lengte",t.analyse_lengte],
-              ["Analyse taal",t.analyse_taal],
-              ["Team aanmaken",t.team_aanmaken?t.team_aanmaken+"/5":null],
-            ].filter(function(r){return r[1];}).map(function(row,j){
-              return <div key={j}>
-                <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em"}}>{row[0]}</span>
-                <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,margin:"2px 0 0",fontWeight:600}}>{row[1]}</p>
-              </div>;
-            })}
-          </div>
-          {[
-            ["Eerste reactie",t.eerste_reactie],
-            ["Doelgroep",t.doelgroep],
-            ["Blokkade",t.blokkade],
-            ["Sterkste",t.sterkste],
-            ["Inzetten",t.inzetten],
-            ["Wat mist",t.mist],
-            ["Overig",t.overig],
-          ].filter(function(r){return r[1];}).map(function(row,j){
-            return <div key={j} style={{marginTop:10}}>
-              <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em",margin:"0 0 3px"}}>{row[0]}</p>
-              <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,margin:0,lineHeight:1.6}}>{row[1]}</p>
-            </div>;
-          })}
-        </div>;
+        </Card>;
       })}
-    </Card>}
+    </>}
 
     {data.teams.map(function(t){
       var pct = t.memberCount ? Math.round((t.entries.length/t.memberCount)*100) : 0;
