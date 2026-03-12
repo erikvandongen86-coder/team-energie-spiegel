@@ -1110,24 +1110,24 @@ function TeamPage(props) {
       </Card>}
 
       <Card>
-        <SectionLabel>{meta&&!meta.shareWithAll?"Jouw scores":"Gemiddelde teamscores"}{meta&&meta.shareWithAll&&completed>1?" ("+completed+" deelnemers)":""}</SectionLabel>
+        <SectionLabel>{meta&&!meta.shareWithAll?"Jouw eigen scores":"Gemiddelde teamscores"}{meta&&meta.shareWithAll&&completed>1?" ("+completed+" deelnemers)":""}</SectionLabel>
         <RadarViz data={avg()}/>
       </Card>
 
       <Card>
-        <SectionLabel>{meta&&!meta.shareWithAll?"Jouw resultaat per categorie":"Per categorie (teamgemiddelde)"}</SectionLabel>
+        <SectionLabel>{meta&&!meta.shareWithAll?"Jouw scores per categorie":"Teamgemiddelde per categorie"}</SectionLabel>
         {Object.entries(avg()).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})}</Card>
 
-      {/* Team AI analysis */}
-      <Card style={{background:C.warm,border:"none"}}>
-        <SectionLabel>Team AI-analyse</SectionLabel>
+      {/* Team analyse — alleen tonen als shareWithAll of als owner */}
+      {(meta&&meta.shareWithAll||props.isOwner)&&<Card style={{background:C.warm,border:"none"}}>
+        <SectionLabel>Teamanalyse</SectionLabel>
         {!teamAnalysisLoaded&&!teamAnalysisLoading&&<>
           <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>Genereer een teamanalyse op basis van het gemiddelde van <strong>{completed} deelnemer{completed!==1?"s":""}</strong>. Individuele antwoorden blijven anoniem.</p>
           <Btn onClick={handleTeamAnalysis}>Genereer teamanalyse</Btn>
         </>}
         {teamAnalysisLoading&&<><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Teamanalyse wordt gegenereerd...</p><LoadingDots/></>}
         {teamAnalysisLoaded&&teamAnalysis&&<AnalysisBlock analysis={teamAnalysis} isTeam={true}/>}
-      </Card>
+      </Card>}
 
       {/* Email for team results */}
       {meta&&!meta.shareWithAll&&<Card style={{background:C.warm,border:"none"}}>
@@ -1641,7 +1641,7 @@ export default function App() {
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
           {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage(!prefilledCode?"feedback":"team");}}/>}
           {page==="feedback" &&(feedbackDone ? (function(){ setTimeout(function(){setPage("team");},0); return null; })() : <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}}/>)}
-          {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} onBack={function(){setPage("analysis");}}/>}
+          {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} isOwner={ownerView} onBack={function(){setPage("analysis");}}/>}
         </>
     }
   </div>;
