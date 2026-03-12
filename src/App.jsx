@@ -521,9 +521,27 @@ function SocialProof() {
 function TeamCodePage(props) {
   var [digits, setDigits] = useState("");
   var [showInput, setShowInput] = useState(false);
-  var teamCode = "TEAM-" + digits;
-  var inputCode = teamCode.trim().toUpperCase();
-  var isValid = /^TEAM-\d{4}$/.test(inputCode);
+  var [checking, setChecking] = useState(false);
+  var [codeStatus, setCodeStatus] = useState(null); // null | "found" | "notfound"
+  var inputCode = ("TEAM-" + digits).trim().toUpperCase();
+  var isFormatValid = /^TEAM-\d{4}$/.test(inputCode);
+
+  function checkCode() {
+    if (!isFormatValid) return;
+    setChecking(true);
+    setCodeStatus(null);
+    fetch("/api/teams?code=" + inputCode)
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d && d.teamCode) {
+          setCodeStatus("found");
+        } else {
+          setCodeStatus("notfound");
+        }
+      })
+      .catch(function() { setCodeStatus("notfound"); })
+      .finally(function() { setChecking(false); });
+  }
 
   return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(28px,6vw,72px) 24px"}}>
     {/* Logo */}
@@ -543,31 +561,41 @@ function TeamCodePage(props) {
             Ja, ik heb een teamcode
           </Btn>
           <Btn variant="ghost" onClick={function(){props.onStart(null);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px",border:"1.5px solid "+C.muted,color:C.charcoal}}>
-            Nee, ik doe het individueel →
+            Nee, ik heb geen teamcode →
           </Btn>
         </div>
       : <div>
-          <div style={{background:C.white,border:"1.5px solid "+(isValid?C.olive:C.warm),borderRadius:14,padding:"20px 24px",marginBottom:16}}>
+          <div style={{background:C.white,border:"1.5px solid "+(codeStatus==="found"?C.olive:codeStatus==="notfound"?"#c0392b":C.warm),borderRadius:14,padding:"20px 24px",marginBottom:16}}>
             <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:10,marginTop:0}}>Jouw teamcode</p>
             <div style={{display:"flex",alignItems:"center",gap:0,borderRadius:8,border:"1.5px solid "+C.warm,background:C.cream,overflow:"hidden"}}>
               <span style={{fontFamily:FONT_BODY,fontSize:20,fontWeight:700,letterSpacing:"0.15em",color:C.muted,padding:"12px 0 12px 16px",userSelect:"none",whiteSpace:"nowrap"}}>TEAM-</span>
               <input type="text" placeholder="0000" value={digits} onChange={function(e){
                 var v = e.target.value.replace(/[^0-9]/g,"").slice(0,4);
                 setDigits(v);
+                setCodeStatus(null);
               }} autoFocus maxLength={4} inputMode="numeric"
                 style={{flex:1,border:"none",padding:"12px 16px 12px 4px",fontFamily:FONT_BODY,fontSize:20,fontWeight:700,letterSpacing:"0.15em",color:C.charcoal,background:"transparent",outline:"none",width:"80px"}}/>
             </div>
-            {isValid&&<div style={{display:"flex",alignItems:"center",gap:6,marginTop:10}}>
+            {codeStatus==="found"&&<div style={{display:"flex",alignItems:"center",gap:6,marginTop:10}}>
               <div style={{width:7,height:7,borderRadius:"50%",background:C.olive}}/>
-              <span style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600}}>Teamcode herkend</span>
+              <span style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600}}>Teamcode herkend ✓</span>
+            </div>}
+            {codeStatus==="notfound"&&<div style={{display:"flex",alignItems:"center",gap:6,marginTop:10}}>
+              <div style={{width:7,height:7,borderRadius:"50%",background:"#c0392b"}}/>
+              <span style={{fontFamily:FONT_BODY,fontSize:13,color:"#c0392b",fontWeight:600}}>Teamcode niet herkend — controleer de code en probeer opnieuw.</span>
             </div>}
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <Btn onClick={function(){if(isValid) props.onStart(inputCode);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px",opacity:isValid?1:0.5}}>
-              Start met teamcode →
-            </Btn>
-            <button onClick={function(){setShowInput(false); setTeamCode("");}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.muted,textDecoration:"underline",textUnderlineOffset:3,padding:"8px 0"}}>
-              ← Toch individueel doen
+            {codeStatus==="found"
+              ? <Btn onClick={function(){props.onStart(inputCode);}} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px"}}>
+                  Start met teamcode →
+                </Btn>
+              : <Btn onClick={checkCode} disabled={!isFormatValid||checking} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px",opacity:isFormatValid?1:0.5}}>
+                  {checking ? "Controleren..." : "Controleer teamcode"}
+                </Btn>
+            }
+            <button onClick={function(){setShowInput(false); setDigits(""); setCodeStatus(null);}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.muted,textDecoration:"underline",textUnderlineOffset:3,padding:"8px 0"}}>
+              ← Toch zonder teamcode doorgaan
             </button>
           </div>
         </div>
@@ -1159,13 +1187,13 @@ function TeamPage(props) {
         />
       </Card>}
 
-      {/* Share reminder */}
-      {meta&&completed<target&&<Card>
+      {/* Share reminder — alleen voor owner/beheerder */}
+      {(props.isOwner||isDemo)&&meta&&completed<target&&<Card>
         <SectionLabel>Nog niet iedereen ingevuld?</SectionLabel>
-        <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Stuur een reminder naar de teamleden die nog niet hebben ingevuld.</p>
+        <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Stuur alle teamleden een herinnering om de test in te vullen.</p>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
           <Btn variant="secondary" onClick={function(){window.open("mailto:?subject=Reminder: "+meta.teamName+" Team Energie Spiegel&body="+encodeURIComponent(shareMsg));}}>✉ Stuur reminder</Btn>
-          <Btn variant="green" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent(shareMsg));}}>✓ WhatsApp</Btn>
+          <Btn variant="secondary" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent(shareMsg));}}>↗ WhatsApp</Btn>
         </div>
       </Card>}
     </>}
@@ -1244,8 +1272,7 @@ function OwnerDashboard(props) {
 
   return <div style={{maxWidth:640,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
     {isDemo&&<div style={{background:C.terra,borderRadius:14,padding:"14px 20px",marginBottom:24,display:"flex",alignItems:"flex-start",gap:12}}>
-      <span style={{fontSize:18,flexShrink:0}}>👀</span>
-      <div>
+            <div>
         <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:700,color:C.white,marginBottom:3,marginTop:0}}>Dit is een voorbeeldweergave</p>
         <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(255,255,255,0.85)",marginBottom:0,marginTop:0,lineHeight:1.5}}>Je ziet hoe het dashboard eruitziet als teamaanmaker, met 4 van 6 ingevulde resultaten. Alle data is fictief.</p>
       </div>
@@ -1289,7 +1316,6 @@ function OwnerDashboard(props) {
             return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
               <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
               <td style={{padding:"8px 10px",color:C.charcoal,fontWeight:e.name?600:400}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
-              <td style={{padding:"8px 10px",color:C.muted}}>{e.email||"—"}</td>
               <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL",{day:"numeric",month:"short",year:"numeric"})}</td>
             </tr>;
           })}</tbody>
@@ -1330,7 +1356,6 @@ function OwnerDashboard(props) {
         {teamAnalysisLoading&&<><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Teamanalyse wordt gegenereerd...</p><LoadingDots/></>}
         {teamAnalysisLoaded&&teamAnalysis&&<>
           <AnalysisBlock analysis={teamAnalysis} isTeam={true}/>
-          <div style={{marginTop:12}}><Btn variant="ghost" style={{fontSize:13,padding:"8px 18px"}} onClick={function(){ setTeamAnalysisLoaded(false); setTeamAnalysis(null); }}>↺ Opnieuw genereren</Btn></div>
         </>}
       </Card>
       <Card>
@@ -1350,7 +1375,7 @@ function OwnerDashboard(props) {
       <div style={{background:C.warm,borderRadius:10,padding:"10px 14px",marginBottom:14,fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,wordBreak:"break-all"}}>{inviteLink}</div>
       <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
         <Btn variant="secondary" onClick={function(){window.open("mailto:?subject=Reminder Team Energie Spiegel - "+meta.teamName+"&body="+encodeURIComponent("Reminder: vul de Team Energie Spiegel in voor team "+meta.teamName+".\n\n"+inviteLink));}}>✉ Stuur reminder</Btn>
-        <Btn variant="green" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent("Reminder voor team "+meta.teamName+": "+inviteLink));}}>✓ WhatsApp</Btn>
+        <Btn variant="secondary" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent("Reminder voor team "+meta.teamName+": "+inviteLink));}}>↗ WhatsApp</Btn>
       </div>
     </Card>
     <Card style={{background:C.olive,border:"none"}}>
@@ -1519,7 +1544,6 @@ function AdminDashboard() {
             return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
               <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
               <td style={{padding:"8px 10px",color:C.charcoal}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
-              <td style={{padding:"8px 10px",color:C.muted}}>{e.email||"—"}</td>
               <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL")}</td>
             </tr>;
           })}</tbody>
