@@ -632,7 +632,7 @@ function StartPage(props) {
 
     <SectionLabel>Team Energie Spiegel</SectionLabel>
     <Heading size={1}>Waar zit de energie in jouw team en waar lekt die weg?</Heading>
-    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>Je team werkt hard. De intenties zijn goed. En toch kost samenwerken meer energie dan het oplevert. Niet omdat mensen niet willen, maar omdat kleine verschillen in tempo, verwachting en eigenaarschap zich ophopen. Ongemerkt. Tot het voelt alsof je steeds tegen de stroom in roeit, terwijl iedereen dezelfde kant op wil.</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>Je team werkt hard. De intenties zijn goed. En toch loopt samenwerking niet altijd soepel. Kleine verschillen in tempo, verwachting en eigenaarschap hopen zich op, ongemerkt. Maar er zit ook kracht in je team die je misschien nog niet volledig benut. Deze spiegel laat zien waar energie weglekt én waar die juist stroomt, zodat je weet waar je op kunt bouwen en wat aandacht verdient.</p>
 
     <div style={{background:C.warm,borderRadius:16,padding:"22px 26px",marginBottom:32}}>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",color:C.charcoal,marginBottom:18,fontStyle:"italic",marginTop:0}}>In drie stappen van inzicht naar gesprek:</p>
