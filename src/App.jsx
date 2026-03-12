@@ -748,7 +748,7 @@ function AnalysisPage(props) {
       <div style={{width:7,height:7,borderRadius:"50%",background:C.olive,flexShrink:0,marginTop:5}}/>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,margin:0,lineHeight:1.6}}>
         Dit is jouw <strong>individuele analyse</strong>, gebaseerd op jouw eigen antwoorden.
-        Jouw antwoorden zijn <strong>anoniem</strong> en worden samengevoegd met die van je teamgenoten voor het teamgemiddelde.
+        Jouw antwoorden zijn <strong>anoniem</strong> en worden samengevoegd met die van je teamgenoten voor het teamgemiddelde, zodra jij hieronder op 'Resultaten indienen' hebt geklikt.
       </p>
     </div>}
 
