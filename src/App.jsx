@@ -1688,6 +1688,7 @@ function TesterForm() {
   var [saving, setSaving] = useState(false);
 
   var [f, setF] = useState({
+    apparaat:[],
     eersteReactie:"", doelgroep:"",
     teamGetest: null,
     invulErvaring: null, invulToelichting:"",
@@ -1764,6 +1765,22 @@ function TesterForm() {
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,marginBottom:32,marginTop:0,lineHeight:1.6}}>
         {anonymous ? "Je antwoorden worden anoniem opgeslagen." : "Je antwoorden worden opgeslagen op naam van "+name+"."}
       </p>
+
+      {/* Apparaat */}
+      <Card style={{marginBottom:20}}>
+        <TesterVraag label="Op welk apparaat heb je de test gedaan?" sub="Je kunt meerdere opties selecteren.">
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:8}}>
+            {["Mobiel","Desktop / laptop","Tablet"].map(function(opt){
+              var active = f.apparaat.indexOf(opt) > -1;
+              return <div key={opt} onClick={function(){
+                set("apparaat", active ? f.apparaat.filter(function(a){return a!==opt;}) : f.apparaat.concat(opt));
+              }} style={{padding:"8px 16px",borderRadius:20,border:"1.5px solid "+(active?C.olive:C.warm),background:active?"#E8EDE3":C.white,cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:active?C.olive:C.charcoal,transition:"all 0.15s"}}>
+                {opt}
+              </div>;
+            })}
+          </div>
+        </TesterVraag>
+      </Card>
 
       {/* Blok 1 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16}}>Eerste indruk</p>
