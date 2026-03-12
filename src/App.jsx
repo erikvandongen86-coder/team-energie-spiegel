@@ -1324,6 +1324,7 @@ function OwnerDashboard(props) {
             return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
               <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
               <td style={{padding:"8px 10px",color:C.charcoal,fontWeight:e.name?600:400}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
+              <td style={{padding:"8px 10px",color:C.muted,fontStyle:"italic"}}>Anoniem</td>
               <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL",{day:"numeric",month:"short",year:"numeric"})}</td>
             </tr>;
           })}</tbody>
