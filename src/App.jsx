@@ -1614,6 +1614,9 @@ function AdminDashboard() {
       })}
     </>}
 
+    <div style={{borderTop:"2px solid "+C.warm,margin:"32px 0 24px"}}/>
+    <SectionLabel>Teams & sessies</SectionLabel>
+
     {data.teams.map(function(t){
       var pct = t.memberCount ? Math.round((t.entries.length/t.memberCount)*100) : 0;
       return <Card key={t.teamCode} style={{cursor:"pointer",transition:"box-shadow 0.2s"}} onClick={function(){setSelectedTeam(t);}}>
