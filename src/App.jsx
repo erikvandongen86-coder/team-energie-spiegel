@@ -519,8 +519,9 @@ function SocialProof() {
 
 // ─── TEAM CODE PAGE ───────────────────────────────────────────────────────────
 function TeamCodePage(props) {
-  var [teamCode, setTeamCode] = useState("");
+  var [digits, setDigits] = useState("");
   var [showInput, setShowInput] = useState(false);
+  var teamCode = "TEAM-" + digits;
   var inputCode = teamCode.trim().toUpperCase();
   var isValid = /^TEAM-\d{4}$/.test(inputCode);
 
@@ -548,13 +549,14 @@ function TeamCodePage(props) {
       : <div>
           <div style={{background:C.white,border:"1.5px solid "+(isValid?C.olive:C.warm),borderRadius:14,padding:"20px 24px",marginBottom:16}}>
             <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:10,marginTop:0}}>Jouw teamcode</p>
-            <input type="text" placeholder="TEAM-0000" value={teamCode} onChange={function(e){
-              var v = e.target.value.toUpperCase();
-              if(!v.startsWith("TEAM-")) v = "TEAM-";
-              if(v.length > 9) v = v.slice(0,9);
-              setTeamCode(v);
-            }} autoFocus
-              style={{width:"100%",boxSizing:"border-box",padding:"12px 16px",borderRadius:8,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:20,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.charcoal,background:C.cream,outline:"none"}}/>
+            <div style={{display:"flex",alignItems:"center",gap:0,borderRadius:8,border:"1.5px solid "+C.warm,background:C.cream,overflow:"hidden"}}>
+              <span style={{fontFamily:FONT_BODY,fontSize:20,fontWeight:700,letterSpacing:"0.15em",color:C.muted,padding:"12px 0 12px 16px",userSelect:"none",whiteSpace:"nowrap"}}>TEAM-</span>
+              <input type="text" placeholder="0000" value={digits} onChange={function(e){
+                var v = e.target.value.replace(/[^0-9]/g,"").slice(0,4);
+                setDigits(v);
+              }} autoFocus maxLength={4} inputMode="numeric"
+                style={{flex:1,border:"none",padding:"12px 16px 12px 4px",fontFamily:FONT_BODY,fontSize:20,fontWeight:700,letterSpacing:"0.15em",color:C.charcoal,background:"transparent",outline:"none",width:"80px"}}/>
+            </div>
             {isValid&&<div style={{display:"flex",alignItems:"center",gap:6,marginTop:10}}>
               <div style={{width:7,height:7,borderRadius:"50%",background:C.olive}}/>
               <span style={{fontFamily:FONT_BODY,fontSize:13,color:C.olive,fontWeight:600}}>Teamcode herkend</span>
@@ -1546,6 +1548,47 @@ function AdminDashboard() {
       </table>
     </Card>}
 
+    {data.testers&&data.testers.length>0&&<Card style={{marginBottom:20}}>
+      <SectionLabel>Testersfeedback ({data.testers.length})</SectionLabel>
+      {data.testers.map(function(t,i){
+        return <div key={i} style={{padding:"16px 0",borderBottom:i<data.testers.length-1?"1px solid "+C.warm:"none"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+            <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:600,color:C.charcoal,margin:0}}>{t.anonymous||!t.name?<span style={{color:C.muted,fontStyle:"italic",fontWeight:400}}>Anoniem</span>:t.name}</p>
+            <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,margin:0}}>{new Date(t.created_at).toLocaleDateString("nl-NL")}</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 20px"}}>
+            {[
+              ["Team getest",t.team_getest],
+              ["Invul ervaring",t.invul_ervaring?t.invul_ervaring+"/5":null],
+              ["Aantal vragen",t.aantal_vragen],
+              ["Analyse lengte",t.analyse_lengte],
+              ["Analyse taal",t.analyse_taal],
+              ["Team aanmaken",t.team_aanmaken?t.team_aanmaken+"/5":null],
+            ].filter(function(r){return r[1];}).map(function(row,j){
+              return <div key={j}>
+                <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em"}}>{row[0]}</span>
+                <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,margin:"2px 0 0",fontWeight:600}}>{row[1]}</p>
+              </div>;
+            })}
+          </div>
+          {[
+            ["Eerste reactie",t.eerste_reactie],
+            ["Doelgroep",t.doelgroep],
+            ["Blokkade",t.blokkade],
+            ["Sterkste",t.sterkste],
+            ["Inzetten",t.inzetten],
+            ["Wat mist",t.mist],
+            ["Overig",t.overig],
+          ].filter(function(r){return r[1];}).map(function(row,j){
+            return <div key={j} style={{marginTop:10}}>
+              <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em",margin:"0 0 3px"}}>{row[0]}</p>
+              <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,margin:0,lineHeight:1.6}}>{row[1]}</p>
+            </div>;
+          })}
+        </div>;
+      })}
+    </Card>}
+
     {data.teams.map(function(t){
       var pct = t.memberCount ? Math.round((t.entries.length/t.memberCount)*100) : 0;
       return <Card key={t.teamCode} style={{cursor:"pointer",transition:"box-shadow 0.2s"}} onClick={function(){setSelectedTeam(t);}}>
@@ -1571,11 +1614,219 @@ function AdminDashboard() {
 }
 
 // ─── APP SHELL ────────────────────────────────────────────────────────────────
+// ─── TESTER FORM ──────────────────────────────────────────────────────────────
+function TesterForm() {
+  var [anonymous, setAnonymous] = useState(null);
+  var [name, setName] = useState("");
+  var [step, setStep] = useState("intro"); // intro | form | done
+  var [saving, setSaving] = useState(false);
+
+  var [f, setF] = useState({
+    eersteReactie:"", doelgroep:"",
+    teamGetest: null,
+    invulErvaring: null, invulToelichting:"",
+    aantalVragen: null, aantalVragenOpmerking:"",
+    blokkade:"", sterkste:"",
+    analyseLengte: null, analyseTaal: null,
+    teamAnalyseLengte: null, teamAnalyseTaal: null,
+    teamAanmaken: null, teamAanmakenToelichting:"",
+    inzetten:"", mist:"", overig:""
+  });
+
+  function set(key, val) { setF(function(prev){ return Object.assign({}, prev, {[key]:val}); }); }
+
+  var showTeamVragen = f.teamGetest === "ja";
+
+  async function handleSubmit() {
+    setSaving(true);
+    try {
+      await fetch("/api/tester", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ anonymous, name: anonymous ? null : name, ...f }),
+      });
+      setStep("done");
+    } catch(e) { console.error(e); }
+    setSaving(false);
+  }
+
+  function Radio(props) {
+    return <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:8}}>
+      {props.options.map(function(opt){
+        var active = f[props.field] === opt.val;
+        return <div key={opt.val} onClick={function(){set(props.field, opt.val);}}
+          style={{padding:"8px 16px",borderRadius:20,border:"1.5px solid "+(active?C.olive:C.warm),background:active?"#E8EDE3":C.white,cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:active?C.olive:C.charcoal,transition:"all 0.15s"}}>
+          {opt.label}
+        </div>;
+      })}
+    </div>;
+  }
+
+  function Scale(props) {
+    return <div style={{display:"flex",gap:8,marginTop:8}}>
+      {[1,2,3,4,5].map(function(n){
+        var active = f[props.field] === n;
+        return <div key={n} onClick={function(){set(props.field, n);}}
+          style={{width:44,height:44,borderRadius:"50%",border:"1.5px solid "+(active?C.olive:C.warm),background:active?C.olive:C.white,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FONT_BODY,fontSize:15,fontWeight:600,color:active?C.white:C.charcoal,transition:"all 0.15s",flexShrink:0}}>
+          {n}
+        </div>;
+      })}
+    </div>;
+  }
+
+  function Vraag(props) {
+    return <div style={{marginBottom:28}}>
+      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,margin:"0 0 4px",fontWeight:600,lineHeight:1.5}}>{props.label}</p>
+      {props.sub&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"0 0 6px",lineHeight:1.5}}>{props.sub}</p>}
+      {props.children}
+    </div>;
+  }
+
+  function Textarea(props) {
+    return <textarea value={f[props.field]} onChange={function(e){set(props.field,e.target.value);}} placeholder={props.placeholder||""}
+      style={{width:"100%",boxSizing:"border-box",padding:"11px 14px",borderRadius:10,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,background:C.white,outline:"none",resize:"vertical",minHeight:80,lineHeight:1.6,marginTop:8}}/>;
+  }
+
+  if(step === "done") return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(40px,8vw,80px) 24px",textAlign:"center"}}>
+    <div style={{background:C.olive,borderRadius:"50%",width:64,height:64,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px"}}>
+      <span style={{fontSize:28,color:C.white}}>✓</span>
+    </div>
+    <Heading size={2}>Bedankt voor je feedback!</Heading>
+    <p style={{fontFamily:FONT_BODY,fontSize:16,color:C.muted,lineHeight:1.7,marginTop:8}}>Je input is opgeslagen en helpt de tool beter te maken. Waardevol.</p>
+  </div>;
+
+  return <div style={{maxWidth:600,margin:"0 auto",padding:"clamp(28px,5vw,56px) 24px"}}>
+
+    {/* Header */}
+    <div style={{background:C.olive,margin:"0 -24px",padding:"22px 24px",marginBottom:40,borderRadius:"0 0 20px 20px"}}>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:28,color:"#F5F3EF",fontWeight:400,margin:"0 0 4px"}}>Testersfeedback</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(245,243,239,0.7)",margin:0}}>Team Energie Spiegel · erikvandongen.eu</p>
+    </div>
+
+    {step === "intro" && <>
+      <Heading size={2}>Bedankt dat je de tool hebt getest.</Heading>
+      <p style={{fontFamily:FONT_BODY,fontSize:16,color:C.muted,lineHeight:1.7,marginBottom:32,marginTop:8}}>
+        Deze vragenlijst bestaat uit 13 vragen en duurt ongeveer 5 minuten. Je helpt mij de tool te verbeteren. Eerst een kleine keuze:
+      </p>
+      <Card>
+        <p style={{fontFamily:FONT_BODY,fontSize:15,fontWeight:600,color:C.charcoal,margin:"0 0 14px"}}>Wil je je feedback op naam indienen?</p>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {[{val:false,title:"Ja, op mijn naam",desc:"Je naam wordt zichtbaar in het overzicht."},{val:true,title:"Nee, anoniem",desc:"Alleen je antwoorden worden opgeslagen."}].map(function(opt){
+            return <div key={String(opt.val)} onClick={function(){setAnonymous(opt.val);}}
+              style={{padding:"13px 17px",borderRadius:12,border:"2px solid "+(anonymous===opt.val?C.olive:C.warm),cursor:"pointer",background:anonymous===opt.val?"#E8EDE3":C.white,transition:"all 0.15s"}}>
+              <p style={{fontFamily:FONT_BODY,fontSize:14,fontWeight:600,color:C.charcoal,margin:"0 0 2px"}}>{opt.title}</p>
+              <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0}}>{opt.desc}</p>
+            </div>;
+          })}
+        </div>
+        {anonymous === false && <div style={{marginTop:16}}>
+          <FormInput label="Jouw naam" value={name} onChange={setName} placeholder="Voornaam en achternaam"/>
+        </div>}
+        <Btn onClick={function(){setStep("form");}} style={{marginTop:20,width:"100%",justifyContent:"center"}}
+          disabled={anonymous===null||(anonymous===false&&!name.trim())}>
+          Start de vragenlijst →
+        </Btn>
+      </Card>
+    </>}
+
+    {step === "form" && <>
+      <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,marginBottom:32,marginTop:0,lineHeight:1.6}}>
+        {anonymous ? "Je antwoorden worden anoniem opgeslagen." : "Je antwoorden worden opgeslagen op naam van "+name+"."}
+      </p>
+
+      {/* Blok 1 */}
+      <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16}}>Eerste indruk</p>
+      <Card>
+        <Vraag label="1. Wat was je eerste reactie toen je hoorde wat de tool doet?">
+          <Textarea field="eersteReactie" placeholder="Vertel het ons..."/>
+        </Vraag>
+        <Vraag label="2. Voor welk type team of organisatie zie jij dit het meest werken?">
+          <Textarea field="doelgroep" placeholder="Bijv. MT's, teams in groei, organisaties in verandering..."/>
+        </Vraag>
+      </Card>
+
+      {/* Blok 2 */}
+      <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Ervaring met de tool</p>
+      <Card>
+        <Vraag label="3. Heb je alleen de scan ingevuld, of ook een team aangemaakt en dit met je teamleden getest?">
+          <Radio field="teamGetest" options={[{val:"alleen",label:"Alleen de scan ingevuld"},{val:"ja",label:"Ja, ook met een team getest"}]}/>
+        </Vraag>
+        <Vraag label="4. Hoe verliep het invullen voor jou?" sub="1 = moeizaam, 5 = vlekkeloos">
+          <Scale field="invulErvaring"/>
+          <Textarea field="invulToelichting" placeholder="Toelichting (optioneel)"/>
+        </Vraag>
+        <Vraag label="5. Wat vond je van het aantal vragen?">
+          <Radio field="aantalVragen" options={[{val:"te weinig",label:"Te weinig"},{val:"precies goed",label:"Precies goed"},{val:"te veel",label:"Te veel"}]}/>
+          <Textarea field="aantalVragenOpmerking" placeholder="Opmerking (optioneel)"/>
+        </Vraag>
+        <Vraag label="6. Was er iets dat je niet begreep of dat je afremde?">
+          <Textarea field="blokkade" placeholder="Bijv. onduidelijke stap, verwarrende tekst..."/>
+        </Vraag>
+        <Vraag label="7. Wat vond je het sterkste onderdeel van de tool?">
+          <Textarea field="sterkste" placeholder="Vertel het ons..."/>
+        </Vraag>
+      </Card>
+
+      {/* Blok 3 */}
+      <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Analyse</p>
+      <Card>
+        <Vraag label="8. Wat vond je van de lengte van jouw persoonlijke analyse?">
+          <Radio field="analyseLengte" options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
+        </Vraag>
+        <Vraag label="Wat vond je van de taal van jouw persoonlijke analyse?">
+          <Radio field="analyseTaal" options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
+        </Vraag>
+
+        {showTeamVragen && <>
+          <div style={{borderTop:"1px solid "+C.warm,marginTop:8,paddingTop:20}}>
+            <Vraag label="9. Wat vond je van de lengte van de teamanalyse?">
+              <Radio field="teamAnalyseLengte" options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
+            </Vraag>
+            <Vraag label="Wat vond je van de taal van de teamanalyse?">
+              <Radio field="teamAnalyseTaal" options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
+            </Vraag>
+            <Vraag label="10. Hoe gemakkelijk was het om een team aan te maken?" sub="1 = erg lastig, 5 = heel eenvoudig">
+              <Scale field="teamAanmaken"/>
+              <Textarea field="teamAanmakenToelichting" placeholder="Toelichting (optioneel)"/>
+            </Vraag>
+          </div>
+        </>}
+      </Card>
+
+      {/* Blok 4 */}
+      <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Waarde</p>
+      <Card>
+        <Vraag label="11. Zou jij dit inzetten voor je eigen team? Waarom wel of niet?">
+          <Textarea field="inzetten" placeholder="Vertel het ons..."/>
+        </Vraag>
+      </Card>
+
+      {/* Blok 5 */}
+      <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Verbeteringen</p>
+      <Card>
+        <Vraag label="12. Wat mis je, of wat zou de tool significant beter maken?">
+          <Textarea field="mist" placeholder="Vertel het ons..."/>
+        </Vraag>
+        <Vraag label="13. Heb je nog iets dat je kwijt wil?">
+          <Textarea field="overig" placeholder="Vrije ruimte..."/>
+        </Vraag>
+      </Card>
+
+      <Btn onClick={handleSubmit} disabled={saving} style={{width:"100%",justifyContent:"center",marginTop:8,fontSize:16,padding:"16px 24px"}}>
+        {saving ? "Opslaan..." : "Verstuur mijn feedback →"}
+      </Btn>
+      <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,textAlign:"center",marginTop:12}}>
+        Team Energie Spiegel · erikvandongen.eu
+      </p>
+    </>}
+  </div>;
+}
+
 export default function App() {
   var [urlParams] = useState(function(){
     try {
       var p = new URLSearchParams(window.location.search);
-      return { team: p.get("team")||null, owner: p.get("owner")||null, admin: p.get("admin")||null };
+      return { team: p.get("team")||null, owner: p.get("owner")||null, admin: p.get("admin")||null, tester: p.get("tester")||null };
     } catch(e){ return {team:null,owner:null}; }
   });
 
@@ -1600,6 +1851,7 @@ export default function App() {
   }, []);
 
   var isAdmin = urlParams.admin === "true";
+  var isTester = urlParams.tester === "true";
   var [page, setPage] = useState("start");
   var [feedbackDone, setFeedbackDone] = useState(false);
   var [welcomeMeta, setWelcomeMeta] = useState(null);
@@ -1636,7 +1888,8 @@ export default function App() {
       </div>
     </div>
     <FeedbackButton page={page}/>
-    {showingDashboard
+    {isTester ? <TesterForm/>
+    : showingDashboard
       ? <OwnerDashboard teamCode={urlParams.team} isDemo={demoMode}/>
       : <>
           {page==="start"    &&(!ownerView&&urlParams.team
