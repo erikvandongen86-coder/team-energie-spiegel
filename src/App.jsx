@@ -1317,15 +1317,13 @@ function OwnerDashboard(props) {
           <thead><tr style={{borderBottom:"2px solid "+C.warm}}>
             <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>#</th>
             <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Naam</th>
-            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>E-mail</th>
-            <th style={{textAlign:"left",padding:"6px 10px",color:C.muted,fontWeight:600}}>Ingevuld op</th>
+            <th style={{textAlign:"right",padding:"6px 10px",color:C.muted,fontWeight:600}}>Ingevuld op</th>
           </tr></thead>
           <tbody>{teamData.map(function(e,i){
             return <tr key={e.sid} style={{borderBottom:"1px solid "+C.warm}}>
               <td style={{padding:"8px 10px",color:C.muted}}>{i+1}</td>
               <td style={{padding:"8px 10px",color:C.charcoal,fontWeight:e.name?600:400}}>{e.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
-              <td style={{padding:"8px 10px",color:C.muted,fontStyle:"italic"}}>Anoniem</td>
-              <td style={{padding:"8px 10px",color:C.muted}}>{new Date(e.ts).toLocaleDateString("nl-NL",{day:"numeric",month:"short",year:"numeric"})}</td>
+              <td style={{padding:"8px 10px",color:C.muted,textAlign:"right"}}>{new Date(e.ts).toLocaleDateString("nl-NL",{day:"numeric",month:"short",year:"numeric"})}</td>
             </tr>;
           })}</tbody>
         </table>
@@ -1959,14 +1957,15 @@ export default function App() {
 
   return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
-    <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(245,240,232,0.93)",backdropFilter:"blur(8px)",borderBottom:"1px solid "+C.warm,padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+    <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(245,240,232,0.93)",backdropFilter:"blur(8px)",borderBottom:"1px solid "+C.warm,padding:"10px 24px",display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"center"}}>
       <div style={{display:"flex",alignItems:"center",gap:8}}>
         <div style={{width:24,height:24,background:C.olive,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center"}}>
           <div style={{display:"flex",gap:2,alignItems:"flex-end",height:12}}>{[6,9,12,9,6].map(function(h,i){return <div key={i} style={{width:2,height:h,background:C.cream,borderRadius:1}}/>;})}</div>
         </div>
         <span style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted}}>Team Energie Spiegel</span>
       </div>
-      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+      <a href="https://erikvandongen.eu" target="_blank" rel="noopener noreferrer" style={{fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,textDecoration:"none",letterSpacing:"0.02em",textAlign:"center"}}>erikvandongen.eu</a>
+      <div style={{display:"flex",gap:8,alignItems:"center",justifyContent:"flex-end"}}>
         {demoMode&&<div style={{display:"inline-flex",alignItems:"center",gap:5,background:"rgba(181,98,42,0.1)",borderRadius:20,padding:"4px 11px"}}>
           <div style={{width:5,height:5,borderRadius:"50%",background:C.terra}}/>
           <span style={{fontFamily:FONT_BODY,fontSize:11,color:C.terra,fontWeight:600,letterSpacing:"0.05em"}}>Voorbeeldweergave</span>
