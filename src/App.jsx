@@ -1762,10 +1762,14 @@ function TesterForm() {
           <Radio field="aantalVragen" options={[{val:"te weinig",label:"Te weinig"},{val:"precies goed",label:"Precies goed"},{val:"te veel",label:"Te veel"}]}/>
           <Textarea field="aantalVragenOpmerking" placeholder="Opmerking (optioneel)"/>
         </Vraag>
-        <Vraag label="6. Was er iets dat je niet begreep of dat je afremde?">
+        <Vraag label="6. Denk je dat 12 vragen voldoende zijn voor een betrouwbare analyse, of zou je meer vragen adviseren voor de geloofwaardigheid?" sub="Als je meer vragen adviseert, hoeveel zou je dan aanbevelen?">
+          <Radio field="aantalVragenBetrouwbaar" options={[{val:"ja voldoende",label:"Ja, 12 is voldoende"},{val:"meer nodig",label:"Meer vragen nodig"}]}/>
+          {f.aantalVragenBetrouwbaar==="meer nodig"&&<Textarea field="aantalVragenAdvies" placeholder="Hoeveel vragen zou je aanbevelen en waarom?"/>}
+        </Vraag>
+        <Vraag label="7. Was er iets dat je niet begreep of dat je afremde?">
           <Textarea field="blokkade" placeholder="Bijv. onduidelijke stap, verwarrende tekst..."/>
         </Vraag>
-        <Vraag label="7. Wat vond je het sterkste onderdeel van de tool?">
+        <Vraag label="8. Wat vond je het sterkste onderdeel van de tool?">
           <Textarea field="sterkste" placeholder="Vertel het ons..."/>
         </Vraag>
       </Card>
@@ -1773,22 +1777,24 @@ function TesterForm() {
       {/* Blok 3 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Analyse</p>
       <Card>
-        <Vraag label="8. Wat vond je van de lengte van jouw persoonlijke analyse?">
+        <Vraag label="9. Wat vond je van de persoonlijke analyse?" sub="Dit is de analyse die verschijnt nadat je op 'Genereer analyse' hebt geklikt na het invullen van de 12 vragen.">
+          <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"8px 0 4px"}}>Lengte</p>
           <Radio field="analyseLengte" options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
-        </Vraag>
-        <Vraag label="Wat vond je van de taal van jouw persoonlijke analyse?">
+          <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"14px 0 4px"}}>Taal</p>
           <Radio field="analyseTaal" options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
+          <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"14px 0 4px"}}>Overige opmerkingen</p>
+          <Textarea field="analyseOpmerking" placeholder="Wat vond je verder van de analyse? (optioneel)"/>
         </Vraag>
 
         {showTeamVragen && <>
           <div style={{borderTop:"1px solid "+C.warm,marginTop:8,paddingTop:20}}>
-            <Vraag label="9. Wat vond je van de lengte van de teamanalyse?">
+            <Vraag label="10. Wat vond je van de teamanalyse?">
+              <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"8px 0 4px"}}>Lengte</p>
               <Radio field="teamAnalyseLengte" options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
-            </Vraag>
-            <Vraag label="Wat vond je van de taal van de teamanalyse?">
+              <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"14px 0 4px"}}>Taal</p>
               <Radio field="teamAnalyseTaal" options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
             </Vraag>
-            <Vraag label="10. Hoe gemakkelijk was het om een team aan te maken?" sub="1 = erg lastig, 5 = heel eenvoudig">
+            <Vraag label="11. Hoe gemakkelijk was het om een team aan te maken?" sub="1 = erg lastig, 5 = heel eenvoudig">
               <Scale field="teamAanmaken"/>
               <Textarea field="teamAanmakenToelichting" placeholder="Toelichting (optioneel)"/>
             </Vraag>
@@ -1799,18 +1805,19 @@ function TesterForm() {
       {/* Blok 4 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Waarde</p>
       <Card>
-        <Vraag label="11. Zou jij dit inzetten voor je eigen team? Waarom wel of niet?">
-          <Textarea field="inzetten" placeholder="Vertel het ons..."/>
+        <Vraag label="12. Zou jij dit inzetten voor je eigen team?">
+          <Radio field="inzettenKeuze" options={[{val:"ja",label:"Ja"},{val:"nee",label:"Nee"},{val:"misschien",label:"Misschien"}]}/>
+          {f.inzettenKeuze&&<Textarea field="inzetten" placeholder="Waarom wel of niet?"/>}
         </Vraag>
       </Card>
 
       {/* Blok 5 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Verbeteringen</p>
       <Card>
-        <Vraag label="12. Wat mis je, of wat zou de tool significant beter maken?">
+        <Vraag label="13. Wat mis je, of wat zou de tool significant beter maken?">
           <Textarea field="mist" placeholder="Vertel het ons..."/>
         </Vraag>
-        <Vraag label="13. Heb je nog iets dat je kwijt wil?">
+        <Vraag label="14. Heb je nog iets dat je kwijt wil?">
           <Textarea field="overig" placeholder="Vrije ruimte..."/>
         </Vraag>
       </Card>
