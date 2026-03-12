@@ -1,7 +1,9 @@
-// api/admin.js — admin overzicht van alle teams en sessies
+// api/admin.js — admin overzicht
 import { neon } from '@neondatabase/serverless'
 
 export default async function handler(req, res) {
+  const sql = neon(process.env.DATABASE_URL)
+
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -9,32 +11,25 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Methode niet toegestaan' })
 
   const { password } = req.body
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
+  if (password !== process.env.ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'Ongeldig wachtwoord' })
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL)
-
-    const teams = await sql`
-      SELECT team_code, team_name, owner_name, owner_email, company_name,
-             member_count, deadline_days, share_with_all, created_at, analysis, analysis_at
-      FROM teams ORDER BY created_at DESC
-    `
-    const entries = await sql`
-      SELECT team_code, session_id, scores, email, name, submitted_at
-      FROM entries ORDER BY submitted_at DESC
-    `
+    const teams = await sql`SELECT * FROM teams ORDER BY created_at DESC`
+    const entries = await sql`SELECT * FROM entries ORDER BY submitted_at DESC`
     const subscribers = await sql`
-      SELECT DISTINCT name, email, submitted_at
-      FROM entries
-      WHERE email IS NOT NULL
-      ORDER BY submitted_at DESC
+      SELECT DISTINCT ON (email) name, email, submitted_at
+      FROM entries WHERE email IS NOT NULL ORDER BY email, submitted_at DESC
     `
     const feedback = await sql`
       SELECT session_id, page, rating, comment, would_use, created_at
       FROM feedback ORDER BY created_at DESC
     `
+
+    const testers = await sql`
+      SELECT * FROM tester_responses ORDER BY created_at DESC
+    `.catch(() => [])
 
     const result = teams.map(t => {
       const teamEntries = entries.filter(e => e.team_code === t.team_code)
@@ -45,7 +40,6 @@ export default async function handler(req, res) {
         ownerEmail: t.owner_email,
         companyName: t.company_name,
         memberCount: t.member_count,
-        deadlineDays: t.deadline_days,
         shareWithAll: t.share_with_all,
         createdAt: new Date(t.created_at).getTime(),
         analysis: t.analysis || null,
@@ -65,6 +59,7 @@ export default async function handler(req, res) {
       totalTeams: teams.length,
       totalEntries: entries.length,
       totalSessions: entries.length,
+      testers: testers,
       subscribers: subscribers.map(s => ({
         name: s.name || '—',
         email: s.email,
