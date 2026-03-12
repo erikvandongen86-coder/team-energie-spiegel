@@ -1683,7 +1683,10 @@ function TesterForm() {
   }
 
   function Textarea(props) {
-    return <textarea value={f[props.field]} onChange={function(e){set(props.field,e.target.value);}} placeholder={props.placeholder||""}
+    return <textarea value={f[props.field]}
+      onChange={function(e){set(props.field,e.target.value);}}
+      onKeyDown={function(e){e.stopPropagation();}}
+      placeholder={props.placeholder||""}
       style={{width:"100%",boxSizing:"border-box",padding:"11px 14px",borderRadius:10,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,background:C.white,outline:"none",resize:"vertical",minHeight:80,lineHeight:1.6,marginTop:8}}/>;
   }
 
