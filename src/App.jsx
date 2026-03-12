@@ -759,7 +759,13 @@ function AnalysisPage(props) {
 
     <Card>
       <SectionLabel>Scores per categorie</SectionLabel>
-      {Object.entries(catScores).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})}</Card>
+      {Object.entries(catScores).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})
+      }
+      {!prefilledCode&&<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginTop:20,paddingTop:16,borderTop:"1px solid "+C.warm}}>
+        <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0,lineHeight:1.5}}>Wil je weten hoe je team dit ervaart?</p>
+        <Btn variant="primary" onClick={props.onDone} style={{fontSize:13,padding:"9px 20px",whiteSpace:"nowrap"}}>Maak een team aan →</Btn>
+      </div>}
+    </Card>
 
     <Card style={{background:C.warm,border:"none"}}>
       <SectionLabel>Analyse · individueel</SectionLabel>
