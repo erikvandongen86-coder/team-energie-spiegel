@@ -1639,6 +1639,44 @@ function AdminDashboard() {
 }
 
 // ─── APP SHELL ────────────────────────────────────────────────────────────────
+// ─── TESTER FORM HELPERS (buiten component om focus-verlies te voorkomen) ───────
+function TesterVraag(props) {
+  return <div style={{marginBottom:28}}>
+    <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,margin:"0 0 4px",fontWeight:600,lineHeight:1.5}}>{props.label}</p>
+    {props.sub&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"0 0 6px",lineHeight:1.5}}>{props.sub}</p>}
+    {props.children}
+  </div>;
+}
+function TesterTextarea(props) {
+  return <textarea value={props.value}
+    onChange={function(e){props.onChange(e.target.value);}}
+    onKeyDown={function(e){e.stopPropagation();}}
+    placeholder={props.placeholder||""}
+    style={{width:"100%",boxSizing:"border-box",padding:"11px 14px",borderRadius:10,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,background:C.white,outline:"none",resize:"vertical",minHeight:80,lineHeight:1.6,marginTop:8}}/>;
+}
+function TesterRadio(props) {
+  return <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:8}}>
+    {props.options.map(function(opt){
+      var active = props.value === opt.val;
+      return <div key={opt.val} onClick={function(){props.onChange(opt.val);}}
+        style={{padding:"8px 16px",borderRadius:20,border:"1.5px solid "+(active?C.olive:C.warm),background:active?"#E8EDE3":C.white,cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:active?C.olive:C.charcoal,transition:"all 0.15s"}}>
+        {opt.label}
+      </div>;
+    })}
+  </div>;
+}
+function TesterScale(props) {
+  return <div style={{display:"flex",gap:8,marginTop:8}}>
+    {[1,2,3,4,5].map(function(n){
+      var active = props.value === n;
+      return <div key={n} onClick={function(){props.onChange(n);}}
+        style={{width:44,height:44,borderRadius:"50%",border:"1.5px solid "+(active?C.olive:C.warm),background:active?C.olive:C.white,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FONT_BODY,fontSize:15,fontWeight:600,color:active?C.white:C.charcoal,transition:"all 0.15s",flexShrink:0}}>
+        {n}
+      </div>;
+    })}
+  </div>;
+}
+
 // ─── TESTER FORM ──────────────────────────────────────────────────────────────
 function TesterForm() {
   var [anonymous, setAnonymous] = useState(null);
@@ -1675,45 +1713,7 @@ function TesterForm() {
     setSaving(false);
   }
 
-  function Radio(props) {
-    return <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:8}}>
-      {props.options.map(function(opt){
-        var active = f[props.field] === opt.val;
-        return <div key={opt.val} onClick={function(){set(props.field, opt.val);}}
-          style={{padding:"8px 16px",borderRadius:20,border:"1.5px solid "+(active?C.olive:C.warm),background:active?"#E8EDE3":C.white,cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:active?C.olive:C.charcoal,transition:"all 0.15s"}}>
-          {opt.label}
-        </div>;
-      })}
-    </div>;
-  }
 
-  function Scale(props) {
-    return <div style={{display:"flex",gap:8,marginTop:8}}>
-      {[1,2,3,4,5].map(function(n){
-        var active = f[props.field] === n;
-        return <div key={n} onClick={function(){set(props.field, n);}}
-          style={{width:44,height:44,borderRadius:"50%",border:"1.5px solid "+(active?C.olive:C.warm),background:active?C.olive:C.white,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FONT_BODY,fontSize:15,fontWeight:600,color:active?C.white:C.charcoal,transition:"all 0.15s",flexShrink:0}}>
-          {n}
-        </div>;
-      })}
-    </div>;
-  }
-
-  function Vraag(props) {
-    return <div style={{marginBottom:28}}>
-      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,margin:"0 0 4px",fontWeight:600,lineHeight:1.5}}>{props.label}</p>
-      {props.sub&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"0 0 6px",lineHeight:1.5}}>{props.sub}</p>}
-      {props.children}
-    </div>;
-  }
-
-  function Textarea(props) {
-    return <textarea value={f[props.field]}
-      onChange={function(e){set(props.field,e.target.value);}}
-      onKeyDown={function(e){e.stopPropagation();}}
-      placeholder={props.placeholder||""}
-      style={{width:"100%",boxSizing:"border-box",padding:"11px 14px",borderRadius:10,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,background:C.white,outline:"none",resize:"vertical",minHeight:80,lineHeight:1.6,marginTop:8}}/>;
-  }
 
   if(step === "done") return <div style={{maxWidth:560,margin:"0 auto",padding:"clamp(40px,8vw,80px) 24px",textAlign:"center"}}>
     <div style={{background:C.olive,borderRadius:"50%",width:64,height:64,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px"}}>
@@ -1765,64 +1765,64 @@ function TesterForm() {
       {/* Blok 1 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16}}>Eerste indruk</p>
       <Card>
-        <Vraag label="1. Wat was je eerste reactie toen je hoorde wat de tool doet?">
-          <Textarea field="eersteReactie" placeholder="Vertel het ons..."/>
-        </Vraag>
-        <Vraag label="2. Voor welk type team of organisatie zie jij dit het meest werken?">
-          <Textarea field="doelgroep" placeholder="Bijv. MT's, teams in groei, organisaties in verandering..."/>
-        </Vraag>
+        <TesterVraag label="1. Wat was je eerste reactie toen je hoorde wat de tool doet?">
+          <TesterTextarea value={f["eersteReactie"]} onChange={function(v){set("eersteReactie",v);}} placeholder="Vertel het ons..."/>
+        </TesterVraag>
+        <TesterVraag label="2. Voor welk type team of organisatie zie jij dit het meest werken?">
+          <TesterTextarea value={f["doelgroep"]} onChange={function(v){set("doelgroep",v);}} placeholder="Bijv. MT's, teams in groei, organisaties in verandering..."/>
+        </TesterVraag>
       </Card>
 
       {/* Blok 2 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Ervaring met de tool</p>
       <Card>
-        <Vraag label="3. Heb je alleen de scan ingevuld, of ook een team aangemaakt en dit met je teamleden getest?">
-          <Radio field="teamGetest" options={[{val:"alleen",label:"Alleen de scan ingevuld"},{val:"ja",label:"Ja, ook met een team getest"}]}/>
-        </Vraag>
-        <Vraag label="4. Hoe verliep het invullen voor jou?" sub="1 = moeizaam, 5 = vlekkeloos">
-          <Scale field="invulErvaring"/>
-          <Textarea field="invulToelichting" placeholder="Toelichting (optioneel)"/>
-        </Vraag>
-        <Vraag label="5. Wat vond je van het aantal vragen?">
-          <Radio field="aantalVragen" options={[{val:"te weinig",label:"Te weinig"},{val:"precies goed",label:"Precies goed"},{val:"te veel",label:"Te veel"}]}/>
-          <Textarea field="aantalVragenOpmerking" placeholder="Opmerking (optioneel)"/>
-        </Vraag>
-        <Vraag label="6. Denk je dat 12 vragen voldoende zijn voor een betrouwbare analyse, of zou je meer vragen adviseren voor de geloofwaardigheid?" sub="Als je meer vragen adviseert, hoeveel zou je dan aanbevelen?">
-          <Radio field="aantalVragenBetrouwbaar" options={[{val:"ja voldoende",label:"Ja, 12 is voldoende"},{val:"meer nodig",label:"Meer vragen nodig"}]}/>
-          {f.aantalVragenBetrouwbaar==="meer nodig"&&<Textarea field="aantalVragenAdvies" placeholder="Hoeveel vragen zou je aanbevelen en waarom?"/>}
-        </Vraag>
-        <Vraag label="7. Was er iets dat je niet begreep of dat je afremde?">
-          <Textarea field="blokkade" placeholder="Bijv. onduidelijke stap, verwarrende tekst..."/>
-        </Vraag>
-        <Vraag label="8. Wat vond je het sterkste onderdeel van de tool?">
-          <Textarea field="sterkste" placeholder="Vertel het ons..."/>
-        </Vraag>
+        <TesterVraag label="3. Heb je alleen de scan ingevuld, of ook een team aangemaakt en dit met je teamleden getest?">
+          <TesterRadio value={f["teamGetest"]} onChange={function(v){set("teamGetest",v);}} options={[{val:"alleen",label:"Alleen de scan ingevuld"},{val:"ja",label:"Ja, ook met een team getest"}]}/>
+        </TesterVraag>
+        <TesterVraag label="4. Hoe verliep het invullen voor jou?" sub="1 = moeizaam, 5 = vlekkeloos">
+          <TesterScale value={f["invulErvaring"]} onChange={function(v){set("invulErvaring",v);}}/>
+          <TesterTextarea value={f["invulToelichting"]} onChange={function(v){set("invulToelichting",v);}} placeholder="Toelichting (optioneel)"/>
+        </TesterVraag>
+        <TesterVraag label="5. Wat vond je van het aantal vragen?">
+          <TesterRadio value={f["aantalVragen"]} onChange={function(v){set("aantalVragen",v);}} options={[{val:"te weinig",label:"Te weinig"},{val:"precies goed",label:"Precies goed"},{val:"te veel",label:"Te veel"}]}/>
+          <TesterTextarea value={f["aantalVragenOpmerking"]} onChange={function(v){set("aantalVragenOpmerking",v);}} placeholder="Opmerking (optioneel)"/>
+        </TesterVraag>
+        <TesterVraag label="6. Denk je dat 12 vragen voldoende zijn voor een betrouwbare analyse, of zou je meer vragen adviseren voor de geloofwaardigheid?" sub="Als je meer vragen adviseert, hoeveel zou je dan aanbevelen?">
+          <TesterRadio value={f["aantalVragenBetrouwbaar"]} onChange={function(v){set("aantalVragenBetrouwbaar",v);}} options={[{val:"ja voldoende",label:"Ja, 12 is voldoende"},{val:"meer nodig",label:"Meer vragen nodig"}]}/>
+          {f.aantalVragenBetrouwbaar==="meer nodig"&&<TesterTextarea value={f["aantalVragenAdvies"]} onChange={function(v){set("aantalVragenAdvies",v);}} placeholder="Hoeveel vragen zou je aanbevelen en waarom?"/>}
+        </TesterVraag>
+        <TesterVraag label="7. Was er iets dat je niet begreep of dat je afremde?">
+          <TesterTextarea value={f["blokkade"]} onChange={function(v){set("blokkade",v);}} placeholder="Bijv. onduidelijke stap, verwarrende tekst..."/>
+        </TesterVraag>
+        <TesterVraag label="8. Wat vond je het sterkste onderdeel van de tool?">
+          <TesterTextarea value={f["sterkste"]} onChange={function(v){set("sterkste",v);}} placeholder="Vertel het ons..."/>
+        </TesterVraag>
       </Card>
 
       {/* Blok 3 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Analyse</p>
       <Card>
-        <Vraag label="9. Wat vond je van de persoonlijke analyse?" sub="Dit is de analyse die verschijnt nadat je op 'Genereer analyse' hebt geklikt na het invullen van de 12 vragen.">
+        <TesterVraag label="9. Wat vond je van de persoonlijke analyse?" sub="Dit is de analyse die verschijnt nadat je op 'Genereer analyse' hebt geklikt na het invullen van de 12 vragen.">
           <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"8px 0 4px"}}>Lengte</p>
-          <Radio field="analyseLengte" options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
+          <TesterRadio value={f["analyseLengte"]} onChange={function(v){set("analyseLengte",v);}} options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
           <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"14px 0 4px"}}>Taal</p>
-          <Radio field="analyseTaal" options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
+          <TesterRadio value={f["analyseTaal"]} onChange={function(v){set("analyseTaal",v);}} options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
           <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"14px 0 4px"}}>Overige opmerkingen</p>
-          <Textarea field="analyseOpmerking" placeholder="Wat vond je verder van de analyse? (optioneel)"/>
-        </Vraag>
+          <TesterTextarea value={f["analyseOpmerking"]} onChange={function(v){set("analyseOpmerking",v);}} placeholder="Wat vond je verder van de analyse? (optioneel)"/>
+        </TesterVraag>
 
         {showTeamVragen && <>
           <div style={{borderTop:"1px solid "+C.warm,marginTop:8,paddingTop:20}}>
-            <Vraag label="10. Wat vond je van de teamanalyse?">
+            <TesterVraag label="10. Wat vond je van de teamanalyse?">
               <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"8px 0 4px"}}>Lengte</p>
-              <Radio field="teamAnalyseLengte" options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
+              <TesterRadio value={f["teamAnalyseLengte"]} onChange={function(v){set("teamAnalyseLengte",v);}} options={[{val:"te kort",label:"Te kort"},{val:"precies goed",label:"Precies goed"},{val:"te lang",label:"Te lang"}]}/>
               <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:"14px 0 4px"}}>Taal</p>
-              <Radio field="teamAnalyseTaal" options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
-            </Vraag>
-            <Vraag label="11. Hoe gemakkelijk was het om een team aan te maken?" sub="1 = erg lastig, 5 = heel eenvoudig">
-              <Scale field="teamAanmaken"/>
-              <Textarea field="teamAanmakenToelichting" placeholder="Toelichting (optioneel)"/>
-            </Vraag>
+              <TesterRadio value={f["teamAnalyseTaal"]} onChange={function(v){set("teamAnalyseTaal",v);}} options={[{val:"helder en concreet",label:"Helder en concreet"},{val:"begrijpelijk maar globaal",label:"Begrijpelijk maar globaal"},{val:"moeilijk te duiden",label:"Moeilijk te duiden"}]}/>
+            </TesterVraag>
+            <TesterVraag label="11. Hoe gemakkelijk was het om een team aan te maken?" sub="1 = erg lastig, 5 = heel eenvoudig">
+              <TesterScale value={f["teamAanmaken"]} onChange={function(v){set("teamAanmaken",v);}}/>
+              <TesterTextarea value={f["teamAanmakenToelichting"]} onChange={function(v){set("teamAanmakenToelichting",v);}} placeholder="Toelichting (optioneel)"/>
+            </TesterVraag>
           </div>
         </>}
       </Card>
@@ -1830,21 +1830,21 @@ function TesterForm() {
       {/* Blok 4 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Waarde</p>
       <Card>
-        <Vraag label="12. Zou jij dit inzetten voor je eigen team?">
-          <Radio field="inzettenKeuze" options={[{val:"ja",label:"Ja"},{val:"nee",label:"Nee"},{val:"misschien",label:"Misschien"}]}/>
-          {f.inzettenKeuze&&<Textarea field="inzetten" placeholder="Waarom wel of niet?"/>}
-        </Vraag>
+        <TesterVraag label="12. Zou jij dit inzetten voor je eigen team?">
+          <TesterRadio value={f["inzettenKeuze"]} onChange={function(v){set("inzettenKeuze",v);}} options={[{val:"ja",label:"Ja"},{val:"nee",label:"Nee"},{val:"misschien",label:"Misschien"}]}/>
+          {f.inzettenKeuze&&<TesterTextarea value={f["inzetten"]} onChange={function(v){set("inzetten",v);}} placeholder="Waarom wel of niet?"/>}
+        </TesterVraag>
       </Card>
 
       {/* Blok 5 */}
       <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",color:C.muted,marginBottom:16,marginTop:28}}>Verbeteringen</p>
       <Card>
-        <Vraag label="13. Wat mis je, of wat zou de tool significant beter maken?">
-          <Textarea field="mist" placeholder="Vertel het ons..."/>
-        </Vraag>
-        <Vraag label="14. Heb je nog iets dat je kwijt wil?">
-          <Textarea field="overig" placeholder="Vrije ruimte..."/>
-        </Vraag>
+        <TesterVraag label="13. Wat mis je, of wat zou de tool significant beter maken?">
+          <TesterTextarea value={f["mist"]} onChange={function(v){set("mist",v);}} placeholder="Vertel het ons..."/>
+        </TesterVraag>
+        <TesterVraag label="14. Heb je nog iets dat je kwijt wil?">
+          <TesterTextarea value={f["overig"]} onChange={function(v){set("overig",v);}} placeholder="Vrije ruimte..."/>
+        </TesterVraag>
       </Card>
 
       <Btn onClick={handleSubmit} disabled={saving} style={{width:"100%",justifyContent:"center",marginTop:8,fontSize:16,padding:"16px 24px"}}>
