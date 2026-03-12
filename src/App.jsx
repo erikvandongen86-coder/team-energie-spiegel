@@ -808,7 +808,7 @@ function AnalysisPage(props) {
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:12,lineHeight:1.75,marginTop:0}}>In mijn Team-dynamiek traject help ik teams deze patronen zichtbaar te maken en om te zetten naar betere samenwerking, duidelijker eigenaarschap en meer energie in het team.</p>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:28,lineHeight:1.75,marginTop:0}}>Wil je eerst zien hoe dit traject eruitziet? Download hieronder de Team-dynamiek trajectbeschrijving of plan een vrijblijvend intakegesprek om samen naar jullie uitkomst te kijken.</p>
       <div style={{display:"flex",flexWrap:"wrap",gap:12,marginTop:4}}>
-        <Btn variant="ghost" onClick={function(){window.open("https://erikvandongen.eu/downloads/Inzicht-in-teamdynamiek-brochure.pdf","_blank");}} style={{fontSize:14,padding:"11px 24px",border:"1.5px solid rgba(255,255,255,0.5)",color:C.white,background:"transparent"}}>Download Team-dynamiek traject</Btn>
+        <Btn variant="ghost" onClick={function(){window.open("https://erikvandongen.eu/inzicht-in-teamdynamiek","_blank");}} style={{fontSize:14,padding:"11px 24px",border:"1.5px solid rgba(255,255,255,0.5)",color:C.white,background:"transparent"}}>Meer over het Team-dynamiek traject</Btn>
         <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/kennismaken","_blank");}} style={{fontSize:14,padding:"12px 24px"}}>Plan een vrijblijvend intakegesprek</Btn>
       </div>
     </Card>
@@ -1363,7 +1363,7 @@ function OwnerDashboard(props) {
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:12,lineHeight:1.75,marginTop:0}}>In mijn Team-dynamiek traject help ik teams deze patronen zichtbaar te maken en om te zetten naar betere samenwerking, duidelijker eigenaarschap en meer energie in het team.</p>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:28,lineHeight:1.75,marginTop:0}}>Wil je eerst zien hoe dit traject eruitziet? Download hieronder de Team-dynamiek trajectbeschrijving of plan een vrijblijvend intakegesprek om samen naar jullie uitkomst te kijken.</p>
       <div style={{display:"flex",flexWrap:"wrap",gap:12,marginTop:4}}>
-        <Btn variant="ghost" onClick={function(){window.open("https://erikvandongen.eu/downloads/Inzicht-in-teamdynamiek-brochure.pdf","_blank");}} style={{fontSize:14,padding:"11px 24px",border:"1.5px solid rgba(255,255,255,0.5)",color:C.white,background:"transparent"}}>Download Team-dynamiek traject</Btn>
+        <Btn variant="ghost" onClick={function(){window.open("https://erikvandongen.eu/inzicht-in-teamdynamiek","_blank");}} style={{fontSize:14,padding:"11px 24px",border:"1.5px solid rgba(255,255,255,0.5)",color:C.white,background:"transparent"}}>Meer over het Team-dynamiek traject</Btn>
         <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/kennismaken","_blank");}} style={{fontSize:14,padding:"12px 24px"}}>Plan een vrijblijvend intakegesprek</Btn>
       </div>
     </Card>
