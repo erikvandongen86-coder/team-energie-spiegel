@@ -1176,10 +1176,10 @@ var DEMO_META = {
   createdAt: Date.now() - 3*86400000,
 };
 var DEMO_ENTRIES = [
-  {scores:{Vertrouwen:4.0,Eigenaarschap:3.7,Samenwerking:4.5,Richting:3.0,Tempo:4.2},sid:"s1",email:null,ts:Date.now()-2*86400000},
-  {scores:{Vertrouwen:3.5,Eigenaarschap:4.0,Samenwerking:3.5,Richting:3.5,Tempo:3.8},sid:"s2",email:null,ts:Date.now()-1.5*86400000},
-  {scores:{Vertrouwen:4.5,Eigenaarschap:3.3,Samenwerking:4.0,Richting:2.5,Tempo:4.5},sid:"s3",email:null,ts:Date.now()-1*86400000},
-  {scores:{Vertrouwen:2.5,Eigenaarschap:3.0,Samenwerking:3.5,Richting:3.0,Tempo:3.0},sid:"s4",email:"anna@bedrijf.nl",ts:Date.now()-0.5*86400000},
+  {scores:{Vertrouwen:4.2,Eigenaarschap:3.1,Samenwerking:2.0,Richting:1.8,Tempo:4.4},sid:"s1",email:null,ts:Date.now()-2*86400000},
+  {scores:{Vertrouwen:4.5,Eigenaarschap:3.4,Samenwerking:2.5,Richting:2.0,Tempo:4.0},sid:"s2",email:null,ts:Date.now()-1.5*86400000},
+  {scores:{Vertrouwen:3.8,Eigenaarschap:3.0,Samenwerking:1.8,Richting:1.5,Tempo:4.2},sid:"s3",email:null,ts:Date.now()-1*86400000},
+  {scores:{Vertrouwen:4.0,Eigenaarschap:3.3,Samenwerking:2.2,Richting:2.2,Tempo:3.8},sid:"s4",email:"anna@bedrijf.nl",ts:Date.now()-0.5*86400000},
 ];
 
 // ─── OWNER DASHBOARD ─────────────────────────────────────────────────────────
