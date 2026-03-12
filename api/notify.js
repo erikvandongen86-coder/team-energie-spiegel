@@ -4,13 +4,13 @@ import { neon } from '@neondatabase/serverless'
 async function generateTeamAnalysis(avgScores, memberCount) {
   const lines = Object.entries(avgScores)
     .map(([cat, sc]) => {
-      const label = sc <= 2 ? 'kracht' : sc <= 3 ? 'neutraal' : 'energielek'
+      const label = sc >= 4 ? 'kracht' : sc >= 3 ? 'neutraal' : 'energielek'
       return `${cat}: ${sc}/5 (${label})`
     }).join('\n')
 
   const prompt = `Je bent een scherpe, eerlijke teamcoach. Dit zijn de GEMIDDELDE scores van ${memberCount} teamleden op de Team Energie Spiegel.
 
-Scores (1-5, waarbij 4-5 energielek is en 1-2 kracht):
+Scores (1-5, waarbij 4-5=kracht/positief en 1-2=energielek/probleem):
 ${lines}
 
 Schrijf in het Nederlands vanuit TEAM-perspectief een heldere teamanalyse.
@@ -37,47 +37,50 @@ Antwoord ALLEEN in JSON (geen markdown):
   return JSON.parse(text.replace(/```json|```/g, '').trim())
 }
 
+const CTA_BLOCK = `
+  <div style="background: #45543B; border-radius: 12px; padding: 28px 32px; text-align: center; margin-top: 32px;">
+    <p style="font-family: Georgia, serif; font-size: 11px; color: #c0d4a8; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px;">Van diagnose naar beweging</p>
+    <p style="font-family: Georgia, serif; font-size: 20px; font-weight: 400; color: #F5F3EF; margin: 0 0 12px; line-height: 1.35;">Je weet nu waar energie lekt in jullie team.</p>
+    <p style="font-size: 14px; line-height: 1.7; color: #b8c9a3; margin: 0 0 20px;">In een vrijblijvend gesprek kijk ik met je mee naar de uitkomsten en verkennen we hoe wat nu wrijving geeft, kan uitgroeien tot de kracht van jullie team.</p>
+    <a href="https://erikvandongen.eu/inzicht-in-teamdynamiek" style="display: inline-block; background: #F5F3EF; color: #332D28; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 50px; text-decoration: none;">Plan een vrijblijvend intakegesprek</a>
+    <p style="font-size: 12px; color: #9E9688; margin: 20px 0 0; text-align: center;">Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a></p>
+  </div>
+`
+
 function buildTeamEmailHtml(teamName, ownerName, analysis, memberCount) {
   return `
-    <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; color: #2C2C2A;">
-      <div style="background: #5C6B3A; padding: 28px 32px; border-radius: 12px 12px 0 0;">
-        <p style="color: #c8d4a8; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 6px;">Team Energie Spiegel</p>
-        <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 28px; color: #FDFCFA; margin: 0;">${teamName}</h1>
+    <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; color: #332D28;">
+      <div style="background: #45543B; padding: 28px 32px; border-radius: 12px 12px 0 0;">
+        <p style="color: #c0d4a8; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 6px;">Team Energie Spiegel</p>
+        <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 28px; color: #F5F3EF; margin: 0;">${teamName}</h1>
       </div>
-      <div style="background: #F5F0E8; padding: 32px; border-radius: 0 0 12px 12px;">
-        <p style="font-size: 15px; color: #7A7268; line-height: 1.7; margin: 0 0 28px;">
+      <div style="background: #F5F3EF; padding: 32px; border-radius: 0 0 12px 12px;">
+        <p style="font-size: 15px; color: #766960; line-height: 1.7; margin: 0 0 28px;">
           Hoi ${ownerName}, alle ${memberCount} teamleden hebben de spiegel ingevuld.
-          Hieronder vind je de teamanalyse — gebruik hem als gespreksstarter.
+          Hieronder vind je de teamanalyse, gebruik hem als gespreksstarter.
         </p>
-        <div style="background: #FBF0EA; border-radius: 10px; padding: 20px 24px; margin-bottom: 20px;">
-          <p style="font-family: Georgia, serif; font-size: 16px; font-weight: 600; color: #B5622A; margin: 0 0 8px;">Diagnose</p>
-          <p style="font-size: 15px; line-height: 1.7; color: #2C2C2A; margin: 0;">${analysis.diagnose}</p>
+        <div style="background: #FBF0EA; border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;">
+          <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #9D6D58; margin: 0 0 8px;">Diagnose</p>
+          <p style="font-size: 14px; line-height: 1.7; color: #332D28; margin: 0;">${analysis.diagnose}</p>
         </div>
-        <div style="margin-bottom: 20px;">
-          <p style="font-family: Georgia, serif; font-size: 16px; font-weight: 600; color: #2C2C2A; margin: 0 0 8px;">Wat dit betekent</p>
-          <p style="font-size: 15px; line-height: 1.7; color: #2C2C2A; margin: 0;">${analysis.betekenis}</p>
+        <div style="background: #EFEBE7; border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;">
+          <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #332D28; margin: 0 0 8px;">Wat dit betekent</p>
+          <p style="font-size: 14px; line-height: 1.7; color: #332D28; margin: 0;">${analysis.betekenis}</p>
         </div>
-        <div style="background: #EDE7D9; border-radius: 10px; padding: 20px 24px; margin-bottom: 20px;">
-          <p style="font-family: Georgia, serif; font-size: 16px; font-weight: 600; color: #2C2C2A; margin: 0 0 8px;">Als er niets verandert</p>
-          <p style="font-size: 15px; line-height: 1.7; color: #2C2C2A; margin: 0;">${analysis.geenVerandering}</p>
+        <div style="background: #EFEBE7; border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;">
+          <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #332D28; margin: 0 0 8px;">Als er niets verandert</p>
+          <p style="font-size: 14px; line-height: 1.7; color: #332D28; margin: 0;">${analysis.geenVerandering}</p>
         </div>
-        <div style="margin-bottom: 28px;">
-          <p style="font-family: Georgia, serif; font-size: 16px; font-weight: 600; color: #5C6B3A; margin: 0 0 12px;">Start het gesprek</p>
+        <div style="padding: 4px 0 20px;">
+          <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #45543B; margin: 0 0 12px;">Start het gesprek</p>
           ${(analysis.gespreksvragen || []).map((v, i) => `
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-              <span style="font-size: 13px; font-weight: 700; color: #5C6B3A; min-width: 20px;">${i + 1}.</span>
-              <p style="font-size: 14px; line-height: 1.6; color: #2C2C2A; margin: 0;">${v}</p>
+              <span style="font-size: 13px; font-weight: 700; color: #45543B; min-width: 20px;">${i + 1}.</span>
+              <p style="font-size: 14px; line-height: 1.6; color: #332D28; margin: 0;">${v}</p>
             </div>
           `).join('')}
         </div>
-        <div style="background: #5C6B3A; border-radius: 10px; padding: 20px 24px; text-align: center;">
-          <p style="font-family: Georgia, serif; font-size: 18px; color: #FDFCFA; margin: 0 0 8px;">Wil je dit verder bespreken?</p>
-          <p style="font-size: 13px; color: #c8d4a8; margin: 0 0 16px;">Erik denkt graag 30 minuten mee — vrijblijvend.</p>
-          <a href="https://erikvandongen.eu/contact" style="display: inline-block; background: #FDFCFA; color: #2C2C2A; font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 50px; text-decoration: none;">Plan een gesprek →</a>
-        </div>
-        <p style="font-size: 12px; color: #9E9688; margin: 24px 0 0; text-align: center;">
-          Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a>
-        </p>
+        ${CTA_BLOCK}
       </div>
     </div>
   `
