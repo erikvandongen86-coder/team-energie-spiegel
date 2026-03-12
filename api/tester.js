@@ -12,6 +12,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const {
       anonymous, name,
+      apparaat,
       eersteReactie, doelgroep,
       teamGetest,
       invulErvaring, invulToelichting,
@@ -29,6 +30,7 @@ export default async function handler(req, res) {
       await sql`
         INSERT INTO tester_responses (
           anonymous, name,
+          apparaat,
           eerste_reactie, doelgroep,
           team_getest,
           invul_ervaring, invul_toelichting,
@@ -42,6 +44,7 @@ export default async function handler(req, res) {
           inzetten, mist, overig
         ) VALUES (
           ${anonymous}, ${anonymous ? null : name},
+          ${apparaat && apparaat.length ? apparaat.join(', ') : null},
           ${eersteReactie||null}, ${doelgroep||null},
           ${teamGetest||null},
           ${invulErvaring||null}, ${invulToelichting||null},
