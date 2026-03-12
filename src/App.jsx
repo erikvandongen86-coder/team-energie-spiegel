@@ -1891,13 +1891,12 @@ export default function App() {
   var isAdmin = urlParams.admin === "true";
   var isTester = urlParams.tester === "true";
   var [page, setPage] = useState("start");
-  var [feedbackDone, setFeedbackDone] = useState(false);
   var [welcomeMeta, setWelcomeMeta] = useState(null);
   var [answers, setAnswers] = useState({});
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
 
-  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({}); setFeedbackDone(false); setWelcomeMeta(null); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
+  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({});  setWelcomeMeta(null); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
 
   var showingDashboard = ownerView || demoMode;
 
@@ -1943,8 +1942,7 @@ export default function App() {
             apiGetTeam(code).then(function(m){ if(m){ setWelcomeMeta(m); setPage("welcome"); } else { setPage("questions"); } });
           }}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
-          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage(!prefilledCode?"feedback":"team");}}/>}
-          {page==="feedback" &&(feedbackDone ? (function(){ setTimeout(function(){setPage("team");},0); return null; })() : <FeedbackEndScreen onDone={function(){setFeedbackDone(true);setPage("team");}}/>)}
+          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("team");}}/>}
           {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} isOwner={ownerView} onBack={function(){setPage("analysis");}}/>}
         </>
     }
