@@ -632,14 +632,22 @@ function StartPage(props) {
 
     <SectionLabel>Team Energie Spiegel</SectionLabel>
     <Heading size={1}>Waar zit de energie in jouw team en waar lekt die weg?</Heading>
-    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>In 12 vragen scan je waar energie stroomt en waar het stokt in jullie team. Anoniem en geen account nodig. Nodig daarna eventueel je teamleden uit, zij vullen dezelfde scan in en jullie zien automatisch het teamgemiddelde. Een eerlijke, anonieme spiegel als vertrekpunt voor een goed gesprek.</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:17,color:C.muted,marginBottom:32,lineHeight:1.7,marginTop:0}}>Je team werkt hard. De intenties zijn goed. En toch kost samenwerken meer energie dan het oplevert. Niet omdat mensen niet willen, maar omdat kleine verschillen in tempo, verwachting en eigenaarschap zich ophopen. Ongemerkt. Tot het voelt alsof je steeds tegen de stroom in roeit, terwijl iedereen dezelfde kant op wil.</p>
 
     <div style={{background:C.warm,borderRadius:16,padding:"22px 26px",marginBottom:32}}>
-      <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,lineHeight:1.8,marginBottom:12,marginTop:0}}>Teams werken hard. Er worden plannen gemaakt, doelen gesteld en overleggen gepland. En toch voelt het soms alsof er iets blijft hangen.</p>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",color:C.charcoal,marginBottom:14,fontStyle:"italic",marginTop:0}}>Met deze korte spiegel ontdek je:</p>
-      {["Waar energie in je team weglekt","Waar juist kracht zit","Waar de volgende stap voor jullie team ligt"].map(function(item,i){return <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:7}}>
-        <div style={{width:6,height:6,borderRadius:"50%",background:C.terra,marginTop:7,flexShrink:0}}/>
-        <span style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal}}>{item}</span>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",color:C.charcoal,marginBottom:18,fontStyle:"italic",marginTop:0}}>In drie stappen van inzicht naar gesprek:</p>
+      {[
+        ["Doe de individuele scan","Beantwoord 12 vragen vanuit jouw beleving van het team. Je ziet direct waar energie weglekt, waar kracht zit en waar de volgende stap voor jullie ligt."],
+        ["Betrek je team (optioneel)","Nodig teamleden uit dezelfde scan in te vullen. Anoniem en laagdrempelig. Jullie antwoorden worden samengevoegd tot een eerlijk teamgemiddelde."],
+        ["Ga het gesprek aan","Je ontvangt een concrete teamanalyse met een gespreksstarter. Geen rapport dat in een la verdwijnt, maar een startpunt voor een echt gesprek."]
+      ].map(function(item,i){return <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:i<2?18:0}}>
+        <div style={{width:26,height:26,borderRadius:"50%",background:C.olive,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:2}}>
+          <span style={{fontFamily:FONT_BODY,fontSize:13,fontWeight:700,color:C.white}}>{i+1}</span>
+        </div>
+        <div>
+          <p style={{fontFamily:FONT_BODY,fontSize:15,fontWeight:600,color:C.charcoal,margin:"0 0 3px"}}>{item[0]}</p>
+          <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0,lineHeight:1.6}}>{item[1]}</p>
+        </div>
       </div>;})}
     </div>
 
@@ -648,12 +656,12 @@ function StartPage(props) {
       <span style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted}}>⏱ 3 minuten · 12 vragen</span>
     </div>
     <SocialProof/>
-    <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.6,marginTop:4}}>Geen registratie nodig · Direct starten · Anoniem</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.6,marginTop:4}}>Geen registratie nodig · Resultaten direct zichtbaar · Anoniem</p>
 
     {props.onDemo&&<div style={{marginTop:36,paddingTop:24,borderTop:"1px solid "+C.warm}}>
       <div style={{background:C.white,border:"1.5px solid "+C.warm,borderRadius:16,padding:"20px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:16}}>
         <div>
-          <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:6,marginTop:0}}>Voor teamaanmakers</p>
+          <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:6,marginTop:0}}>Maak je een team aan?</p>
           <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.15rem",color:C.charcoal,margin:"0 0 4px",lineHeight:1.3}}>Benieuwd hoe het dashboard eruitziet?</p>
           <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0,lineHeight:1.5}}>Bekijk een werkende voorbeeldweergave met echte data.</p>
         </div>
