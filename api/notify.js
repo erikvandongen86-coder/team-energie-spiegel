@@ -38,11 +38,15 @@ Antwoord ALLEEN in JSON (geen markdown):
 }
 
 const CTA_BLOCK = `
-  <div style="background: #45543B; border-radius: 12px; padding: 28px 32px; text-align: center; margin-top: 32px;">
+  <div style="background: #45543B; border-radius: 12px; padding: 32px; text-align: center; margin-top: 32px;">
     <p style="font-family: Georgia, serif; font-size: 11px; color: #c0d4a8; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px;">Van diagnose naar beweging</p>
-    <p style="font-family: Georgia, serif; font-size: 20px; font-weight: 400; color: #F5F3EF; margin: 0 0 12px; line-height: 1.35;">Je weet nu waar energie lekt in jullie team.</p>
-    <p style="font-size: 14px; line-height: 1.7; color: #b8c9a3; margin: 0 0 20px;">In een vrijblijvend gesprek kijk ik met je mee naar de uitkomsten en verkennen we hoe wat nu wrijving geeft, kan uitgroeien tot de kracht van jullie team.</p>
-    <a href="https://erikvandongen.eu/inzicht-in-teamdynamiek" style="display: inline-block; background: #F5F3EF; color: #332D28; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 50px; text-decoration: none;">Plan een vrijblijvend intakegesprek</a>
+    <p style="font-family: Georgia, serif; font-size: 20px; font-weight: 400; color: #F5F3EF; margin: 0 0 16px; line-height: 1.35;">Je weet nu waar energie lekt in jullie team.</p>
+    <p style="font-size: 14px; line-height: 1.8; color: #b8c9a3; margin: 0 0 12px; text-align: left;">In bijna ieder team zijn de intenties goed. Toch ontstaan er irritaties die steeds terugkomen. Niet omdat mensen onprofessioneel zijn, maar omdat verschillen in tempo, stijl en prioriteit onbewust botsen.</p>
+    <p style="font-size: 14px; line-height: 1.8; color: #F5F3EF; margin: 0 0 12px; text-align: left; font-style: italic;">En precies daar zit de kans.</p>
+    <p style="font-size: 14px; line-height: 1.8; color: #b8c9a3; margin: 0 0 12px; text-align: left;">In mijn Team-dynamiek traject help ik teams deze patronen zichtbaar te maken en om te zetten naar betere samenwerking, duidelijker eigenaarschap en meer energie in het team.</p>
+    <p style="font-size: 14px; line-height: 1.8; color: #b8c9a3; margin: 0 0 24px; text-align: left;">Wil je eerst zien hoe dit traject eruitziet? Download hieronder de Team-dynamiek trajectbeschrijving of plan een vrijblijvend intakegesprek om samen naar jullie uitkomst te kijken.</p>
+    <a href="https://erikvandongen.eu/downloads/Inzicht-in-teamdynamiek-brochure.pdf" style="display: inline-block; background: transparent; color: #F5F3EF; font-size: 14px; font-weight: 600; padding: 11px 24px; border-radius: 50px; text-decoration: none; border: 1.5px solid #F5F3EF; margin: 0 8px 12px;">Download Team-dynamiek traject</a>
+    <a href="https://erikvandongen.eu/kennismaken" style="display: inline-block; background: #F5F3EF; color: #332D28; font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 50px; text-decoration: none; margin: 0 8px 12px;">Plan een vrijblijvend intakegesprek</a>
     <p style="font-size: 12px; color: #9E9688; margin: 20px 0 0; text-align: center;">Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a></p>
   </div>
 `
