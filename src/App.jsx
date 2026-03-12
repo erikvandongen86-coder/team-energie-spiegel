@@ -621,10 +621,16 @@ function StartPage(props) {
     <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.6,marginTop:4}}>Geen registratie nodig · Direct starten · Anoniem</p>
 
     {props.onDemo&&<div style={{marginTop:36,paddingTop:24,borderTop:"1px solid "+C.warm}}>
-      <p style={{fontFamily:FONT_BODY,fontSize:12,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:8,marginTop:0}}>Voor teamaanmakers</p>
-      <button onClick={props.onDemo} style={{background:"none",border:"none",padding:0,cursor:"pointer",fontFamily:FONT_BODY,fontSize:14,color:C.olive,textDecoration:"underline",textUnderlineOffset:3}}>
-        Bekijk een voorbeeldweergave van het beheerdersdashboard →
-      </button>
+      <div style={{background:C.white,border:"1.5px solid "+C.warm,borderRadius:16,padding:"20px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:16}}>
+        <div>
+          <p style={{fontFamily:FONT_BODY,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted,marginBottom:6,marginTop:0}}>Voor teamaanmakers</p>
+          <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.15rem",color:C.charcoal,margin:"0 0 4px",lineHeight:1.3}}>Benieuwd hoe het dashboard eruitziet?</p>
+          <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,margin:0,lineHeight:1.5}}>Bekijk een werkende voorbeeldweergave met echte data.</p>
+        </div>
+        <Btn variant="primary" onClick={props.onDemo} style={{whiteSpace:"nowrap",fontSize:14,padding:"11px 22px"}}>
+          Bekijk voorbeelddashboard →
+        </Btn>
+      </div>
     </div>}
   </div>;
 }
@@ -1194,7 +1200,14 @@ function OwnerDashboard(props) {
   var [loading, setLoading] = useState(!isDemo);
 
   useEffect(function(){
-    if(isDemo) return;
+    if(isDemo) {
+      // Auto-genereer analyse voor demo
+      fetchAIAnalysis(
+        {Vertrouwen:4.125,Eigenaarschap:3.2,Samenwerking:2.125,Richting:1.875,Tempo:4.1},
+        4, true
+      ).then(function(result){ setTeamAnalysis(result); setTeamAnalysisLoaded(true); });
+      return;
+    }
     function loadData() {
       apiGetTeam(teamCode).then(function(m){
         if(m) {
