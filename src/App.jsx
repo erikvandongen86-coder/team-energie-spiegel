@@ -95,7 +95,9 @@ async function apiSaveEmail(teamCode, sessionId, name, email, wantsTeamAnalysis,
 function calcCategoryScores(answers) {
   const result = {};
   for (const [cat, qIds] of Object.entries(CATEGORIES)) {
-    const vals = qIds.map(id => answers[id] || 3);
+    // Alle vragen zijn negatief geformuleerd: score 1 = goed, score 5 = slecht
+    // Inverteer naar: score 5 = kracht, score 1 = energielek
+    const vals = qIds.map(id => 6 - (answers[id] || 3));
     result[cat] = parseFloat((vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(2));
   }
   return result;
@@ -130,7 +132,7 @@ async function fetchAIAnalysis(categoryScores, memberCount, isTeam) {
   const perspective = isTeam
     ? "Schrijf vanuit TEAM-perspectief. Spreek het team als geheel aan."
     : "Schrijf vanuit individueel perspectief. Spreek de invuller direct aan.";
-  const prompt = "Je bent een scherpe, eerlijke teamcoach. " + context + "\n\nScores op de Team Energie Spiegel (1-5, 1-2=energielek, 4-5=kracht):\n" + lines + "\n\n" + perspective + "\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen)\n2. Wat dit betekent\n3. Wat er gebeurt als er niets verandert\n4. 3 gespreksvragen (genummerd)\n\nToon: eerlijk, scherp, herkenbaar.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{\"diagnose\":\"...\",\"betekenis\":\"...\",\"geenVerandering\":\"...\",\"gespreksvragen\":[\"...\",\"...\",\"...\"]}";
+  const prompt = "Je bent een scherpe, eerlijke teamcoach. " + context + "\n\nScores op de Team Energie Spiegel (1-5, waarbij 4-5=kracht/positief en 1-2=energielek/probleem):\n" + lines + "\n\n" + perspective + "\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen)\n2. Wat dit betekent\n3. Wat er gebeurt als er niets verandert\n4. 3 gespreksvragen (genummerd)\n\nToon: eerlijk, scherp, herkenbaar.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{\"diagnose\":\"...\",\"betekenis\":\"...\",\"geenVerandering\":\"...\",\"gespreksvragen\":[\"...\",\"...\",\"...\"]}";
 
   try {
     const res = await fetch("/api/analyze", {
@@ -276,7 +278,7 @@ function exportTeamCSV(meta, entries, avg, analysis) {
   rows.push(['Categorie', 'Score', 'Status']);
   cats.forEach(cat => {
     const sc = avg[cat];
-    const status = sc <= 2 ? 'Kracht' : sc <= 3 ? 'Neutraal' : 'Energielek';
+    const status = sc >= 4 ? 'Kracht' : sc >= 3 ? 'Neutraal' : 'Energielek';
     rows.push([cat, sc.toFixed(2), status]);
   });
   rows.push([]);
@@ -306,8 +308,8 @@ function exportTeamPDF(meta, entries, avg, analysis) {
   const cats = ['Vertrouwen', 'Eigenaarschap', 'Samenwerking', 'Richting', 'Tempo'];
   const scoreRows = cats.map(cat => {
     const sc = avg[cat];
-    const status = sc <= 2 ? 'Kracht' : sc <= 3 ? 'Neutraal' : 'Energielek';
-    const color = sc <= 2 ? '#45543B' : sc <= 3 ? '#766960' : '#9D6D58';
+    const status = sc >= 4 ? 'Kracht' : sc >= 3 ? 'Neutraal' : 'Energielek';
+    const color = sc >= 4 ? '#45543B' : sc >= 3 ? '#766960' : '#9D6D58';
     return `<tr><td style="padding:8px 12px;border-bottom:1px solid #EFEBE7;">${cat}</td><td style="padding:8px 12px;border-bottom:1px solid #EFEBE7;font-weight:700;">${sc.toFixed(2)}/5</td><td style="padding:8px 12px;border-bottom:1px solid #EFEBE7;color:${color};font-weight:600;">${status}</td></tr>`;
   }).join('');
   const memberRows = entries.map((e, i) =>
