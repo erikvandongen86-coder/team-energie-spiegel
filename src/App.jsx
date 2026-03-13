@@ -2048,7 +2048,7 @@ export default function App() {
   var [urlParams] = useState(function(){
     try {
       var p = new URLSearchParams(window.location.search);
-      return { team: p.get("team")||null, owner: p.get("owner")||null, admin: p.get("admin")||null, tester: p.get("tester")||null };
+      return { team: p.get("team")||null, owner: p.get("owner")||null, admin: p.get("admin")||null, tester: p.get("tester")||null, delete: p.get("delete")||null };
     } catch(e){ return {team:null,owner:null}; }
   });
 
