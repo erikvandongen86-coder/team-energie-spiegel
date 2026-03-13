@@ -400,6 +400,19 @@ function FormInput(props) {
     {props.hint && <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,marginTop:4,marginBottom:0,lineHeight:1.4}}>{props.hint}</p>}
   </div>;
 }
+function PrivacyCheckbox(props) {
+  return <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:14,marginTop:-4}}>
+    <input
+      type="checkbox"
+      checked={props.checked}
+      onChange={function(e){ props.onChange(e.target.checked); }}
+      style={{marginTop:2,accentColor:C.olive,width:16,height:16,flexShrink:0,cursor:"pointer"}}
+    />
+    <label style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,lineHeight:1.5,cursor:"pointer"}} onClick={function(){ props.onChange(!props.checked); }}>
+      Ik ga akkoord met de <a href="https://erikvandongen.eu/privacy" target="_blank" rel="noopener noreferrer" style={{color:C.olive,textDecoration:"underline"}} onClick={function(e){e.stopPropagation();}}>privacyverklaring</a>.
+    </label>
+  </div>;
+}
 function FaceIcon(props) {
   var type = props.type; var size = props.size||28;
   var cfg = {strength:{color:C.olive,bg:"#E8EDE3"},neutral:{color:C.muted,bg:"#F0EDE6"},leak:{color:C.terra,bg:"#FBF0EA"}};
@@ -467,7 +480,8 @@ function AnalysisBlock(props) {
 function EmailCapture(props) {
   var [name, setName] = useState("");
   var [email, setEmail] = useState("");
-  var valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && name.trim().length > 0;
+  var [privacyOk, setPrivacyOk] = useState(false);
+  var valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && name.trim().length > 0 && privacyOk;
   if (props.submitted) return <div style={{display:"flex",alignItems:"center",gap:10,padding:"13px 17px",background:"#E8EDE3",borderRadius:12}}>
     <span style={{fontSize:16}}>✓</span>
     <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,margin:0,fontWeight:600}}>{props.submittedMsg||"Genoteerd, we sturen je de resultaten zodra ze beschikbaar zijn."}</p>
@@ -475,7 +489,8 @@ function EmailCapture(props) {
   return <div>
     {props.label && <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.6,marginBottom:14,marginTop:0}}>{props.label}</p>}
     <FormInput placeholder="Jouw naam" value={name} onChange={setName}/>
-    <FormInput type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.hint||"Je ontvangt geen spam. Alleen jouw resultaten."} subHint="Door je e-mail achter te laten ga je akkoord met de privacyverklaring."/>
+    <FormInput type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.hint||"Je ontvangt geen spam. Alleen jouw resultaten."}/>
+    <PrivacyCheckbox checked={privacyOk} onChange={setPrivacyOk}/>
     <Btn onClick={function(){props.onSubmit(name,email);}} disabled={!valid}>{props.buttonLabel||"Verstuur"}</Btn>
   </div>;
 }
@@ -763,11 +778,13 @@ function EmailDropdown(props) {
   var [open, setOpen] = useState(false);
   var [name, setName] = useState("");
   var [email, setEmail] = useState("");
+  var [privacyOk, setPrivacyOk] = useState(false);
   var [error, setError] = useState("");
 
   function handleSubmit() {
     if(!name.trim()){ setError("Vul je naam in."); return; }
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setError("Vul een geldig e-mailadres in."); return; }
+    if(!privacyOk){ setError("Ga akkoord met de privacyverklaring om verder te gaan."); return; }
     props.onSubmit(name.trim(), email.trim());
   }
 
@@ -783,7 +800,8 @@ function EmailDropdown(props) {
           : "Laat je gegevens achter en ontvang jouw individuele analyse. Volledig vrijblijvend."}
       </p>
       <FormInput label="Jouw naam" placeholder="Erik van Dongen" value={name} onChange={setName}/>
-      <FormInput label="Jouw e-mailadres" type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.canReceiveTeamAnalysis ? "Je ontvangt jouw analyse én de teamanalyse. Jouw antwoorden blijven anoniem." : "Alleen jouw individuele analyse. Geen spam."} subHint="Door je e-mail achter te laten ga je akkoord met de privacyverklaring."/>
+      <FormInput label="Jouw e-mailadres" type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.canReceiveTeamAnalysis ? "Je ontvangt jouw analyse én de teamanalyse. Jouw antwoorden blijven anoniem." : "Alleen jouw individuele analyse. Geen spam."}/>
+      <PrivacyCheckbox checked={privacyOk} onChange={setPrivacyOk}/>
       {error&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.terra,marginBottom:10,marginTop:0}}>{error}</p>}
       <Btn onClick={handleSubmit}>Stuur mij mijn resultaten</Btn>
     </div>}
@@ -916,6 +934,7 @@ function TeamPage(props) {
   var [teamName, setTeamName] = useState("");
   var [memberCount, setMemberCount] = useState("");
   var [shareWithAll, setShareWithAll] = useState(null);
+  var [privacyOk, setPrivacyOk] = useState(false);
   var [formError, setFormError] = useState("");
 
   // Join
@@ -978,6 +997,7 @@ function TeamPage(props) {
     if(!teamName.trim()){ setFormError("Vul een teamnaam in."); return; }
     if(!memberCount||parseInt(memberCount)<2){ setFormError("Vul het aantal teamleden in (minimaal 2)."); return; }
     if(shareWithAll===null){ setFormError("Kies wie de teamanalyse mag ontvangen."); return; }
+    if(!privacyOk){ setFormError("Ga akkoord met de privacyverklaring om verder te gaan."); return; }
     setFormError("Bezig met aanmaken...");
     var code = generateTeamCode();
     var token = generateOwnerToken();
@@ -1052,7 +1072,7 @@ function TeamPage(props) {
         <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Hierop ontvang je de teamresultaten zodra iedereen heeft ingevuld.</p>
         <FormInput label="Jouw naam" placeholder="Erik van Dongen" value={ownerName} onChange={setOwnerName}/>
         <FormInput label="Bedrijfsnaam" placeholder="Bijv. Acme B.V." value={companyName} onChange={setCompanyName}/>
-        <FormInput label="Jouw e-mailadres" type="email" placeholder="erik@erikvandongen.eu" value={ownerEmail} onChange={setOwnerEmail} hint="Je ontvangt hier de teamanalyse en je beheerlink." subHint="Door je e-mail achter te laten ga je akkoord met de privacyverklaring."/>
+        <FormInput label="Jouw e-mailadres" type="email" placeholder="erik@erikvandongen.eu" value={ownerEmail} onChange={setOwnerEmail} hint="Je ontvangt hier de teamanalyse en je beheerlink."/>
       </Card>
 
       <Card>
@@ -1078,6 +1098,7 @@ function TeamPage(props) {
         </div>;})}
       </Card>
 
+      <PrivacyCheckbox checked={privacyOk} onChange={setPrivacyOk}/>
       {formError&&<p style={{fontFamily:FONT_BODY,fontSize:14,color:C.terra,marginBottom:14}}>{formError}</p>}
       <div style={{display:"flex",gap:10,alignItems:"center"}}>
         <Btn onClick={handleCreate}>Maak team aan →</Btn>
