@@ -123,7 +123,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, analysis, note: 'Geen Brevo key geconfigureerd' })
     }
 
+    // Voorkom dubbele verzending
+    if (team.notified_at) {
+      console.log('notify: al eerder verstuurd voor', teamCode)
+      return res.status(200).json({ success: true, note: 'Al eerder verstuurd' })
+    }
+
+    // Aanmaker ontvangt altijd de mail
     const recipients = [team.owner_email]
+
+    // Als share_with_all: ook teamleden die e-mail hebben achtergelaten
     if (team.share_with_all) {
       const memberEmails = await sql`
         SELECT DISTINCT email FROM entries
@@ -131,6 +140,11 @@ export default async function handler(req, res) {
       `
       memberEmails.forEach(r => recipients.push(r.email))
     }
+
+    // Markeer als verstuurd vóór het versturen (voorkomt race conditions)
+    await sql`UPDATE teams SET notified_at = NOW() WHERE team_code = ${teamCode}`
+
+    console.log('notify: verstuur naar', recipients)
 
     await Promise.all(recipients.map(to =>
       fetch('https://api.brevo.com/v3/smtp/email', {
