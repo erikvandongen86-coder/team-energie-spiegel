@@ -802,7 +802,7 @@ function AnalysisPage(props) {
   var canReceiveTeamAnalysis = meta&&meta.shareWithAll;
 
   useEffect(function(){
-    fetchAIAnalysis(catScores, 1, false).then(function(a){ setAnalysis(a); setLoading(false); });
+    fetchAIAnalysis(catScores, 1, false).then(function(a){ setAnalysis(a); setLoading(false); if(props.onAnalysisReady) props.onAnalysisReady(a); });
     if(prefilledCode) apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); });
   },[]);
 
@@ -1227,7 +1227,7 @@ function TeamPage(props) {
           label={"De teamaanmaker heeft ingesteld dat iedereen de teamanalyse mag ontvangen. Laat je e-mailadres achter, je ontvangt de analyse zodra ze beschikbaar is."}
           hint="Alleen de teamanalyse. Geen spam."
           buttonLabel="Stuur mij de teamanalyse"
-          onSubmit={function(name,email){ apiSaveEmail(teamCode, getSessionId(), name, email, true).finally(function(){ setTeamEmailSubmitted(true); }); }}
+          onSubmit={function(name,email){ apiSaveEmail(teamCode, getSessionId(), name, email, true, props.personalAnalysis||null).finally(function(){ setTeamEmailSubmitted(true); }); }}
           submitted={teamEmailSubmitted}
           submittedMsg="Genoteerd ✓, je ontvangt de teamanalyse zodra die beschikbaar is."
         />
@@ -1443,6 +1443,22 @@ function OwnerDashboard(props) {
 
 
 // ─── ADMIN DASHBOARD ──────────────────────────────────────────────────────────
+function AdminAnalysisBtn(props) {
+  var [loading, setLoading] = useState(false);
+  async function handleGenerate() {
+    setLoading(true);
+    try {
+      var a = await fetchAIAnalysis(props.avg, props.team.entries.length, true);
+      await fetch("/api/teams",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({teamCode:props.team.teamCode,analysis:a})});
+      props.onDone(a);
+    } finally { setLoading(false); }
+  }
+  return <div>
+    <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.6,marginBottom:14,marginTop:0}}>Er is nog geen teamanalyse gegenereerd voor dit team.</p>
+    {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : <Btn onClick={handleGenerate}>Genereer teamanalyse</Btn>}
+  </div>;
+}
+
 function AdminDashboard() {
   var [password, setPassword] = useState("");
   var [authed, setAuthed] = useState(false);
@@ -1570,11 +1586,22 @@ function AdminDashboard() {
         <SectionLabel>Per categorie</SectionLabel>
         {Object.entries(avg).map(function(e){return <ScorePill key={e[0]} label={e[0]} score={e[1]}/>;})}</Card></>}
 
-      {t.analysis&&<Card style={{background:C.warm,border:"none"}}>
-        <SectionLabel>Opgeslagen teamanalyse</SectionLabel>
-        <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,margin:"0 0 12px"}}>{t.analysisAt ? "Gegenereerd op "+new Date(t.analysisAt).toLocaleDateString("nl-NL") : ""}</p>
-        <AnalysisBlock analysis={t.analysis} isTeam={true}/>
-      </Card>}
+      <Card style={{background:C.warm,border:"none"}}>
+        <SectionLabel>Teamanalyse</SectionLabel>
+        {t.analysis
+          ? <><p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,margin:"0 0 12px"}}>{t.analysisAt ? "Gegenereerd op "+new Date(t.analysisAt).toLocaleDateString("nl-NL") : ""}</p>
+              <AnalysisBlock analysis={t.analysis} isTeam={true}/>
+              <Btn variant="ghost" style={{marginTop:12}} onClick={async function(){
+                if(!avg||!window.confirm("Nieuwe analyse genereren?")) return;
+                const a = await fetchAIAnalysis(avg, t.entries.length, true);
+                await fetch("/api/teams",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({teamCode:t.teamCode,analysis:a})});
+                setSelectedTeam(Object.assign({},t,{analysis:a,analysisAt:Date.now()}));
+              }}>↺ Opnieuw genereren</Btn></>
+          : t.entries.length>0
+            ? <AdminAnalysisBtn team={t} avg={avg} onDone={function(a){ setSelectedTeam(Object.assign({},t,{analysis:a,analysisAt:Date.now()})); }}/>
+            : <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Nog geen deelnemers ingevuld.</p>
+        }
+      </Card>
 
       {t.entries.length>0&&<Card>
         <SectionLabel>Deelnemers ({t.entries.length})</SectionLabel>
@@ -1981,8 +2008,9 @@ export default function App() {
   var [answers, setAnswers] = useState({});
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
+  var [personalAnalysis, setPersonalAnalysis] = useState(null);
 
-  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({});  setWelcomeMeta(null); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); window.scrollTo(0,0); }
+  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({});  setWelcomeMeta(null); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); setPersonalAnalysis(null); window.scrollTo(0,0); }
   useEffect(function(){ window.scrollTo({top:0,behavior:"smooth"}); },[page]);
 
   var showingDashboard = ownerView || demoMode;
@@ -2030,8 +2058,8 @@ export default function App() {
             apiGetTeam(code).then(function(m){ if(m){ setWelcomeMeta(m); setPage("welcome"); } else { setPage("questions"); } });
           }}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
-          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("team");}}/>}
-          {page==="team"     &&<ErrorBoundary><TeamPage answers={answers} prefilledCode={prefilledCode} isOwner={ownerView} onBack={function(){setPage("analysis");}}/></ErrorBoundary>}
+          {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("team");}} onAnalysisReady={setPersonalAnalysis}/>}
+          {page==="team"     &&<ErrorBoundary><TeamPage answers={answers} prefilledCode={prefilledCode} isOwner={ownerView} onBack={function(){setPage("analysis");}} personalAnalysis={personalAnalysis}/></ErrorBoundary>}
         </>
     }
   </div>;
