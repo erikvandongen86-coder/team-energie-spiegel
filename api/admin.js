@@ -1,16 +1,19 @@
-// api/admin.js — admin dashboard data
+// api/admin.js — admin overzicht van alle teams en sessies
 import { neon } from '@neondatabase/serverless'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   if (req.method === 'OPTIONS') return res.status(200).end()
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Methode niet toegestaan' })
 
-  const { password } = req.query
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Niet geautoriseerd' })
+  // Ondersteun zowel POST (body) als GET (query) voor wachtwoord
+  const password = req.method === 'POST'
+    ? req.body?.password
+    : req.query?.password
+
+  if (!password || password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Ongeldig wachtwoord' })
   }
 
   try {
@@ -18,8 +21,7 @@ export default async function handler(req, res) {
 
     const teams = await sql`
       SELECT team_code, team_name, owner_name, owner_email, company_name,
-             member_count, deadline_days, share_with_all, created_at,
-             analysis, analysis_at, owner_token
+             member_count, share_with_all, created_at, analysis, analysis_at, owner_token
       FROM teams ORDER BY created_at DESC
     `
 
@@ -35,9 +37,9 @@ export default async function handler(req, res) {
     `
 
     const feedback = await sql`
-      SELECT session_id, page, rating, comment, would_use, naam, created_at
+      SELECT session_id, page, rating, comment, would_use, created_at
       FROM feedback ORDER BY created_at DESC
-    `
+    `.catch(() => [])
 
     const testers = await sql`
       SELECT * FROM tester_responses ORDER BY created_at DESC
@@ -52,7 +54,6 @@ export default async function handler(req, res) {
         ownerEmail: t.owner_email,
         companyName: t.company_name,
         memberCount: t.member_count,
-        deadlineDays: t.deadline_days,
         shareWithAll: t.share_with_all,
         createdAt: new Date(t.created_at).getTime(),
         analysis: t.analysis || null,
@@ -90,6 +91,6 @@ export default async function handler(req, res) {
     })
   } catch (err) {
     console.error('admin error:', err)
-    return res.status(500).json({ error: 'Serverfout' })
+    return res.status(500).json({ error: err.message || 'Serverfout' })
   }
 }
