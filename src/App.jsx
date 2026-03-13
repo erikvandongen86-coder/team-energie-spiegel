@@ -158,6 +158,7 @@ function FeedbackButton(props) {
   var page = props.page;
   var [open, setOpen] = useState(false);
   var [comment, setComment] = useState("");
+  var [naam, setNaam] = useState("");
   var [sent, setSent] = useState(false);
 
   if (!FEEDBACK_MODE) return null;
@@ -167,21 +168,26 @@ function FeedbackButton(props) {
     try {
       await fetch("/api/feedback", {
         method: "POST", headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ sessionId: getSessionId(), page, comment })
+        body: JSON.stringify({ sessionId: getSessionId(), page, comment, naam: naam.trim()||null })
       });
       setSent(true);
-      setTimeout(function(){ setOpen(false); setSent(false); setComment(""); }, 1500);
+      setTimeout(function(){ setOpen(false); setSent(false); setComment(""); setNaam(""); }, 1500);
     } catch(e) { console.error(e); }
   }
 
   return <>
     <div style={{position:"fixed",bottom:24,right:24,zIndex:1000}}>
-      {open && <div style={{background:C.white,borderRadius:16,boxShadow:"0 8px 40px rgba(44,44,42,0.15)",padding:"20px",width:280,marginBottom:12,border:"1px solid "+C.warm}}>
+      {open && <div style={{background:C.white,borderRadius:16,boxShadow:"0 8px 40px rgba(44,44,42,0.15)",padding:"20px",width:290,marginBottom:12,border:"1px solid "+C.warm}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
           <p style={{fontFamily:FONT_BODY,fontSize:13,fontWeight:600,color:C.charcoal,margin:0}}>Feedback — {page}</p>
-          <button onClick={function(){setOpen(false);setComment("");}} style={{background:"none",border:"none",cursor:"pointer",color:C.muted,fontSize:18,padding:0,lineHeight:1}}>×</button>
+          <button onClick={function(){setOpen(false);setComment("");setNaam("");}} style={{background:"none",border:"none",cursor:"pointer",color:C.muted,fontSize:18,padding:0,lineHeight:1}}>×</button>
         </div>
         {sent ? <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.olive,margin:0,textAlign:"center",padding:"8px 0"}}>✓ Verstuurd, dankjewel!</p> : <>
+          <input
+            value={naam} onChange={function(e){setNaam(e.target.value);}}
+            placeholder="Jouw naam (optioneel)"
+            style={{width:"100%",padding:"9px 12px",borderRadius:10,border:"1.5px solid "+C.warm,fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,boxSizing:"border-box",outline:"none",marginBottom:8}}
+          />
           <textarea
             value={comment} onChange={function(e){setComment(e.target.value);}}
             placeholder="Wat valt je op op deze pagina?"
@@ -416,7 +422,7 @@ function ScorePill(props) {
   var c = cfg[type];
   return <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 15px",borderRadius:12,background:c.bg,marginBottom:8}}>
     <div style={{display:"flex",alignItems:"center",gap:10}}><FaceIcon type={type} size={26}/><span style={{fontFamily:FONT_BODY,fontSize:15,color:C.charcoal,fontWeight:500}}>{props.label}</span></div>
-    <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontFamily:FONT_BODY,fontSize:12,color:c.text,fontWeight:600}}>{c.lbl}</span><span style={{fontFamily:FONT_BODY,fontSize:14,color:c.text,fontWeight:700}}>{props.score.toFixed(1)}</span></div>
+    <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontFamily:FONT_BODY,fontSize:12,color:c.text,fontWeight:600}}>{c.lbl}</span><span style={{fontFamily:FONT_BODY,fontSize:14,color:c.text,fontWeight:700}}>{props.score.toFixed(1)}<span style={{fontSize:11,fontWeight:400,opacity:0.7}}> /5</span></span></div>
   </div>;
 }
 function RadarViz(props) {
@@ -1052,7 +1058,7 @@ function TeamPage(props) {
       <Card>
         <SectionLabel>Teaminstellingen</SectionLabel>
         <FormInput label="Teamnaam" placeholder="Bijv. MT Commercie" value={teamName} onChange={setTeamName}/>
-        <FormInput label="Aantal teamleden dat je uitnodigt" placeholder="Bijv. 6" value={memberCount} onChange={setMemberCount} hint="Zodra iedereen klaar is ontvang je automatisch de teamanalyse."/>
+        <FormInput label="Aantal teamleden (inclusief jezelf)" placeholder="Bijv. 6" value={memberCount} onChange={setMemberCount} hint="Jouw eigen analyse telt mee als 1. Nodig je 5 collega's uit? Vul dan 6 in."/>
       </Card>
 
       <Card>
@@ -1647,7 +1653,7 @@ function AdminDashboard() {
         </tr></thead>
         <tbody>{data.feedback.map(function(f,i){
           return <tr key={i} style={{borderBottom:"1px solid "+C.warm}}>
-            <td style={{padding:"8px 10px",color:C.charcoal}}>{f.name||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
+            <td style={{padding:"8px 10px",color:C.charcoal}}>{f.naam||<span style={{color:C.muted,fontStyle:"italic"}}>Anoniem</span>}</td>
             <td style={{padding:"8px 10px",color:C.muted}}>{f.page||"—"}</td>
             <td style={{padding:"8px 10px"}}>{f.rating ? "⭐".repeat(f.rating) : "—"}</td>
             <td style={{padding:"8px 10px",color:f.wouldUse==="Ja"?C.olive:f.wouldUse==="Nee"?C.terra:C.muted}}>{f.wouldUse||"—"}</td>
@@ -1976,7 +1982,8 @@ export default function App() {
   var [prefilledCode, setPrefilledCode] = useState(urlParams.team && !urlParams.owner ? urlParams.team : null);
   var [demoMode, setDemoMode] = useState(false);
 
-  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({});  setWelcomeMeta(null); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); }
+  function handleReset(){ setDemoMode(false); setPage("start"); setAnswers({});  setWelcomeMeta(null); setPrefilledCode(urlParams.team&&!urlParams.owner?urlParams.team:null); window.scrollTo(0,0); }
+  useEffect(function(){ window.scrollTo({top:0,behavior:"smooth"}); },[page]);
 
   var showingDashboard = ownerView || demoMode;
 
