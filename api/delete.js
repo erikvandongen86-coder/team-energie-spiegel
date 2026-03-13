@@ -69,28 +69,31 @@ export default async function handler(req, res) {
     `
 
     if (process.env.BREVO_API_KEY) {
-      await Promise.all([
-        fetch('https://api.brevo.com/v3/smtp/email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
-          body: JSON.stringify({
-            sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
-            to: [{ email }],
-            subject: 'Jouw gegevens zijn verwijderd — Team Energie Spiegel',
-            htmlContent: userMailBody,
-          }),
+      const userMailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
+        body: JSON.stringify({
+          sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+          to: [{ email: email }],
+          subject: 'Jouw gegevens zijn verwijderd — Team Energie Spiegel',
+          htmlContent: userMailBody,
         }),
-        fetch('https://api.brevo.com/v3/smtp/email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
-          body: JSON.stringify({
-            sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
-            to: [{ email: 'info@erikvandongen.eu' }],
-            subject: `Verwijderverzoek uitgevoerd — ${email}`,
-            htmlContent: adminMailBody,
-          }),
+      }).catch(err => { console.error('Gebruikersmail fout:', err); return null; })
+      if (userMailRes) {
+        const userMailJson = await userMailRes.json().catch(() => {})
+        console.log('Gebruikersmail result:', userMailRes.status, JSON.stringify(userMailJson))
+      }
+
+      await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
+        body: JSON.stringify({
+          sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+          to: [{ email: 'info@erikvandongen.eu' }],
+          subject: `Verwijderverzoek uitgevoerd — ${email}`,
+          htmlContent: adminMailBody,
         }),
-      ]).catch(err => console.error('Mail fout:', err))
+      }).catch(err => console.error('Adminmail fout:', err))
     }
 
     return res.status(200).json({ success: true, deletedEntries: deletedEntries.length, deletedFeedback })
