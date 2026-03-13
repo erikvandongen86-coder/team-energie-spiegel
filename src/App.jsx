@@ -1228,7 +1228,7 @@ function TeamPage(props) {
       </Card>}
 
       {/* Share reminder — alleen voor owner/beheerder */}
-      {(props.isOwner||isDemo)&&meta&&completed<target&&<Card>
+      {(props.isOwner||props.isDemo)&&meta&&completed<target&&<Card>
         <SectionLabel>Nog niet iedereen ingevuld?</SectionLabel>
         <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Stuur alle teamleden een herinnering om de test in te vullen.</p>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
