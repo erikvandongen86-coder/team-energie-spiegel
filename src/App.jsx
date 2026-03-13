@@ -969,7 +969,7 @@ function TeamPage(props) {
 
   var inviteLink = "https://spiegel.erikvandongen.eu?team=" + teamCode;
   var shareMsg = meta
-    ? meta.ownerName+" nodigt je uit voor de Team Energie Spiegel van team "+meta.teamName+".\n\nOpen deze link, de teamcode wordt automatisch ingevuld:\n"+inviteLink+"\n\nOf gebruik code "+teamCode+" op erikvandongen.eu/spiegel"
+    ? meta.ownerName+" nodigt je uit voor de Team Energie Spiegel van team "+meta.teamName+".\n\nOpen deze link, de teamcode wordt automatisch ingevuld:\n"+inviteLink+"\n\nOf gebruik code "+teamCode+" op spiegel.erikvandongen.eu"
     : "Doe de Team Energie Spiegel met teamcode "+teamCode+": "+inviteLink;
 
   async function handleCreate() {
@@ -1132,7 +1132,7 @@ function TeamPage(props) {
         <div style={{background:C.cream,borderRadius:10,padding:"11px 15px",marginBottom:18,fontFamily:FONT_BODY,fontSize:13,color:C.charcoal,lineHeight:1.6,whiteSpace:"pre-line"}}>{shareMsg}</div>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
           <Btn variant="secondary" onClick={function(){window.open("mailto:?subject=Doe de Team Energie Spiegel - "+createdMeta.teamName+"&body="+encodeURIComponent(shareMsg));}}>✉ Deel via e-mail</Btn>
-          <Btn variant="green" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent(shareMsg));}}>✓ Deel via WhatsApp</Btn>
+          <Btn variant="secondary" onClick={function(){window.open("https://wa.me/?text="+encodeURIComponent(shareMsg));}}>↗ Deel via WhatsApp</Btn>
         </div>
       </Card>
 
