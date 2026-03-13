@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       if (!code) return res.status(400).json({ error: 'Geen teamcode opgegeven' })
 
       const rows = await sql`
-        SELECT team_code, team_name, owner_name, owner_email, company_name,
+        SELECT team_code, team_name, owner_name, owner_email, company_name, notified_at,
                member_count, share_with_all, created_at, analysis, analysis_at
         FROM teams WHERE team_code = ${code}
       `
