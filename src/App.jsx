@@ -357,7 +357,7 @@ function exportTeamPDF(meta, entries, avg, analysis) {
   <h2 style="font-family:Georgia,serif;color:#45543B;font-size:18px;margin:28px 0 12px;">Deelnemers</h2>
   <table><thead><tr style="background:#EFEBE7;"><th style="padding:6px 12px;text-align:left;">#</th><th style="padding:6px 12px;text-align:left;">Naam</th><th style="padding:6px 12px;text-align:left;">E-mail</th><th style="padding:6px 12px;text-align:left;">Datum</th></tr></thead><tbody>${memberRows}</tbody></table>
   ${analysisHtml}
-  <p style="font-size:11px;color:#9E9688;margin-top:40px;text-align:center;">Team Energie Spiegel · erikvandongen.eu · <a href="https://erikvandongen.eu/privacy" target="_blank" rel="noopener noreferrer" style="color:#9E9688;textDecoration:underline;">Privacyverklaring</a></p>
+  <p style="font-size:11px;color:#9E9688;margin-top:40px;text-align:center;">Team Energie Spiegel · erikvandongen.eu · <a href="https://erikvandongen.eu/privacy" target="_blank" rel="noopener noreferrer" style="color:#9E9688;textDecoration:underline;">Privacyverklaring</a> · <a href="/?delete=true" style="color:#9E9688;textDecoration:underline;">Gegevens verwijderen</a></p>
   <script>window.onload=function(){window.print();}</script>
   </body></html>`;
   const w = window.open('','_blank');
@@ -1480,6 +1480,56 @@ function AdminAnalysisBtn(props) {
   </div>;
 }
 
+function DeletePage() {
+  var [email, setEmail] = useState("");
+  var [status, setStatus] = useState(null); // null | "loading" | "success" | "error"
+  var [errorMsg, setErrorMsg] = useState("");
+
+  async function handleDelete() {
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setErrorMsg("Vul een geldig e-mailadres in."); return; }
+    setStatus("loading"); setErrorMsg("");
+    try {
+      var res = await fetch("/api/delete", {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email: email.trim() })
+      });
+      var json = await res.json();
+      if(!res.ok){ setErrorMsg(json.error||"Er is iets misgegaan."); setStatus("error"); return; }
+      setStatus("success");
+    } catch(e) { setErrorMsg("Verbindingsfout. Probeer het opnieuw."); setStatus("error"); }
+  }
+
+  return <div style={{minHeight:"100vh",background:C.cream,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
+    <div style={{maxWidth:480,width:"100%"}}>
+      <div style={{textAlign:"center",marginBottom:32}}>
+        <div style={{width:48,height:48,background:C.warm,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
+          <span style={{fontSize:22}}>🗑</span>
+        </div>
+        <Heading size={2}>Gegevens verwijderen</Heading>
+        <p style={{fontFamily:FONT_BODY,fontSize:15,color:C.muted,lineHeight:1.6,marginTop:8}}>Vul je e-mailadres in om alle gegevens die daaraan gekoppeld zijn te verwijderen. Je ontvangt een bevestiging per mail.</p>
+      </div>
+      {status==="success"
+        ? <div style={{background:"#E8EDE3",borderRadius:16,padding:"28px 32px",textAlign:"center"}}>
+            <span style={{fontSize:32}}>✓</span>
+            <p style={{fontFamily:FONT_BODY,fontSize:16,color:C.olive,fontWeight:600,margin:"12px 0 6px"}}>Gegevens verwijderd</p>
+            <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Je ontvangt een bevestiging op <strong>{email}</strong>.</p>
+          </div>
+        : <Card>
+            <FormInput label="Jouw e-mailadres" type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail}/>
+            {errorMsg&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.terra,margin:"0 0 12px"}}>{errorMsg}</p>}
+            {status==="loading"
+              ? <LoadingDots/>
+              : <Btn onClick={handleDelete} disabled={!email.trim()}>Verwijder mijn gegevens</Btn>
+            }
+            <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,marginTop:14,lineHeight:1.5}}>
+              Heb je vragen? Neem contact op via <a href="mailto:info@erikvandongen.eu" style={{color:C.olive}}>info@erikvandongen.eu</a>.
+            </p>
+          </Card>
+      }
+    </div>
+  </div>;
+}
+
 function AdminDashboard() {
   var [password, setPassword] = useState("");
   var [authed, setAuthed] = useState(false);
@@ -2024,6 +2074,7 @@ export default function App() {
 
   var isAdmin = urlParams.admin === "true";
   var isTester = urlParams.tester === "true";
+  var isDelete = urlParams.delete === "true";
   var [page, setPage] = useState("start");
   var [welcomeMeta, setWelcomeMeta] = useState(null);
   var [answers, setAnswers] = useState({});
@@ -2041,6 +2092,11 @@ export default function App() {
   if(isAdmin) return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
     <AdminDashboard/>
+  </div>;
+
+  if(isDelete) return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+    <DeletePage/>
   </div>;
 
   return <div style={{minHeight:"100vh",background:C.cream,fontFamily:FONT_BODY}}>
