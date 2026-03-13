@@ -37,21 +37,20 @@ Antwoord ALLEEN in JSON (geen markdown):
   return JSON.parse(text.replace(/```json|```/g, '').trim())
 }
 
-const CTA_BLOCK = `
-  <div style="background: #45543B; border-radius: 12px; padding: 32px; text-align: center; margin-top: 32px;">
+const CTA_BLOCK = (dashboardUrl) => `
+  <div style="text-align: center; margin-top: 28px; margin-bottom: 8px;">
+    <a href="${dashboardUrl}" style="display: inline-block; background: #45543B; color: #F5F3EF; font-size: 14px; font-weight: 600; padding: 13px 32px; border-radius: 50px; text-decoration: none;">Bekijk het teamdashboard →</a>
+  </div>
+  <div style="background: #45543B; border-radius: 12px; padding: 28px 32px; text-align: center; margin-top: 24px;">
     <p style="font-family: Georgia, serif; font-size: 11px; color: #c0d4a8; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px;">Van diagnose naar beweging</p>
-    <p style="font-family: Georgia, serif; font-size: 20px; font-weight: 400; color: #F5F3EF; margin: 0 0 16px; line-height: 1.35;">Je weet nu waar energie lekt in jullie team.</p>
-    <p style="font-size: 14px; line-height: 1.8; color: #b8c9a3; margin: 0 0 12px; text-align: left;">In bijna ieder team zijn de intenties goed. Toch ontstaan er irritaties die steeds terugkomen. Niet omdat mensen onprofessioneel zijn, maar omdat verschillen in tempo, stijl en prioriteit onbewust botsen.</p>
-    <p style="font-size: 14px; line-height: 1.8; color: #F5F3EF; margin: 0 0 12px; text-align: left; font-style: italic;">En precies daar zit de kans.</p>
-    <p style="font-size: 14px; line-height: 1.8; color: #b8c9a3; margin: 0 0 12px; text-align: left;">In mijn Team-dynamiek traject help ik teams deze patronen zichtbaar te maken en om te zetten naar betere samenwerking, duidelijker eigenaarschap en meer energie in het team.</p>
-    <p style="font-size: 14px; line-height: 1.8; color: #b8c9a3; margin: 0 0 24px; text-align: left;">Wil je eerst zien hoe dit traject eruitziet? Download hieronder de Team-dynamiek trajectbeschrijving of plan een vrijblijvend intakegesprek om samen naar jullie uitkomst te kijken.</p>
-    <a href="https://erikvandongen.eu/downloads/Inzicht-in-teamdynamiek-brochure.pdf" style="display: inline-block; background: transparent; color: #F5F3EF; font-size: 14px; font-weight: 600; padding: 11px 24px; border-radius: 50px; text-decoration: none; border: 1.5px solid #F5F3EF; margin: 0 8px 12px;">Download Team-dynamiek traject</a>
-    <a href="https://erikvandongen.eu/kennismaken" style="display: inline-block; background: #F5F3EF; color: #332D28; font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 50px; text-decoration: none; margin: 0 8px 12px;">Plan een vrijblijvend intakegesprek</a>
+    <p style="font-family: Georgia, serif; font-size: 20px; font-weight: 400; color: #F5F3EF; margin: 0 0 12px; line-height: 1.35;">Je weet nu waar energie lekt in jullie team.</p>
+    <p style="font-size: 14px; line-height: 1.7; color: #b8c9a3; margin: 0 0 20px;">In een vrijblijvend gesprek kijk ik met je mee naar de uitkomsten en verkennen we hoe wat nu wrijving geeft, kan uitgroeien tot de kracht van jullie team.</p>
+    <a href="https://erikvandongen.eu/inzicht-in-teamdynamiek" style="display: inline-block; background: #F5F3EF; color: #332D28; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 50px; text-decoration: none;">Plan een vrijblijvend intakegesprek</a>
     <p style="font-size: 12px; color: #9E9688; margin: 20px 0 0; text-align: center;">Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a></p>
   </div>
 `
 
-function buildTeamEmailHtml(teamName, ownerName, analysis, memberCount) {
+function buildTeamEmailHtml(teamName, ownerName, analysis, memberCount, dashboardUrl) {
   return `
     <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; color: #332D28;">
       <div style="background: #45543B; padding: 28px 32px; border-radius: 12px 12px 0 0;">
@@ -84,7 +83,7 @@ function buildTeamEmailHtml(teamName, ownerName, analysis, memberCount) {
             </div>
           `).join('')}
         </div>
-        ${CTA_BLOCK}
+        ${CTA_BLOCK(dashboardUrl)}
       </div>
     </div>
   `
@@ -117,7 +116,8 @@ export default async function handler(req, res) {
     })
 
     const analysis = await generateTeamAnalysis(avgScores, entries.length)
-    const html = buildTeamEmailHtml(team.team_name, team.owner_name, analysis, entries.length)
+    const dashboardUrl = `${process.env.APP_URL}/?team=${teamCode}&owner=${team.owner_token}`
+    const html = buildTeamEmailHtml(team.team_name, team.owner_name, analysis, entries.length, dashboardUrl)
 
     if (!process.env.BREVO_API_KEY) {
       return res.status(200).json({ success: true, analysis, note: 'Geen Brevo key geconfigureerd' })
