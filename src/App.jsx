@@ -517,6 +517,23 @@ function SocialProof() {
   </div>;
 }
 
+// ─── ERROR BOUNDARY ───────────────────────────────────────────────────────────
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, info) { console.error("TeamPage crash:", error, info); }
+  render() {
+    if (this.state.hasError) {
+      return <div style={{maxWidth:560,margin:"80px auto",padding:"0 24px",textAlign:"center"}}>
+        <p style={{fontFamily:"sans-serif",fontSize:14,color:"#766960"}}>Er ging iets mis bij het laden van de teampagina.</p>
+        <p style={{fontFamily:"monospace",fontSize:11,color:"#c00",marginTop:8}}>{String(this.state.error)}</p>
+        <button onClick={function(){window.location.reload();}} style={{marginTop:16,padding:"10px 20px",background:"#45543B",color:"#fff",border:"none",borderRadius:20,cursor:"pointer",fontFamily:"sans-serif"}}>Pagina herladen</button>
+      </div>;
+    }
+    return this.props.children;
+  }
+}
+
 // ─── TEAM CODE PAGE ───────────────────────────────────────────────────────────
 function TeamCodePage(props) {
   var [digits, setDigits] = useState("");
@@ -2007,7 +2024,7 @@ export default function App() {
           }}/>}
           {page==="questions"&&<QuestionsPage onComplete={function(a){setAnswers(a);setPage("analysis");}}/>}
           {page==="analysis" &&<AnalysisPage answers={answers} prefilledCode={prefilledCode} onDone={function(){setPage("team");}}/>}
-          {page==="team"     &&<TeamPage answers={answers} prefilledCode={prefilledCode} isOwner={ownerView} onBack={function(){setPage("analysis");}}/>}
+          {page==="team"     &&<ErrorBoundary><TeamPage answers={answers} prefilledCode={prefilledCode} isOwner={ownerView} onBack={function(){setPage("analysis");}}/></ErrorBoundary>}
         </>
     }
   </div>;
