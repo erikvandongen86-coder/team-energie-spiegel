@@ -882,9 +882,8 @@ function TeamPage(props) {
   var prefilledCode = props.prefilledCode;
   var catScores = calcCategoryScores(answers);
 
-  var [step, setStep] = useState(prefilledCode ? "view" : "intro");
+  var [step, setStep] = useState(prefilledCode ? "loading" : "intro");
   var [teamCode, setTeamCode] = useState(prefilledCode||"");
-  var [teamLoading, setTeamLoading] = useState(!!prefilledCode);
   var [teamData, setTeamData] = useState([]);
 
   // Create form
@@ -914,11 +913,22 @@ function TeamPage(props) {
     if(prefilledCode){
       apiSaveEntry(prefilledCode, getSessionId(), catScores, null)
         .catch(function(){})
-        .then(function(){ return apiGetEntries(prefilledCode); })
-        .then(function(entries){ if(entries) setTeamData(entries); })
-        .catch(function(){})
-        .finally(function(){ setTeamLoading(false); });
-      apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); }).catch(function(){});
+        .then(function(){
+          return Promise.all([
+            apiGetEntries(prefilledCode).catch(function(){ return []; }),
+            apiGetTeam(prefilledCode).catch(function(){ return null; })
+          ]);
+        })
+        .then(function(results){
+          var entries = results[0] || [];
+          var teamMeta = results[1];
+          setTeamData(entries);
+          if(teamMeta) setMeta(teamMeta);
+          setStep("view");
+        })
+        .catch(function(){
+          setStep("view");
+        });
     }
   },[]);
 
@@ -1137,8 +1147,8 @@ function TeamPage(props) {
     </>}
 
     {/* VIEW */}
-    {teamLoading&&<Card><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,textAlign:"center",padding:"24px 0",margin:0}}>Resultaten worden opgeslagen...</p></Card>}
-    {step==="view"&&!teamLoading&&<>
+    {step==="loading"&&<Card style={{textAlign:"center",padding:"32px"}}><LoadingDots/><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,marginTop:16}}>Resultaten worden opgeslagen...</p></Card>}
+    {step==="view"&&<>
       <SectionLabel>Teamresultaten</SectionLabel>
       <Heading size={2}>{(meta&&meta.teamName)||"Teamoverzicht"}</Heading>
 
