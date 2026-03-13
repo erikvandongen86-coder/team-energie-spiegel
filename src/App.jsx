@@ -1899,7 +1899,7 @@ function TesterForm() {
     {/* Header */}
     <div style={{background:C.olive,margin:"0 -24px",padding:"22px 24px",marginBottom:40,borderRadius:"0 0 20px 20px"}}>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:28,color:"#F5F3EF",fontWeight:400,margin:"0 0 4px"}}>Testersfeedback</p>
-      <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(245,243,239,0.7)",margin:0}}>Team Energie Spiegel · erikvandongen.eu</p>
+      <p style={{fontFamily:FONT_BODY,fontSize:13,color:"rgba(245,243,239,0.7)",margin:0}}>Team Energie Spiegel · erikvandongen.eu · <a href="https://erikvandongen.eu/privacy" target="_blank" rel="noopener noreferrer" style={{color:"rgba(245,243,239,0.5)",textDecoration:"underline"}}>Privacyverklaring</a> · <a href="/?delete=true" style={{color:"rgba(245,243,239,0.5)",textDecoration:"underline"}}>Gegevens verwijderen</a></p>
     </div>
 
     {step === "intro" && <>
@@ -2038,7 +2038,7 @@ function TesterForm() {
         {saving ? "Opslaan..." : "Verstuur mijn feedback →"}
       </Btn>
       <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,textAlign:"center",marginTop:12}}>
-        Team Energie Spiegel · erikvandongen.eu
+        Team Energie Spiegel · erikvandongen.eu · <a href="https://erikvandongen.eu/privacy" target="_blank" rel="noopener noreferrer" style={{color:C.muted,textDecoration:"underline"}}>Privacyverklaring</a> · <a href="/?delete=true" style={{color:C.muted,textDecoration:"underline"}}>Gegevens verwijderen</a>
       </p>
     </>}
   </div>;
