@@ -890,7 +890,8 @@ function AnalysisPage(props) {
       </div>
     </Card>
 
-    <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.neutral,textAlign:"center",marginTop:22,marginBottom:80,lineHeight:1.6}}>De analyse wordt ondersteund door AI en gebaseerd op jouw antwoorden. De uitkomst is bedoeld als reflectie en gesprekstarter.</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:12,color:C.neutral,textAlign:"center",marginTop:22,lineHeight:1.6}}>De analyse wordt ondersteund door AI en gebaseerd op jouw antwoorden. De uitkomst is bedoeld als reflectie en gesprekstarter.</p>
+    <p style={{fontFamily:FONT_BODY,fontSize:11,color:C.muted,textAlign:"center",marginTop:12,marginBottom:80,lineHeight:1.6}}>Team Energie Spiegel · erikvandongen.eu · <a href="https://erikvandongen.eu/privacy" target="_blank" rel="noopener noreferrer" style={{color:C.muted,textDecoration:"underline"}}>Privacyverklaring</a> · <a href="/?delete=true" style={{color:C.muted,textDecoration:"underline"}}>Gegevens verwijderen</a></p>
 
     {/* Floating CTA */}
     <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,padding:"12px 16px",background:"linear-gradient(to top, rgba(245,240,232,1) 60%, rgba(245,240,232,0))",pointerEvents:"none"}}>
