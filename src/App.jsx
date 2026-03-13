@@ -357,7 +357,7 @@ function exportTeamPDF(meta, entries, avg, analysis) {
   <h2 style="font-family:Georgia,serif;color:#45543B;font-size:18px;margin:28px 0 12px;">Deelnemers</h2>
   <table><thead><tr style="background:#EFEBE7;"><th style="padding:6px 12px;text-align:left;">#</th><th style="padding:6px 12px;text-align:left;">Naam</th><th style="padding:6px 12px;text-align:left;">E-mail</th><th style="padding:6px 12px;text-align:left;">Datum</th></tr></thead><tbody>${memberRows}</tbody></table>
   ${analysisHtml}
-  <p style="font-size:11px;color:#9E9688;margin-top:40px;text-align:center;">Team Energie Spiegel · erikvandongen.eu</p>
+  <p style="font-size:11px;color:#9E9688;margin-top:40px;text-align:center;">Team Energie Spiegel · erikvandongen.eu · <a href="https://erikvandongen.eu/privacy" target="_blank" rel="noopener noreferrer" style="color:#9E9688;textDecoration:underline;">Privacyverklaring</a></p>
   <script>window.onload=function(){window.print();}</script>
   </body></html>`;
   const w = window.open('','_blank');
@@ -475,7 +475,7 @@ function EmailCapture(props) {
   return <div>
     {props.label && <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.6,marginBottom:14,marginTop:0}}>{props.label}</p>}
     <FormInput placeholder="Jouw naam" value={name} onChange={setName}/>
-    <FormInput type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.hint||"Je ontvangt geen spam. Alleen jouw resultaten."}/>
+    <FormInput type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.hint||"Je ontvangt geen spam. Alleen jouw resultaten."} subHint="Door je e-mail achter te laten ga je akkoord met de privacyverklaring."/>
     <Btn onClick={function(){props.onSubmit(name,email);}} disabled={!valid}>{props.buttonLabel||"Verstuur"}</Btn>
   </div>;
 }
@@ -783,7 +783,7 @@ function EmailDropdown(props) {
           : "Laat je gegevens achter en ontvang jouw individuele analyse. Volledig vrijblijvend."}
       </p>
       <FormInput label="Jouw naam" placeholder="Erik van Dongen" value={name} onChange={setName}/>
-      <FormInput label="Jouw e-mailadres" type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.canReceiveTeamAnalysis ? "Je ontvangt jouw analyse én de teamanalyse. Jouw antwoorden blijven anoniem." : "Alleen jouw individuele analyse. Geen spam."}/>
+      <FormInput label="Jouw e-mailadres" type="email" placeholder="jouw@email.nl" value={email} onChange={setEmail} hint={props.canReceiveTeamAnalysis ? "Je ontvangt jouw analyse én de teamanalyse. Jouw antwoorden blijven anoniem." : "Alleen jouw individuele analyse. Geen spam."} subHint="Door je e-mail achter te laten ga je akkoord met de privacyverklaring."/>
       {error&&<p style={{fontFamily:FONT_BODY,fontSize:13,color:C.terra,marginBottom:10,marginTop:0}}>{error}</p>}
       <Btn onClick={handleSubmit}>Stuur mij mijn resultaten</Btn>
     </div>}
@@ -1052,7 +1052,7 @@ function TeamPage(props) {
         <p style={{fontFamily:FONT_BODY,fontSize:13,color:C.muted,lineHeight:1.5,marginBottom:14,marginTop:0}}>Hierop ontvang je de teamresultaten zodra iedereen heeft ingevuld.</p>
         <FormInput label="Jouw naam" placeholder="Erik van Dongen" value={ownerName} onChange={setOwnerName}/>
         <FormInput label="Bedrijfsnaam" placeholder="Bijv. Acme B.V." value={companyName} onChange={setCompanyName}/>
-        <FormInput label="Jouw e-mailadres" type="email" placeholder="erik@erikvandongen.eu" value={ownerEmail} onChange={setOwnerEmail} hint="Je ontvangt hier de teamanalyse."/>
+        <FormInput label="Jouw e-mailadres" type="email" placeholder="erik@erikvandongen.eu" value={ownerEmail} onChange={setOwnerEmail} hint="Je ontvangt hier de teamanalyse en je beheerlink." subHint="Door je e-mail achter te laten ga je akkoord met de privacyverklaring."/>
       </Card>
 
       <Card>
