@@ -8,14 +8,14 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Methode niet toegestaan' })
 
-  const { sessionId, page, rating, comment, wouldUse } = req.body
+  const { sessionId, page, rating, comment, wouldUse, naam } = req.body
   if (!sessionId) return res.status(400).json({ error: 'Geen sessie-ID' })
 
   try {
     const sql = neon(process.env.DATABASE_URL)
     await sql`
-      INSERT INTO feedback (session_id, page, rating, comment, would_use)
-      VALUES (${sessionId}, ${page||null}, ${rating||null}, ${comment||null}, ${wouldUse||null})
+      INSERT INTO feedback (session_id, page, rating, comment, would_use, naam)
+      VALUES (${sessionId}, ${page||null}, ${rating||null}, ${comment||null}, ${wouldUse||null}, ${naam||null})
     `
     return res.status(201).json({ success: true })
   } catch (err) {
