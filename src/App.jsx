@@ -878,12 +878,13 @@ function AnalysisPage(props) {
 
 // ─── TEAM PAGE ────────────────────────────────────────────────────────────────
 function TeamPage(props) {
-  var answers = props.answers;
+  var answers = props.answers || {};
   var prefilledCode = props.prefilledCode;
   var catScores = calcCategoryScores(answers);
 
   var [step, setStep] = useState(prefilledCode ? "view" : "intro");
   var [teamCode, setTeamCode] = useState(prefilledCode||"");
+  var [teamLoading, setTeamLoading] = useState(!!prefilledCode);
   var [teamData, setTeamData] = useState([]);
 
   // Create form
@@ -911,10 +912,13 @@ function TeamPage(props) {
 
   useEffect(function(){
     if(prefilledCode){
-      apiSaveEntry(prefilledCode, getSessionId(), catScores, null).then(function(){
-        return apiGetEntries(prefilledCode);
-      }).then(function(entries){ setTeamData(entries); });
-      apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); });
+      apiSaveEntry(prefilledCode, getSessionId(), catScores, null)
+        .catch(function(){})
+        .then(function(){ return apiGetEntries(prefilledCode); })
+        .then(function(entries){ if(entries) setTeamData(entries); })
+        .catch(function(){})
+        .finally(function(){ setTeamLoading(false); });
+      apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); }).catch(function(){});
     }
   },[]);
 
@@ -1133,7 +1137,8 @@ function TeamPage(props) {
     </>}
 
     {/* VIEW */}
-    {step==="view"&&<>
+    {teamLoading&&<Card><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,textAlign:"center",padding:"24px 0",margin:0}}>Resultaten worden opgeslagen...</p></Card>}
+    {step==="view"&&!teamLoading&&<>
       <SectionLabel>Teamresultaten</SectionLabel>
       <Heading size={2}>{(meta&&meta.teamName)||"Teamoverzicht"}</Heading>
 
