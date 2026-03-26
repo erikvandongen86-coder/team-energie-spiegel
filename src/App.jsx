@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from "recharts";
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from "recharts";
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -444,6 +444,7 @@ function RadarViz(props) {
     <RadarChart data={chartData} margin={{top:14,right:38,bottom:14,left:38}}>
       <PolarGrid stroke={C.warm}/>
       <PolarAngleAxis dataKey="subject" tick={{fontFamily:FONT_BODY,fontSize:12,fill:C.charcoal}}/>
+      <PolarRadiusAxis angle={90} domain={[0,5]} tickCount={6} tick={{fontFamily:FONT_BODY,fontSize:10,fill:C.muted}} axisLine={false}/>
       <Radar dataKey="A" stroke={C.terra} strokeWidth={2} fill={C.terra} fillOpacity={0.2} dot={{fill:C.terra,r:4}}/>
       <Tooltip formatter={function(v){return [v+"/5","Score"];}} contentStyle={{fontFamily:FONT_BODY,fontSize:13,background:C.white,border:"1px solid "+C.warm,borderRadius:8}}/>
     </RadarChart>
@@ -457,7 +458,7 @@ function AnalysisBlock(props) {
   var a = props.analysis; var isTeam = props.isTeam;
   return <div>
     <div style={{marginBottom:18}}>
-      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",fontWeight:600,color:C.terra,marginBottom:5,marginTop:0}}>{isTeam?"Teamdiagnose":"Diagnose"}</p>
+      <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",fontWeight:600,color:C.terra,marginBottom:5,marginTop:0}}>{isTeam?"Teamspiegel":"Spiegel"}</p>
       <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.charcoal,lineHeight:1.7,margin:0}}>{a.diagnose}</p>
     </div>
     <div style={{marginBottom:18}}>
@@ -741,7 +742,7 @@ function WelcomeTeamScreen(props) {
       </div>
     </Card>
     <Btn onClick={onStart} style={{width:"100%",justifyContent:"center",fontSize:16,padding:"16px 24px"}}>Start de spiegel →</Btn>
-    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
+    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}@keyframes pulse-cta{0%{box-shadow:0 0 0 0 rgba(69,84,59,0.4)}70%{box-shadow:0 0 0 10px rgba(69,84,59,0)}100%{box-shadow:0 0 0 0 rgba(69,84,59,0)}}`}</style>
   </div>;
 }
 
@@ -826,7 +827,19 @@ function AnalysisPage(props) {
 
   return <div style={{maxWidth:640,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
     <SectionLabel>Jouw individuele resultaat</SectionLabel>
-    <Heading size={2}>Jouw teampatroon in beeld</Heading>
+    <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <Heading size={2} style={{margin:0}}>Jouw teampatroon in beeld</Heading>
+        <div style={{position:"relative",display:"inline-flex",alignItems:"center"}} className="tooltip-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.olive} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{cursor:"pointer",flexShrink:0}}>
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <div style={{position:"absolute",left:0,bottom:"calc(100% + 8px)",width:280,background:C.charcoal,color:C.white,borderRadius:10,padding:"10px 13px",fontSize:12,fontFamily:FONT_BODY,lineHeight:1.6,zIndex:100,pointerEvents:"none",opacity:0,transition:"opacity 0.15s",boxShadow:"0 4px 16px rgba(0,0,0,0.2)"}} className="tooltip-box">
+            Deze score is gebaseerd op jouw eigen antwoorden. Wil je zien hoe jouw team scoort? Maak een team aan en nodig je teamleden uit, of dien je gegevens in via de knop hieronder als je al onderdeel bent van een team. Let op: teamresultaten zijn alleen zichtbaar als de teamaanmaker heeft aangegeven dat resultaten gedeeld worden met alle deelnemers.
+          </div>
+        </div>
+      </div>
 
     {/* Context note for team members */}
     {prefilledCode&&meta&&<div style={{background:C.warm,borderRadius:12,padding:"13px 17px",marginBottom:16,display:"flex",alignItems:"flex-start",gap:10}}>
@@ -848,12 +861,25 @@ function AnalysisPage(props) {
       }
       {!prefilledCode&&<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginTop:20,paddingTop:16,borderTop:"1px solid "+C.warm}}>
         <p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0,lineHeight:1.5}}>Wil je weten hoe je team dit ervaart?</p>
-        <Btn variant="primary" onClick={props.onDone} style={{fontSize:13,padding:"9px 20px",whiteSpace:"nowrap"}}>Maak een team aan →</Btn>
+        <Btn variant="primary" onClick={props.onDone} style={{fontSize:13,padding:"9px 20px",whiteSpace:"nowrap",animation:"pulse-cta 2s ease-in-out infinite",boxShadow:"0 0 0 0 rgba(69,84,59,0.4)"}}>Maak een team aan →</Btn>
       </div>}
     </Card>
 
     <Card style={{background:C.warm,border:"none"}}>
-      <SectionLabel>Analyse · individueel</SectionLabel>
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+        <SectionLabel style={{margin:0}}>Analyse · individueel</SectionLabel>
+        <div style={{position:"relative",display:"inline-flex",alignItems:"center"}} className="tooltip-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.olive} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{cursor:"pointer",flexShrink:0}}>
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <div style={{position:"absolute",left:0,bottom:"calc(100% + 8px)",width:280,background:C.charcoal,color:C.white,borderRadius:10,padding:"10px 13px",fontSize:12,fontFamily:FONT_BODY,lineHeight:1.6,zIndex:100,pointerEvents:"none",opacity:0,transition:"opacity 0.15s",boxShadow:"0 4px 16px rgba(0,0,0,0.2)"}} className="tooltip-box">
+            Deze score is gebaseerd op jouw eigen antwoorden. Wil je zien hoe jouw team scoort? Maak een team aan en nodig je teamleden uit, of dien je gegevens in via de knop hieronder als je al onderdeel bent van een team. Let op: teamresultaten zijn alleen zichtbaar als de teamaanmaker heeft aangegeven dat resultaten gedeeld worden met alle deelnemers.
+          </div>
+        </div>
+      </div>
+      <style>{`.tooltip-wrap:hover .tooltip-box{opacity:1!important}`}</style>
       {loading ? <><p style={{fontFamily:FONT_BODY,fontSize:14,color:C.muted,margin:0}}>Analyse wordt gegenereerd...</p><LoadingDots/></> : analysis&&<AnalysisBlock analysis={analysis} isTeam={false} cta={
         !emailSubmitted
           ? <EmailDropdown canReceiveTeamAnalysis={canReceiveTeamAnalysis} onSubmit={function(name,email){
@@ -865,19 +891,14 @@ function AnalysisPage(props) {
       }/>}
     </Card>
 
-    <Card>
-      <SectionLabel>Reflectievragen voor je team</SectionLabel>
-      {["Waar wachten wij in dit team eigenlijk op elkaar?","Welke verantwoordelijkheid is nu eigenlijk van niemand?","Welk gesprek stellen we al te lang uit?"].map(function(q,i){return <div key={i} style={{padding:"10px 0",borderBottom:i<2?"1px solid "+C.warm:"none"}}>
-        <p style={{fontFamily:FONT_DISPLAY,fontSize:"1.05rem",color:C.charcoal,lineHeight:1.5,margin:0,fontStyle:"italic"}}>{q}</p>
-      </div>;})}
-    </Card>
+
 
 
 
     {/* CTA */}
     <Card style={{background:C.olive,border:"none"}}>
       <div style={{display:"inline-block",background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"3px 13px",marginBottom:16}}>
-        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Van diagnose naar beweging</span>
+        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Van spiegel naar beweging</span>
       </div>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.3rem,3.5vw,1.75rem)",color:C.white,marginBottom:16,marginTop:0,lineHeight:1.3}}>Je weet nu waar energie lekt in jullie team.</p>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:12,lineHeight:1.75,marginTop:0}}>In bijna ieder team zijn de intenties goed. Toch ontstaan er irritaties die steeds terugkomen. Niet omdat mensen onprofessioneel zijn, maar omdat verschillen in tempo, stijl en prioriteit onbewust botsen.</p>
@@ -914,7 +935,7 @@ function AnalysisPage(props) {
         }
       </div>
     </div>
-    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
+    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}@keyframes pulse-cta{0%{box-shadow:0 0 0 0 rgba(69,84,59,0.4)}70%{box-shadow:0 0 0 10px rgba(69,84,59,0)}100%{box-shadow:0 0 0 0 rgba(69,84,59,0)}}`}</style>
   </div>;
 }
 
@@ -1266,7 +1287,7 @@ function TeamPage(props) {
       </Card>}
     </>}
 
-    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
+    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}@keyframes pulse-cta{0%{box-shadow:0 0 0 0 rgba(69,84,59,0.4)}70%{box-shadow:0 0 0 10px rgba(69,84,59,0)}100%{box-shadow:0 0 0 0 rgba(69,84,59,0)}}`}</style>
   </div>;
 }
 
@@ -1447,7 +1468,7 @@ function OwnerDashboard(props) {
     </Card>
     <Card style={{background:C.olive,border:"none"}}>
       <div style={{display:"inline-block",background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"3px 13px",marginBottom:16}}>
-        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Van diagnose naar beweging</span>
+        <span style={{fontFamily:FONT_BODY,fontSize:11,color:"#c0d4a8",letterSpacing:"0.1em",textTransform:"uppercase"}}>Van spiegel naar beweging</span>
       </div>
       <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.3rem,3.5vw,1.75rem)",color:C.white,marginBottom:16,marginTop:0,lineHeight:1.3}}>Je weet nu waar energie lekt in jullie team.</p>
       <p style={{fontFamily:FONT_BODY,fontSize:15,color:"#b8c9a3",marginBottom:12,lineHeight:1.75,marginTop:0}}>In bijna ieder team zijn de intenties goed. Toch ontstaan er irritaties die steeds terugkomen. Niet omdat mensen onprofessioneel zijn, maar omdat verschillen in tempo, stijl en prioriteit onbewust botsen.</p>
@@ -1459,7 +1480,7 @@ function OwnerDashboard(props) {
         <Btn variant="white" onClick={function(){window.open("https://erikvandongen.eu/kennismaken","_blank");}} style={{fontSize:14,padding:"12px 24px"}}>Plan een vrijblijvend intakegesprek</Btn>
       </div>
     </Card>
-    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
+    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}@keyframes pulse-cta{0%{box-shadow:0 0 0 0 rgba(69,84,59,0.4)}70%{box-shadow:0 0 0 10px rgba(69,84,59,0)}100%{box-shadow:0 0 0 0 rgba(69,84,59,0)}}`}</style>
   </div>;
 }
 
@@ -1805,7 +1826,7 @@ function AdminDashboard() {
         </div>
       </Card>;
     })}
-    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}`}</style>
+    <style>{`@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}@keyframes pulse-cta{0%{box-shadow:0 0 0 0 rgba(69,84,59,0.4)}70%{box-shadow:0 0 0 10px rgba(69,84,59,0)}100%{box-shadow:0 0 0 0 rgba(69,84,59,0)}}`}</style>
   </div>;
 }
 
