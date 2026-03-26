@@ -13,18 +13,18 @@ const FONT_BODY    = "'Source Sans Pro', 'Helvetica Neue', sans-serif";
 
 // ─── Questions & categories ───────────────────────────────────────────────────
 const QUESTIONS = [
-  { id:1,  text:"In ons team houden mensen soms bewust informatie achter." },
-  { id:2,  text:"Niet iedereen spreekt zich uit omdat men twijfelt hoe anderen zullen reageren." },
-  { id:3,  text:"In ons team wordt verantwoordelijkheid regelmatig doorgeschoven." },
-  { id:4,  text:"Als iets blijft liggen is het vaak onduidelijk wie het eigenlijk moet oppakken." },
-  { id:5,  text:"Initiatief komt meestal van een paar mensen terwijl anderen afwachten." },
-  { id:6,  text:"We werken regelmatig langs elkaar heen zonder dat iemand dat echt benoemt." },
-  { id:7,  text:"Er wordt soms meer over elkaar gesproken dan met elkaar." },
-  { id:8,  text:"Niet iedereen in het team weet precies waar we samen naartoe werken." },
-  { id:9,  text:"Besluiten worden genomen maar daarna niet altijd echt gedragen." },
-  { id:10, text:"We praten soms langer over problemen dan dat we ze oplossen." },
-  { id:11, text:"Goede ideeën blijven regelmatig hangen in overleg." },
-  { id:12, text:"Het voelt soms alsof het team harder zou kunnen gaan dan nu gebeurt." },
+  { id:1,  text:"In ons team houden mensen soms bewust informatie achter.", hint:"Bijv. een probleem wordt niet gedeeld omdat men bang is voor de reactie, of nieuws wordt achtergehouden om de eigen positie te beschermen." },
+  { id:2,  text:"Niet iedereen spreekt zich uit omdat men twijfelt hoe anderen zullen reageren.", hint:"Bijv. tijdens vergaderingen blijven meningen onuitgesproken, of eerlijke feedback aan collega's wordt vermeden." },
+  { id:3,  text:"In ons team wordt verantwoordelijkheid regelmatig doorgeschoven.", hint:"Bijv. een taak blijft liggen omdat iedereen dacht dat een ander het zou oppakken." },
+  { id:4,  text:"Als iets blijft liggen is het vaak onduidelijk wie het eigenlijk moet oppakken.", hint:"Bijv. een klacht van een klant of een intern probleem waar niemand zich eigenaar van voelt." },
+  { id:5,  text:"Initiatief komt meestal van een paar mensen terwijl anderen afwachten.", hint:"Bijv. altijd dezelfde teamleden die met ideeën komen of dingen in gang zetten." },
+  { id:6,  text:"We werken regelmatig langs elkaar heen zonder dat iemand dat echt benoemt.", hint:"Bijv. twee collega's doen hetzelfde werk zonder dat ze dat weten, of overlap in taken wordt nooit besproken." },
+  { id:7,  text:"Er wordt soms meer over elkaar gesproken dan met elkaar.", hint:"Bijv. frustraties worden gedeeld in de wandelgangen maar niet direct uitgesproken met de betrokken persoon." },
+  { id:8,  text:"Niet iedereen in het team weet precies waar we samen naartoe werken.", hint:"Bijv. teamdoelen zijn wel ergens opgeschreven maar leven niet echt, of teamleden hebben een ander beeld van de prioriteiten." },
+  { id:9,  text:"Besluiten worden genomen maar daarna niet altijd echt gedragen.", hint:"Bijv. in de vergadering is iedereen akkoord, maar daarna handelt niet iedereen ernaar." },
+  { id:10, text:"We praten soms langer over problemen dan dat we ze oplossen.", hint:"Bijv. een onderwerp komt vergadering na vergadering terug zonder dat er een besluit valt." },
+  { id:11, text:"Goede ideeën blijven regelmatig hangen in overleg.", hint:"Bijv. een idee wordt enthousiast ontvangen maar verdwijnt daarna in de agenda van niemand." },
+  { id:12, text:"Het voelt soms alsof het team harder zou kunnen gaan dan nu gebeurt.", hint:"Bijv. er is potentie maar onduidelijkheid, gebrek aan afstemming of energie houdt het team tegen." },
 ];
 const CATEGORIES = {
   Vertrouwen:[1,2], Eigenaarschap:[3,4,5], Samenwerking:[6,7], Richting:[8,9], Tempo:[10,11,12],
@@ -513,7 +513,8 @@ function ProgressBar(props) {
 function SliderQ(props) {
   var pct = ((props.value-1)/4)*100;
   return <div>
-    <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.1rem,3vw,1.4rem)",color:C.charcoal,lineHeight:1.55,marginBottom:30,fontWeight:400,marginTop:0}}>{props.question.text}</p>
+    <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.1rem,3vw,1.4rem)",color:C.charcoal,lineHeight:1.55,marginBottom:props.question.hint?8:30,fontWeight:400,marginTop:0}}>{props.question.text}</p>
+    {props.question.hint&&<p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,lineHeight:1.6,marginBottom:22,marginTop:0,fontStyle:"italic"}}>{props.question.hint}</p>}
     <div style={{marginBottom:12}}>
       <input type="range" min={1} max={5} step={1} value={props.value} onChange={function(e){props.onChange(parseInt(e.target.value));}}
         style={{width:"100%",WebkitAppearance:"none",appearance:"none",height:4,background:"linear-gradient(to right,"+C.olive+" "+pct+"%,"+C.warm+" "+pct+"%)",borderRadius:2,outline:"none",cursor:"pointer"}}/>
