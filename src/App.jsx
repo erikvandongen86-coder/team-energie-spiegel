@@ -513,7 +513,7 @@ function ProgressBar(props) {
 function SliderQ(props) {
   var pct = ((props.value-1)/4)*100;
   return <div>
-    <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.1rem,3vw,1.4rem)",color:C.charcoal,lineHeight:1.55,marginBottom:props.question.hint?8:30,fontWeight:400,marginTop:0}}>{props.question.text}</p>
+    <p style={{fontFamily:FONT_DISPLAY,fontSize:"clamp(1.5rem,4vw,1.9rem)",color:C.charcoal,lineHeight:1.55,marginBottom:props.question.hint?8:30,fontWeight:400,marginTop:0}}>{props.question.text}</p>
     {props.question.hint&&<p style={{fontFamily:FONT_BODY,fontSize:12,color:C.muted,lineHeight:1.6,marginBottom:22,marginTop:0,fontStyle:"italic"}}>{props.question.hint}</p>}
     <div style={{marginBottom:12}}>
       <input type="range" min={1} max={5} step={1} value={props.value} onChange={function(e){props.onChange(parseInt(e.target.value));}}
