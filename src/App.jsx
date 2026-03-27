@@ -134,22 +134,29 @@ async function fetchAIAnalysis(categoryScores, memberCount, isTeam) {
     : "Schrijf vanuit individueel perspectief. Spreek de invuller direct aan.";
   const prompt = "Je bent een scherpe, eerlijke teamcoach. " + context + "\n\nScores op de Team Energie Spiegel (1-5, waarbij 4-5=kracht/positief en 1-2=energielek/probleem):\n" + lines + "\n\n" + perspective + "\n\nSchrijf in het Nederlands:\n1. Diagnose (max 4 zinnen)\n2. Wat dit betekent\n3. Wat er gebeurt als er niets verandert\n4. 3 gespreksvragen (genummerd)\n\nToon: eerlijk, scherp, herkenbaar.\n\nAntwoord ALLEEN in JSON (geen markdown backticks):\n{\"diagnose\":\"...\",\"betekenis\":\"...\",\"geenVerandering\":\"...\",\"gespreksvragen\":[\"...\",\"...\",\"...\"]}";
 
-  try {
-    const res = await fetch("/api/analyze", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ categoryScores, memberCount, isTeam }),
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data;
-  } catch(e) {
-    return {
-      diagnose:"Op basis van de antwoorden zien we een team dat hard werkt, maar waar een aantal dynamieken energie kosten.",
-      betekenis:"Dit patroon is herkenbaar in veel teams die in een groeifase zitten of onder druk werken.",
-      geenVerandering:"Als dit patroon aanhoudt, is de kans groot dat stille frustraties groter worden.",
-      gespreksvragen:["Welk onderwerp vermijden we al te lang?","Wie voelt zich het minst gehoord?","Wat zou er veranderen als we écht transparant zouden zijn?"],
-    };
+  const maxRetries = 3;
+  for (var attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch("/api/analyze", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ categoryScores, memberCount, isTeam }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      return data;
+    } catch(e) {
+      console.warn("Analyse poging " + attempt + " mislukt:", e.message);
+      if (attempt < maxRetries) {
+        await new Promise(function(r){ setTimeout(r, 1500 * attempt); });
+      }
+    }
   }
+  return {
+    diagnose:"Op basis van de antwoorden zien we een team dat hard werkt, maar waar een aantal dynamieken energie kosten.",
+    betekenis:"Dit patroon is herkenbaar in veel teams die in een groeifase zitten of onder druk werken.",
+    geenVerandering:"Als dit patroon aanhoudt, is de kans groot dat stille frustraties groter worden.",
+    gespreksvragen:["Welk onderwerp vermijden we al te lang?","Wie voelt zich het minst gehoord?","Wat zou er veranderen als we écht transparant zouden zijn?"],
+  };
 }
 
 
