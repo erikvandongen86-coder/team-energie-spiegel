@@ -843,7 +843,7 @@ function AnalysisPage(props) {
             <line x1="12" y1="16" x2="12" y2="12"/>
             <line x1="12" y1="8" x2="12.01" y2="8"/>
           </svg>
-          <div style={{position:"absolute",left:0,bottom:"calc(100% + 8px)",width:280,background:C.charcoal,color:C.white,borderRadius:10,padding:"10px 13px",fontSize:12,fontFamily:FONT_BODY,lineHeight:1.6,zIndex:100,pointerEvents:"none",opacity:0,transition:"opacity 0.15s",boxShadow:"0 4px 16px rgba(0,0,0,0.2)"}} className="tooltip-box">
+          <div style={{position:"absolute",left:0,top:"calc(100% + 8px)",width:280,background:C.charcoal,color:C.white,borderRadius:10,padding:"10px 13px",fontSize:12,fontFamily:FONT_BODY,lineHeight:1.6,zIndex:100,pointerEvents:"none",opacity:0,transition:"opacity 0.15s",boxShadow:"0 4px 16px rgba(0,0,0,0.2)"}} className="tooltip-box">
             Deze score is gebaseerd op jouw eigen antwoorden. Wil je zien hoe jouw team scoort? Maak een team aan en nodig je teamleden uit, of dien je gegevens in via de knop hieronder als je al onderdeel bent van een team. Let op: teamresultaten zijn alleen zichtbaar als de teamaanmaker heeft aangegeven dat resultaten gedeeld worden met alle deelnemers.
           </div>
         </div>
@@ -882,7 +882,7 @@ function AnalysisPage(props) {
             <line x1="12" y1="16" x2="12" y2="12"/>
             <line x1="12" y1="8" x2="12.01" y2="8"/>
           </svg>
-          <div style={{position:"absolute",left:0,bottom:"calc(100% + 8px)",width:280,background:C.charcoal,color:C.white,borderRadius:10,padding:"10px 13px",fontSize:12,fontFamily:FONT_BODY,lineHeight:1.6,zIndex:100,pointerEvents:"none",opacity:0,transition:"opacity 0.15s",boxShadow:"0 4px 16px rgba(0,0,0,0.2)"}} className="tooltip-box">
+          <div style={{position:"absolute",left:0,top:"calc(100% + 8px)",width:280,background:C.charcoal,color:C.white,borderRadius:10,padding:"10px 13px",fontSize:12,fontFamily:FONT_BODY,lineHeight:1.6,zIndex:100,pointerEvents:"none",opacity:0,transition:"opacity 0.15s",boxShadow:"0 4px 16px rgba(0,0,0,0.2)"}} className="tooltip-box">
             Deze score is gebaseerd op jouw eigen antwoorden. Wil je zien hoe jouw team scoort? Maak een team aan en nodig je teamleden uit, of dien je gegevens in via de knop hieronder als je al onderdeel bent van een team. Let op: teamresultaten zijn alleen zichtbaar als de teamaanmaker heeft aangegeven dat resultaten gedeeld worden met alle deelnemers.
           </div>
         </div>
