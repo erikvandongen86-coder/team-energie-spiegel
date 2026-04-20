@@ -831,6 +831,10 @@ function AnalysisPage(props) {
   useEffect(function(){
     fetchAIAnalysis(catScores, 1, false).then(function(a){ setAnalysis(a); setLoading(false); if(props.onAnalysisReady) props.onAnalysisReady(a); });
     if(prefilledCode) apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); });
+    // Sla altijd een entry op voor de teller, ook zonder team
+    if(!prefilledCode) {
+      apiSaveEntry('SOLO-' + getSessionId().slice(0,8), getSessionId(), catScores, null).catch(function(){});
+    }
   },[]);
 
   return <div style={{maxWidth:640,margin:"0 auto",padding:"clamp(22px,5vw,56px) 24px"}}>
