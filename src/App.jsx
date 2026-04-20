@@ -8,7 +8,7 @@ const C = {
   white:"#FFFFFF", neutral:"#DED7CF",
 };
 const FONT_DISPLAY = "'Cormorant Garamond', Georgia, serif";
-const FEEDBACK_MODE = true; // zet op false om feedback uit te schakelen
+const FEEDBACK_MODE = false; // zet op false om feedback uit te schakelen
 const FONT_BODY    = "'Source Sans Pro', 'Helvetica Neue', sans-serif";
 
 // ─── Questions & categories ───────────────────────────────────────────────────
