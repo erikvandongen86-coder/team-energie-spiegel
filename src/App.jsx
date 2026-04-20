@@ -833,7 +833,7 @@ function AnalysisPage(props) {
     if(prefilledCode) apiGetTeam(prefilledCode).then(function(m){ if(m) setMeta(m); });
     // Sla altijd een entry op voor de teller, ook zonder team
     if(!prefilledCode) {
-      apiSaveEntry('SOLO-' + getSessionId().slice(0,8), getSessionId(), catScores, null).catch(function(){});
+      apiSaveEntry(null, getSessionId(), catScores, null).catch(function(){});
     }
   },[]);
 
