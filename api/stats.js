@@ -1,4 +1,4 @@
-// api/stats.js — totaal aantal ingevulde spiegels
+// api/stats.js — totaal aantal ingevulde scans
 import { neon } from '@neondatabase/serverless'
 
 export default async function handler(req, res) {
@@ -9,8 +9,9 @@ export default async function handler(req, res) {
 
   try {
     const sql = neon(process.env.DATABASE_URL)
-    const rows = await sql`SELECT COUNT(*) as total FROM entries`
-    return res.status(200).json({ total: parseInt(rows[0].total) })
+    const result = await sql`SELECT COUNT(*) as total FROM entries`
+    const total = parseInt(result[0].total) || 0
+    return res.status(200).json({ total })
   } catch (err) {
     console.error('stats error:', err)
     return res.status(500).json({ total: 0 })
