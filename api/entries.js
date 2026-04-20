@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { teamCode, sessionId, scores, email } = req.body
 
-      if (!teamCode || !sessionId || !scores) {
+      if (!sessionId || !scores) {
         return res.status(400).json({ error: 'Verplichte velden ontbreken' })
       }
 
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       }
 
       // Check of team compleet is → stuur teamanalyse mail (niet voor solo entries)
-      const [team] = teamCode.startsWith('SOLO-') ? [null] : await sql`SELECT * FROM teams WHERE team_code = ${teamCode}`
+      const [team] = teamCode ? await sql`SELECT * FROM teams WHERE team_code = ${teamCode}` : [null]
       if (team) {
         const [{ count }] = await sql`
           SELECT COUNT(*) as count FROM entries WHERE team_code = ${teamCode}
