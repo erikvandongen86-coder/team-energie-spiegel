@@ -49,8 +49,8 @@ export default async function handler(req, res) {
         `
       }
 
-      // Check of team compleet is → stuur teamanalyse mail
-      const [team] = await sql`SELECT * FROM teams WHERE team_code = ${teamCode}`
+      // Check of team compleet is → stuur teamanalyse mail (niet voor solo entries)
+      const [team] = teamCode.startsWith('SOLO-') ? [null] : await sql`SELECT * FROM teams WHERE team_code = ${teamCode}`
       if (team) {
         const [{ count }] = await sql`
           SELECT COUNT(*) as count FROM entries WHERE team_code = ${teamCode}
