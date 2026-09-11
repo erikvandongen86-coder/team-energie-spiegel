@@ -54,43 +54,56 @@ export default async function handler(req, res) {
       `
 
       const ownerLink = `${process.env.APP_URL}?team=${teamCode}&owner=${ownerToken}`
-      await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'api-key': process.env.BREVO_API_KEY,
-        },
-        body: JSON.stringify({
-          sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
-          to: [{ email: ownerEmail }],
-          subject: `Jouw beheerlink — Team ${teamName}`,
-          htmlContent: `
-            <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 560px; margin: 0 auto; color: #332D28;">
-              <div style="background: #45543B; padding: 28px 32px; border-radius: 12px 12px 0 0;">
-                <p style="color: #F5F3EF; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">Team Energie Spiegel</p>
-              </div>
-              <div style="background: #F5F3EF; padding: 32px; border-radius: 0 0 12px 12px;">
-                <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 24px; color: #332D28; margin: 0 0 16px;">Hoi ${ownerName},</h1>
-                <p style="font-size: 15px; line-height: 1.7; color: #766960; margin: 0 0 16px;">
-                  Je hebt zojuist het team <strong style="color: #332D28;">${teamName}</strong> aangemaakt. Bewaar deze e-mail goed — hieronder vind je jouw persoonlijke beheerlink.
-                </p>
-                <div style="background: #EFEBE7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;">
-                  <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #45543B; margin: 0 0 10px;">Jouw beheerlink</p>
-                  <p style="font-size: 12px; color: #766960; word-break: break-all; margin: 0 0 14px; line-height: 1.6;">${ownerLink}</p>
-                  <a href="${ownerLink}" style="display: inline-block; background: #45543B; color: #F5F3EF; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 50px; text-decoration: none;">Open beheerdersdashboard →</a>
+
+      try {
+        const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': process.env.BREVO_API_KEY,
+          },
+          body: JSON.stringify({
+            sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+            to: [{ email: ownerEmail }],
+            subject: `Jouw beheerlink — Team ${teamName}`,
+            htmlContent: `
+              <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 560px; margin: 0 auto; color: #332D28;">
+                <div style="background: #45543B; padding: 28px 32px; border-radius: 12px 12px 0 0;">
+                  <p style="color: #F5F3EF; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">Team Energie Spiegel</p>
                 </div>
-                <p style="font-size: 14px; line-height: 1.7; color: #766960; margin: 0 0 8px;">
-                  <strong style="color: #332D28;">Uitnodigingslink voor teamleden:</strong><br/>
-                  <a href="${process.env.APP_URL}?team=${teamCode}" style="color: #45543B; word-break: break-all;">${process.env.APP_URL}?team=${teamCode}</a>
-                </p>
-                <p style="font-size: 12px; color: #9E9688; margin: 24px 0 0; text-align: center;">
-                  Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a>
-                </p>
+                <div style="background: #F5F3EF; padding: 32px; border-radius: 0 0 12px 12px;">
+                  <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 24px; color: #332D28; margin: 0 0 16px;">Hoi ${ownerName},</h1>
+                  <p style="font-size: 15px; line-height: 1.7; color: #766960; margin: 0 0 16px;">
+                    Je hebt zojuist het team <strong style="color: #332D28;">${teamName}</strong> aangemaakt. Bewaar deze e-mail goed — hieronder vind je jouw persoonlijke beheerlink.
+                  </p>
+                  <div style="background: #EFEBE7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;">
+                    <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #45543B; margin: 0 0 10px;">Jouw beheerlink</p>
+                    <p style="font-size: 12px; color: #766960; word-break: break-all; margin: 0 0 14px; line-height: 1.6;">${ownerLink}</p>
+                    <a href="${ownerLink}" style="display: inline-block; background: #45543B; color: #F5F3EF; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 50px; text-decoration: none;">Open beheerdersdashboard →</a>
+                  </div>
+                  <p style="font-size: 14px; line-height: 1.7; color: #766960; margin: 0 0 8px;">
+                    <strong style="color: #332D28;">Uitnodigingslink voor teamleden:</strong><br/>
+                    <a href="${process.env.APP_URL}?team=${teamCode}" style="color: #45543B; word-break: break-all;">${process.env.APP_URL}?team=${teamCode}</a>
+                  </p>
+                  <p style="font-size: 12px; color: #9E9688; margin: 24px 0 0; text-align: center;">
+                    Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a>
+                  </p>
+                </div>
               </div>
-            </div>
-          `,
-        }),
-      }).catch(err => console.error('Email fout:', err))
+            `,
+          }),
+        })
+
+        const bodyText = await brevoRes.text()
+
+        if (!brevoRes.ok) {
+          console.error('teams: Brevo fout bij beheerlink-mail voor', ownerEmail, '- status', brevoRes.status, '-', bodyText)
+        } else {
+          console.log('teams: Brevo geaccepteerd voor', ownerEmail, '-', bodyText)
+        }
+      } catch (err) {
+        console.error('teams: fetch naar Brevo mislukt voor', ownerEmail, '-', err.message)
+      }
 
       return res.status(201).json({ success: true, teamCode })
     }
