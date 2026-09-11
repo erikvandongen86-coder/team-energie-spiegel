@@ -220,6 +220,11 @@ export default async function handler(req, res) {
     })
 
     const analysis = await generateTeamAnalysis(avgScores, entries.length)
+
+    // Bewaar de analyse op het team, zodat latere aanmelders 'm kunnen hergebruiken
+    // zonder dat er opnieuw een AI-aanroep nodig is
+    await sql`UPDATE teams SET analysis = ${JSON.stringify(analysis)}, analysis_at = NOW() WHERE team_code = ${teamCode}`
+
     const dashboardUrl = `${process.env.APP_URL}/?team=${teamCode}&owner=${team.owner_token}`
     const html = buildTeamEmailHtml(team.team_name, team.owner_name, analysis, entries.length, dashboardUrl)
 
