@@ -18,23 +18,39 @@ Schrijf in het Nederlands vanuit TEAM-perspectief een heldere teamanalyse.
 Antwoord ALLEEN in JSON (geen markdown):
 {"diagnose":"...","betekenis":"...","geenVerandering":"...","gespreksvragen":["...","...","..."]}`
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-5',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  })
+  const maxRetries = 2
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-5',
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      })
 
-  const data = await res.json()
-  const text = data.content?.find(b => b.type === 'text')?.text || '{}'
-  return JSON.parse(text.replace(/```json|```/g, '').trim())
+      const data = await res.json()
+      const text = data.content?.find(b => b.type === 'text')?.text || '{}'
+      return JSON.parse(text.replace(/```json|```/g, '').trim())
+    } catch (err) {
+      console.error('notify: generateTeamAnalysis poging', attempt, 'mislukt -', err.message)
+      if (attempt === maxRetries) {
+        // Terugval zodat de mail alsnog verstuurd wordt, ook als de AI-analyse faalt
+        return {
+          diagnose: 'De teamanalyse kon niet automatisch worden gegenereerd. Bekijk de scores hieronder voor een eerste beeld.',
+          betekenis: 'Neem de scores per categorie door om te zien waar de meeste energie zit of weglekt.',
+          geenVerandering: 'Gebruik de scores als gespreksstarter met het team.',
+          gespreksvragen: ['Wat valt jullie op aan deze scores?', 'Waar zijn jullie het meest over verrast?', 'Welk onderwerp verdient als eerste aandacht?'],
+        }
+      }
+    }
+  }
 }
 
 const CTA_BLOCK = (dashboardUrl) => `
