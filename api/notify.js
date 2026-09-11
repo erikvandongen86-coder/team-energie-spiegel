@@ -26,7 +26,7 @@ Antwoord ALLEEN in JSON (geen markdown):
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-5',
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
     }),
@@ -146,23 +146,47 @@ export default async function handler(req, res) {
 
     console.log('notify: verstuur naar', recipients)
 
-    await Promise.all(recipients.map(to =>
-      fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'api-key': process.env.BREVO_API_KEY,
-        },
-        body: JSON.stringify({
-          sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
-          to: [{ email: to }],
-          subject: `Teamanalyse ${team.team_name} — Team Energie Spiegel`,
-          htmlContent: html,
-        }),
-      })
-    ))
+    const sendResults = await Promise.all(recipients.map(async (to) => {
+      try {
+        const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': process.env.BREVO_API_KEY,
+          },
+          body: JSON.stringify({
+            sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+            to: [{ email: to }],
+            subject: `Teamanalyse ${team.team_name} — Team Energie Spiegel`,
+            htmlContent: html,
+          }),
+        })
 
-    return res.status(200).json({ success: true, sentTo: recipients.length })
+        const bodyText = await brevoRes.text()
+
+        if (!brevoRes.ok) {
+          console.error('notify: Brevo fout voor', to, '- status', brevoRes.status, '-', bodyText)
+          return { to, success: false, status: brevoRes.status, error: bodyText }
+        }
+
+        console.log('notify: Brevo geaccepteerd voor', to, '-', bodyText)
+        return { to, success: true }
+      } catch (err) {
+        console.error('notify: fetch naar Brevo mislukt voor', to, '-', err.message)
+        return { to, success: false, error: err.message }
+      }
+    }))
+
+    const failed = sendResults.filter(r => !r.success)
+    if (failed.length > 0) {
+      console.error('notify: mislukte verzendingen:', JSON.stringify(failed))
+    }
+
+    return res.status(200).json({
+      success: true,
+      sentTo: recipients.length,
+      failed: failed.length > 0 ? failed : undefined,
+    })
   } catch (err) {
     console.error('notify error:', err)
     return res.status(500).json({ error: 'Serverfout' })
