@@ -55,12 +55,25 @@ export default async function handler(req, res) {
         const [{ count }] = await sql`
           SELECT COUNT(*) as count FROM entries WHERE team_code = ${teamCode}
         `
+        console.log('entries: team', teamCode, '-', count, '/', team.member_count, 'ingevuld')
+
         if (parseInt(count) >= team.member_count) {
-          await fetch(`${process.env.APP_URL}/api/notify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ teamCode, reason: 'complete' }),
-          }).catch(() => {})
+          console.log('entries: team compleet, notify aanroepen voor', teamCode, 'via', `${process.env.APP_URL}/api/notify`)
+          try {
+            const notifyRes = await fetch(`${process.env.APP_URL}/api/notify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ teamCode, reason: 'complete' }),
+            })
+            const notifyBody = await notifyRes.text()
+            if (!notifyRes.ok) {
+              console.error('entries: notify-aanroep faalde voor', teamCode, '- status', notifyRes.status, '-', notifyBody)
+            } else {
+              console.log('entries: notify-aanroep gelukt voor', teamCode, '-', notifyBody)
+            }
+          } catch (err) {
+            console.error('entries: notify-aanroep gooide een fout voor', teamCode, '-', err.message)
+          }
         }
       }
 
