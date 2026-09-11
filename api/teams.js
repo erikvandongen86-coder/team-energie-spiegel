@@ -1,6 +1,104 @@
 // api/teams.js — team aanmaken en ophalen
 import { neon } from '@neondatabase/serverless'
 
+function buildOwnerEmailHtml(ownerName, teamName, ownerLink, inviteLink) {
+  return `<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<meta name="supported-color-schemes" content="light dark" />
+<title>Je beheerlink voor ${teamName}</title>
+<!--[if mso]>
+<xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+<![endif]-->
+</head>
+<body style="margin:0; padding:0; background-color:#EFEBE7; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
+
+<span style="display:none; font-size:1px; color:#EFEBE7; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">Bewaar deze e-mail: hierin staat jouw persoonlijke beheerlink voor ${teamName}.</span>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#EFEBE7; width:100%;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px;">
+
+        <!-- Header -->
+        <tr>
+          <td bgcolor="#45543B" style="background-color:#45543B; padding:26px 40px;">
+            <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; mso-line-height-rule:exactly; letter-spacing:1.6px; text-transform:uppercase; color:#DDE4D4;">Team Energie Spiegel</p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td bgcolor="#F5F3EF" style="background-color:#F5F3EF; padding:40px 40px 8px 40px;">
+            <h1 style="margin:0 0 18px 0; font-family:Georgia,'Times New Roman',serif; font-weight:400; font-size:26px; line-height:34px; mso-line-height-rule:exactly; color:#332D28;">Hoi ${ownerName},</h1>
+            <p style="margin:0 0 14px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:27px; mso-line-height-rule:exactly; color:#332D28;">Je hebt zojuist het team <strong style="font-weight:600; color:#332D28;">${teamName}</strong> aangemaakt.</p>
+            <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:27px; mso-line-height-rule:exactly; color:#332D28;">Bewaar deze e-mail goed. Hieronder vind je jouw persoonlijke beheerlink en de uitnodigingslink voor je teamleden.</p>
+          </td>
+        </tr>
+
+        <!-- Beheerlink -->
+        <tr>
+          <td bgcolor="#F5F3EF" style="background-color:#F5F3EF; padding:24px 40px 0 40px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; background-color:#EFEBE7;">
+              <tr>
+                <td style="padding:26px 28px 28px 28px; border-left:3px solid #45543B;">
+                  <p style="margin:0 0 12px 0; font-family:Georgia,'Times New Roman',serif; font-size:17px; line-height:24px; mso-line-height-rule:exactly; color:#45543B;">Jouw beheerlink</p>
+                  <p style="margin:0 0 20px 0; font-family:'Courier New',Courier,monospace; font-size:13px; line-height:21px; mso-line-height-rule:exactly; color:#5C5349; word-break:break-all;">${ownerLink}</p>
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td bgcolor="#45543B" align="center" style="background-color:#45543B; border-radius:4px; padding:14px 28px;">
+                        <a href="${ownerLink}" style="display:block; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:20px; mso-line-height-rule:exactly; font-weight:600; color:#F5F3EF; text-decoration:none;">Open beheerdersdashboard</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Uitnodigingslink -->
+        <tr>
+          <td bgcolor="#F5F3EF" style="background-color:#F5F3EF; padding:28px 40px 0 40px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">
+              <tr>
+                <td style="padding:0 0 18px 0; border-bottom:1px solid #DFD9D2;"></td>
+              </tr>
+            </table>
+            <p style="margin:0 0 8px 0; font-family:Georgia,'Times New Roman',serif; font-size:17px; line-height:24px; mso-line-height-rule:exactly; color:#332D28; padding-top:18px;">Uitnodigingslink voor teamleden</p>
+            <p style="margin:0 0 10px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:25px; mso-line-height-rule:exactly; color:#5C5349;">Deel deze link met de leden van ${teamName}, zodat zij de spiegel kunnen invullen.</p>
+            <p style="margin:0; font-family:'Courier New',Courier,monospace; font-size:13px; line-height:21px; mso-line-height-rule:exactly; word-break:break-all;"><a href="${inviteLink}" style="color:#45543B; text-decoration:underline;">${inviteLink}</a></p>
+          </td>
+        </tr>
+
+        <tr>
+          <td bgcolor="#F5F3EF" style="background-color:#F5F3EF; padding:36px 40px 40px 40px;">
+            <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:25px; mso-line-height-rule:exactly; color:#5C5349;">Zodra iedereen heeft ingevuld, ontvang je de teamanalyse per e-mail.</p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td bgcolor="#EFEBE7" style="background-color:#EFEBE7; padding:24px 40px 8px 40px;" align="center">
+            <p style="margin:0 0 6px 0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:20px; mso-line-height-rule:exactly; color:#6B6258;">Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color:#45543B; text-decoration:none;">erikvandongen.eu</a></p>
+            <p style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12px; line-height:19px; mso-line-height-rule:exactly; color:#8A8177;">Je ontvangt deze e-mail omdat je een team hebt aangemaakt in Team Energie Spiegel.</p>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>`
+}
+
 export default async function handler(req, res) {
   const sql = neon(process.env.DATABASE_URL)
 
@@ -54,6 +152,7 @@ export default async function handler(req, res) {
       `
 
       const ownerLink = `${process.env.APP_URL}?team=${teamCode}&owner=${ownerToken}`
+      const inviteLink = `${process.env.APP_URL}?team=${teamCode}`
 
       try {
         const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -66,31 +165,7 @@ export default async function handler(req, res) {
             sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
             to: [{ email: ownerEmail }],
             subject: `Jouw beheerlink — Team ${teamName}`,
-            htmlContent: `
-              <div style="font-family: 'Helvetica Neue', sans-serif; max-width: 560px; margin: 0 auto; color: #332D28;">
-                <div style="background: #45543B; padding: 28px 32px; border-radius: 12px 12px 0 0;">
-                  <p style="color: #F5F3EF; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">Team Energie Spiegel</p>
-                </div>
-                <div style="background: #F5F3EF; padding: 32px; border-radius: 0 0 12px 12px;">
-                  <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 24px; color: #332D28; margin: 0 0 16px;">Hoi ${ownerName},</h1>
-                  <p style="font-size: 15px; line-height: 1.7; color: #766960; margin: 0 0 16px;">
-                    Je hebt zojuist het team <strong style="color: #332D28;">${teamName}</strong> aangemaakt. Bewaar deze e-mail goed — hieronder vind je jouw persoonlijke beheerlink.
-                  </p>
-                  <div style="background: #EFEBE7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;">
-                    <p style="font-family: Georgia, serif; font-size: 15px; font-weight: 600; color: #45543B; margin: 0 0 10px;">Jouw beheerlink</p>
-                    <p style="font-size: 12px; color: #766960; word-break: break-all; margin: 0 0 14px; line-height: 1.6;">${ownerLink}</p>
-                    <a href="${ownerLink}" style="display: inline-block; background: #45543B; color: #F5F3EF; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 50px; text-decoration: none;">Open beheerdersdashboard →</a>
-                  </div>
-                  <p style="font-size: 14px; line-height: 1.7; color: #766960; margin: 0 0 8px;">
-                    <strong style="color: #332D28;">Uitnodigingslink voor teamleden:</strong><br/>
-                    <a href="${process.env.APP_URL}?team=${teamCode}" style="color: #45543B; word-break: break-all;">${process.env.APP_URL}?team=${teamCode}</a>
-                  </p>
-                  <p style="font-size: 12px; color: #9E9688; margin: 24px 0 0; text-align: center;">
-                    Team Energie Spiegel · <a href="https://erikvandongen.eu" style="color: #9E9688;">erikvandongen.eu</a>
-                  </p>
-                </div>
-              </div>
-            `,
+            htmlContent: buildOwnerEmailHtml(ownerName, teamName, ownerLink, inviteLink),
           }),
         })
 
