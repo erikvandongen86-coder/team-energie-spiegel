@@ -66,47 +66,59 @@ export default async function handler(req, res) {
 
     const analysisHtml = buildAnalysisHtml(analysis)
 
-    await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-      },
-      body: JSON.stringify({
-        sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
-        to: [{ email }],
-        subject: 'Jouw Team Energie Spiegel resultaten',
-        htmlContent: `
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #EFEBE7;">
-            <tr>
-              <td align="center" style="padding: 32px 16px;">
-                <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width: 560px; width: 100%; font-family: 'Helvetica Neue', sans-serif; color: #332D28; border-radius: 12px; overflow: hidden;">
-                  <tr>
-                    <td style="background: #45543B; padding: 28px 32px; border-radius: 12px 12px 0 0;">
-                      <p style="color: #c0d4a8; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 4px;">Team Energie Spiegel</p>
-                      <p style="color: #F5F3EF; font-size: 13px; margin: 0;">erikvandongen.eu</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="background: #F5F3EF; padding: 32px; border-radius: 0 0 12px 12px;">
-                      <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 26px; color: #332D28; margin: 0 0 16px;">Hoi ${name || 'daar'},</h1>
-                      <p style="font-size: 15px; line-height: 1.7; color: #766960; margin: 0 0 8px;">
-                        Bedankt voor het invullen van de Team Energie Spiegel.${analysis ? ' Hieronder vind je jouw persoonlijke analyse.' : ''}
-                      </p>
-                      ${wantsTeamAnalysis
-                        ? '<p style="font-size: 14px; line-height: 1.7; color: #766960; margin: 0 0 8px;">Zodra alle teamleden klaar zijn ontvang je automatisch ook de teamanalyse.</p>'
-                        : ''}
-                      ${analysisHtml}
-                      ${CTA_BLOCK}
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        `,
-      }),
-    }).catch(err => console.error('Brevo fout:', err))
+    try {
+      const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          sender: { name: 'Team Energie Spiegel', email: 'info@erikvandongen.eu' },
+          to: [{ email }],
+          subject: 'Jouw Team Energie Spiegel resultaten',
+          htmlContent: `
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #EFEBE7;">
+              <tr>
+                <td align="center" style="padding: 32px 16px;">
+                  <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width: 560px; width: 100%; font-family: 'Helvetica Neue', sans-serif; color: #332D28; border-radius: 12px; overflow: hidden;">
+                    <tr>
+                      <td style="background: #45543B; padding: 28px 32px; border-radius: 12px 12px 0 0;">
+                        <p style="color: #c0d4a8; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 4px;">Team Energie Spiegel</p>
+                        <p style="color: #F5F3EF; font-size: 13px; margin: 0;">erikvandongen.eu</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="background: #F5F3EF; padding: 32px; border-radius: 0 0 12px 12px;">
+                        <h1 style="font-family: Georgia, serif; font-weight: 400; font-size: 26px; color: #332D28; margin: 0 0 16px;">Hoi ${name || 'daar'},</h1>
+                        <p style="font-size: 15px; line-height: 1.7; color: #766960; margin: 0 0 8px;">
+                          Bedankt voor het invullen van de Team Energie Spiegel.${analysis ? ' Hieronder vind je jouw persoonlijke analyse.' : ''}
+                        </p>
+                        ${wantsTeamAnalysis
+                          ? '<p style="font-size: 14px; line-height: 1.7; color: #766960; margin: 0 0 8px;">Zodra alle teamleden klaar zijn ontvang je automatisch ook de teamanalyse.</p>'
+                          : ''}
+                        ${analysisHtml}
+                        ${CTA_BLOCK}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          `,
+        }),
+      })
+
+      const bodyText = await brevoRes.text()
+
+      if (!brevoRes.ok) {
+        console.error('subscribe: Brevo fout voor', email, '- status', brevoRes.status, '-', bodyText)
+      } else {
+        console.log('subscribe: Brevo geaccepteerd voor', email, '-', bodyText)
+      }
+    } catch (err) {
+      console.error('subscribe: fetch naar Brevo mislukt voor', email, '-', err.message)
+    }
 
     return res.status(200).json({ success: true })
   } catch (err) {
